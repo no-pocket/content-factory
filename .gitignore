@@ -14,3 +14,8 @@ renderer/output/
 *.mov
 *.mkv
 *.webm
+
+# User-specific trust roots: never commit local CA certificates.
+certs/*.crt
+certs/*.cer
+certs/*.pem

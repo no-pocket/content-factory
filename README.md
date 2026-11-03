@@ -63,6 +63,10 @@ docker compose run --rm --no-deps -v "$PWD/tests:/app/tests:ro" ui pytest -q tes
 
 The tests cover timeline bounds and media safety, ranker fallback, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. This project does not currently include automated social posting, word-level forced alignment after text correction, face tracking, or production fault-tolerant job recovery.
 
+## Troubleshooting — Hugging Face certificate verification
+
+If a job fails during `TRANSCRIBING` with `CERTIFICATE_VERIFY_FAILED`, read [`docs/tls-certificates.md`](docs/tls-certificates.md). The worker supports a mounted `certs/*.crt` root-CA bundle for legitimate TLS inspection; it keeps HTTPS verification enabled.
+
 ## Operation & safety
 
 - UI is bound to localhost. Use SSH tunnel or a trusted VPN rather than making it publicly accessible.
