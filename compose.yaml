@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis_data:/data]
+    restart: unless-stopped
+  ui:
+    build: .
+    command: ["streamlit", "run", "app/ui.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.maxUploadSize=2048"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      ASSETS_DIR: /data/assets
+    volumes: ["./data:/data"]
+    ports: ["127.0.0.1:8501:8501"]
+    depends_on: [redis]
+    restart: unless-stopped
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+      WHISPER_MODEL: ${WHISPER_MODEL:-base}
+      WHISPER_BEAM_SIZE: ${WHISPER_BEAM_SIZE:-5}
+      WHISPER_INITIAL_PROMPT: ${WHISPER_INITIAL_PROMPT:-GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida.}
+      EDIT_DIRECTOR: ${EDIT_DIRECTOR:-ollama}
+      RENDER_ENGINE: ${RENDER_ENGINE:-remotion}
+      RENDER_FALLBACK_FFMPEG: ${RENDER_FALLBACK_FFMPEG:-true}
+      RENDER_TIMEOUT: ${RENDER_TIMEOUT:-900}
+      ASSETS_DIR: /data/assets
+      CLIP_RANKER: ${CLIP_RANKER:-heuristic}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      OLLAMA_TIMEOUT: ${OLLAMA_TIMEOUT:-180}
+      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-false}
+      YOUTUBE_MAX_DURATION: ${YOUTUBE_MAX_DURATION:-7200}
+      YOUTUBE_MAX_BYTES: ${YOUTUBE_MAX_BYTES:-1500000000}
+    volumes:
+      - ./data:/data
+      - hf_cache:/root/.cache/huggingface
+    depends_on: [redis]
+    restart: unless-stopped
+  ollama:
+    profiles: ["local-ai"]
+    image: ollama/ollama:latest
+    volumes: [ollama_models:/root/.ollama]
+    restart: unless-stopped
+volumes:
+  ollama_models:
+  redis_data:
+  hf_cache:

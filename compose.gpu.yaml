@@ -1,0 +1,18 @@
+# Optional override for an NVIDIA GPU workstation with NVIDIA Container Toolkit.
+# Requires an image containing matching CUDA 12 + cuDNN 9 runtime libraries.
+# This file uses an NVIDIA runtime base; the rest of the app is installed on top.
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      WHISPER_DEVICE: cuda
+      WHISPER_COMPUTE_TYPE: float16

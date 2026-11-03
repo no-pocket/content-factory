@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes Clip Proposal Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "proposals"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "job_id": {"type": "string", "format": "uuid"},
+    "proposals": {"type": "array", "minItems": 1, "maxItems": 5, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["start", "end", "reason", "confidence"],
+      "properties": {
+        "start": {"type": "number", "minimum": 0},
+        "end": {"type": "number", "exclusiveMinimum": 0},
+        "reason": {"type": "string", "minLength": 5},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }}
+  }
+}

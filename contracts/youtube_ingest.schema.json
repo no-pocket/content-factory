@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authorized YouTube Creator Clip Ingest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_url", "creator", "license_note", "rights_confirmed", "platform_permission"],
+  "properties": {
+    "source_url": {"type": "string", "pattern": "^https://"},
+    "creator": {"type": "string", "minLength": 1},
+    "license_note": {"type": "string", "minLength": 1},
+    "rights_confirmed": {"const": true},
+    "platform_permission": {"const": true}
+  }
+}

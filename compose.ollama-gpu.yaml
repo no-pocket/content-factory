@@ -1,0 +1,10 @@
+# Use with --profile local-ai only when NVIDIA Container Toolkit / Docker Desktop GPU support works.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+data/
+**/__pycache__/
+.pytest_cache/
+*.pyc
+*.egg-info/
+renderer/node_modules/
+renderer/public/jobs/*
+!renderer/public/jobs/.gitkeep
+renderer/output/
+*.mp4
+*.mov
+*.mkv
+*.webm
