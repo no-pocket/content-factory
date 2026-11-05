@@ -16,19 +16,25 @@ def render_doctor() -> None:
     ranker = info['ranker']
     a, b, c, d = st.columns(4)
     a.metric('Worker', 'Online' if worker.get('online') else 'Offline')
-    b.metric('Ranker ativo no worker', ranker)
+    b.metric('Ranker padrão do worker', ranker)
     c.metric('Ollama API', 'Online' if ollama['reachable'] else 'Offline')
     d.metric('Modelo instalado', 'Sim' if ollama['installed'] else 'Não')
     st.caption(f"Modelo esperado: `{ollama['model']}` · Carregado no Ollama agora: {'Sim' if ollama['loaded'] else 'Não'} · GPU/CPU: verificar `ollama ps` no host")
+    kepler = info.get('kepler')
+    if kepler is not None:
+        st.metric('GPU K4200', 'Online' if kepler['reachable'] and kepler['loaded'] else 'Offline')
+        st.caption(f"Modelo GPU: `{kepler['model']}` · Contexto: {kepler.get('context_window', 'indisponível')} tokens")
+        if kepler.get('error'):
+            st.caption('GPU: ' + kepler['error'])
     st.caption(f"Editor: `{worker.get('edit_director', 'desconhecido')}` · Renderer: `{worker.get('render_engine', 'desconhecido')}`")
     if not worker.get('online'):
         st.error('Worker sem heartbeat recente. O estado de CLIP_RANKER não pode ser confirmado.')
     elif ranker != 'ollama':
-        st.warning('Worker está configurado para heurística. Ollama online, sozinho, não significa que a IA esteja selecionando cortes.')
+        st.warning('Padrão do worker: heurística. Cada job pode escolher outro modo; confira o motor efetivo no job.')
     elif not ollama['reachable'] or not ollama['installed']:
         st.error('IA configurada, mas Ollama ou o modelo não está disponível. Novos jobs podem usar fallback heurístico.')
     else:
-        st.success('Worker configurado para Ollama; serviço e modelo disponíveis. O uso real é registrado por job abaixo.')
+        st.success('Ollama disponível para jobs que o escolherem. O uso real é registrado por job abaixo.')
     if ollama.get('error'):
         st.caption('Ollama: ' + ollama['error'])
     if worker.get('error'):
@@ -61,7 +67,9 @@ def render_doctor() -> None:
 def render_job_ai(job: dict) -> None:
     used = job.get('ranker_used')
     state = job.get('ai_activity', {}).get('state', 'unknown')
-    if used == 'ollama':
+    if used == 'kepler_gpu':
+        st.success('Este job foi classificado pelo Qwen na GPU K4200 (resposta válida).')
+    elif used == 'ollama':
         st.success('Este job foi classificado pelo Qwen local (resposta válida).')
     elif used == 'heuristic_fallback':
         st.warning('Este job usou fallback heurístico: ' + job.get('ai_activity', {}).get('reason', 'sem motivo registrado'))
@@ -71,7 +79,7 @@ def render_job_ai(job: dict) -> None:
         st.info('Qwen está avaliando os candidatos. Aguardando resultado.')
     elif state == 'queued':
         st.info('Análise por IA agendada.')
-    elif used == 'ollama_pending':
+    elif used in ('ollama_pending', 'kepler_gpu_pending'):
         st.warning('Análise interrompida antes de um resultado confirmado.')
     else:
         st.caption('Motor efetivo não registrado (job anterior à v3.2 ou ainda transcrevendo).')

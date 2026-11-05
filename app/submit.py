@@ -17,7 +17,8 @@ def submit(payload: dict) -> dict:
     if payload.get("rights_confirmed") is not True or payload.get("platform_permission") is not True:
         raise PermissionError("A autorização do titular e da plataforma deve ser confirmada")
     url = normalize_youtube_url(payload["source_url"])
-    job = new_job(None, url, payload["creator"].strip(), payload["license_note"].strip(), source_url=url, platform_permission=True)
+    job = new_job(None, url, payload["creator"].strip(), payload["license_note"].strip(),
+                  source_url=url, platform_permission=True, settings=payload.get('settings'))
     rconn().lpush("clips:queue", job["id"])
     return {"job_id": job["id"], "status": job["status"]}
 

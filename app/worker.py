@@ -10,11 +10,13 @@ from .core import get_duration, propose_clips
 from .timeline import build_timeline
 from .director import direct_edit
 from .edit_render import render_edited, read_assets
-from .ranker import rerank_with_ollama
+from .ranker import select_highlights
 from .youtube import download_youtube, normalize_youtube_url
 from .doctor import HEARTBEAT_KEY
 from .store import INPUT
 from .store import rconn, load, save, OUTPUT, JOBS
+from .queueing import PENDING, PROCESSING, TERMINAL, recover_inflight
+from .job_settings import normalize_job_settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("worker")
@@ -42,12 +44,13 @@ def record_ai_event(job: dict, event: str, details: dict) -> None:
     event_at = time.time()
     activity = job.setdefault('ai_activity', {})
     activity.update({'state': event, 'updated_at': event_at, **details})
+    backend = job.get('settings', {}).get('llm_backend', 'ollama')
     if event == 'analyzing':
         activity['started_at'] = event_at
-        job['ranker_used'] = 'ollama_pending'
+        job['ranker_used'] = backend + '_pending'
     elif event == 'completed':
         activity['elapsed_seconds'] = round(event_at - activity.get('started_at', event_at), 1)
-        job['ranker_used'] = 'ollama'
+        job['ranker_used'] = backend
     elif event == 'fallback':
         activity['elapsed_seconds'] = round(event_at - activity.get('started_at', event_at), 1)
         job['ranker_used'] = 'heuristic_fallback'
@@ -60,6 +63,7 @@ def process(jid: str) -> None:
     if job["status"] != "QUEUED":
         return
     try:
+        settings = normalize_job_settings(job.get('settings'))
         if job.get("source_type") == "youtube":
             if not job.get("platform_permission") or not job.get("license_note"):
                 raise PermissionError("Autorização da plataforma e do titular precisam estar registradas")
@@ -77,11 +81,12 @@ def process(jid: str) -> None:
         duration = get_duration(source)
         device = os.getenv("WHISPER_DEVICE", "cpu")
         compute_type = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
-        model_name = os.getenv("WHISPER_MODEL", "base")
+        model_name = settings['whisper_model']
+        job['model'] = model_name
         log.info("Transcribing %s using %s/%s/%s", jid, model_name, device, compute_type)
         model = WhisperModel(model_name, device=device, compute_type=compute_type)
         generator, info = model.transcribe(
-            str(source), vad_filter=True, beam_size=int(os.getenv("WHISPER_BEAM_SIZE", "5")),
+            str(source), vad_filter=True, beam_size=settings['whisper_beam_size'],
             word_timestamps=True, initial_prompt=os.getenv("WHISPER_INITIAL_PROMPT", "GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida."),
         )
         segments = [{
@@ -91,16 +96,18 @@ def process(jid: str) -> None:
         } for s in generator]
         transcript_path = JOBS / f"{jid}.transcript.json"
         transcript_path.write_text(json.dumps({"language": info.language, "segments": segments}, ensure_ascii=False, indent=2), encoding="utf-8")
-        mode = os.getenv("CLIP_RANKER", "heuristic").strip().lower()
+        mode = settings['ranker_mode']
         if mode == "ollama":
-            shortlist = propose_clips(segments, duration, count=16)
-            record_ai_event(job, 'queued', {'total_candidates': min(len(shortlist), int(os.getenv('OLLAMA_SHORTLIST', '12')))})
-            clips = rerank_with_ollama(shortlist, count=3, on_event=lambda event, details: record_ai_event(job, event, details))
-            log.info("Ranker=ollama, shortlist=%s, clips=%s", len(shortlist), len(clips))
+            record_ai_event(job, 'queued', {'transcript_segments': len(segments)})
+            clips = select_highlights(segments, duration, count=settings['clip_count'], settings=settings,
+                                      on_event=lambda event, details: record_ai_event(job, event, details))
+            log.info("Ranker=ollama transcript discovery, clips=%s", len(clips))
         else:
             job['ranker_used'] = 'heuristic'
             job['ai_activity'] = {'state': 'disabled', 'updated_at': time.time()}
-            clips = propose_clips(segments, duration, count=3)
+            clips = propose_clips(segments, duration, count=settings['clip_count'],
+                                  target=settings['target_seconds'], min_seconds=settings['min_seconds'],
+                                  max_seconds=settings['max_seconds'])
         if not clips:
             raise ValueError("No usable speech windows found; try a longer video with speech")
         job.update({"language": info.language, "duration": duration, "status": "RENDERING", "candidates": clips})
@@ -115,12 +122,15 @@ def process(jid: str) -> None:
                 job["editing_activity"] = {"state": event, "updated_at": time.time(), **details}
                 save(job)
                 log.info("EDITOR job=%s clip=%s event=%s", jid, i+1, event)
-            hints, director_used = direct_edit(clip, assets, on_event=on_director_event)
+            hints, director_used = direct_edit(clip, assets, on_event=on_director_event,
+                                                mode=settings['director_mode'],
+                                                llm_backend=settings['llm_backend'])
             timeline = build_timeline(clip, segments, edit=hints, assets=assets)
             video = folder / f"candidate_{i+1}.mp4"
             job["status"] = "RENDERING"
             save(job)
-            renderer_used = render_edited(source, jid, i+1, clip, segments, timeline, assets, video)
+            renderer_used = render_edited(source, jid, i+1, clip, segments, timeline, assets, video,
+                                          engine=settings['render_engine'])
             clip["file"] = str(video)
             clip["timeline_file"] = str(video.with_suffix(".timeline.json"))
             clip["director_used"] = director_used
@@ -141,12 +151,15 @@ def process(jid: str) -> None:
 def main() -> None:
     threading.Thread(target=heartbeat_loop, daemon=True, name="worker-heartbeat").start()
     queue = rconn()
-    log.info("Worker waiting on clips:queue")
+    recovered = recover_inflight(queue, load, save)
+    log.info("Worker waiting on %s; recovered=%s", PENDING, recovered)
     while True:
         try:
-            item = queue.brpop("clips:queue", timeout=5)
-            if item:
-                process(item[1])
+            jid = queue.brpoplpush(PENDING, PROCESSING, timeout=5)
+            if jid:
+                process(jid)
+                if load(jid).get('status') in TERMINAL:
+                    queue.lrem(PROCESSING, 1, jid)
         except Exception:
             log.exception("worker loop error")
             time.sleep(3)

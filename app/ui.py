@@ -7,11 +7,14 @@ import streamlit as st
 from app.store import INPUT, OUTPUT, all_jobs, load, new_job, rconn, save
 from app.youtube import normalize_youtube_url
 from app.dashboard_health import render_doctor, render_job_ai
+from app.version import VERSION
 from app.asset_library import register_asset
-from app.edit_render import read_assets
+from app.edit_render import read_assets, browser_preview
+from app.ui_settings import render_settings_controls
 
 st.set_page_config(page_title="GTA VI — Clip Factory MVP", page_icon="🎬", layout="wide")
 st.title("🎬 Content Factory — Creator Clips")
+st.caption(f"Versão {VERSION}")
 st.caption("v4: vídeo autorizado → Whisper por palavra → Qwen Editor → timeline → FFmpeg/Remotion → revisão humana. Sem postagem automática.")
 st.warning("Uso privado: a interface deve ficar acessível apenas via localhost, SSH tunnel ou VPN. Não exponha a porta 8501 publicamente.")
 with st.expander("Adicionar um vídeo autorizado", expanded=True):
@@ -27,6 +30,9 @@ with st.expander("Adicionar um vídeo autorizado", expanded=True):
             platform_permission = False
         creator = st.text_input("Criador / canal", placeholder="Nome do criador")
         license_note = st.text_area("Comprovação ou referência da autorização", placeholder="URL/ID da licença, acordo escrito, alcance comercial e permissão para editar/cortar")
+        with st.expander('Ajustes de processamento'):
+            st.caption('Estes valores são salvos por job e também podem ser enviados pela entrada JSON.')
+            processing_settings = render_settings_controls(st)
         permitted = st.checkbox("Confirmo que possuo permissão para editar este vídeo e gerar cortes (e para os usos posteriores pretendidos)")
         submitted = st.form_submit_button("Criar job de cortes", type="primary")
         if submitted:
@@ -40,13 +46,14 @@ with st.expander("Adicionar um vídeo autorizado", expanded=True):
                 try:
                     if source_type == "URL do YouTube":
                         canonical = normalize_youtube_url(youtube_url)
-                        job = new_job(None, canonical, creator.strip(), license_note.strip(), source_url=canonical, platform_permission=True)
+                        job = new_job(None, canonical, creator.strip(), license_note.strip(), source_url=canonical,
+                                      platform_permission=True, settings=processing_settings)
                     else:
                         suffix = Path(uploaded.name).suffix.lower()
                         temp = INPUT / f"{uuid.uuid4().hex}{suffix}"
                         with temp.open("wb") as f:
                             shutil.copyfileobj(uploaded, f)
-                        job = new_job(temp, uploaded.name, creator.strip(), license_note.strip())
+                        job = new_job(temp, uploaded.name, creator.strip(), license_note.strip(), settings=processing_settings)
                 except ValueError as exc:
                     st.error(str(exc))
                 else:
@@ -101,6 +108,8 @@ else:
     job = load(options[choice])
     st.write(f"**Status:** `{job['status']}`  |  **Criador:** {job['creator']}")
     st.caption(f"Licença/registro: {job['license_note']}")
+    if job.get('settings'):
+        st.caption('Ajustes deste job: ' + ', '.join(f'{key}={value}' for key, value in job['settings'].items()))
     render_job_ai(job)
     if job.get("error"):
         st.error(job["error"])
@@ -119,7 +128,8 @@ else:
                 with timeline_path.open("rb") as timeline_handle:
                     st.download_button("Baixar timeline JSON", timeline_handle, file_name=timeline_path.name, mime="application/json", key=f"timeline_{job['id']}_{idx}")
             if file.is_file():
-                st.video(str(file))
+                preview, mime = browser_preview(file)
+                st.video(str(preview), format=mime)
                 with file.open("rb") as f:
                     st.download_button(f"Baixar candidato {idx+1}", f, file_name=file.name, mime="video/mp4", key=f"download_{job['id']}_{idx}")
             if st.checkbox(f"Aprovar candidato {idx+1}", value=idx in job.get("approved", []), key=f"approve_{job['id']}_{idx}"):

@@ -11,6 +11,7 @@ import time
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
+from .llm_routing import local_model_url
 
 HEARTBEAT_KEY = 'clips:worker:heartbeat'
 
@@ -62,8 +63,40 @@ def ollama_state(model: str) -> dict:
     return result
 
 
+def _get_kepler_json(path: str) -> dict:
+    base = local_model_url('kepler_gpu')
+    if base is None:
+        raise ValueError('Invalid local Kepler bridge URL')
+    with urllib.request.urlopen(urllib.request.Request(base + path,
+                                headers={'Accept': 'application/json'}), timeout=2.5) as response:
+        data = json.load(response)
+    if not isinstance(data, dict):
+        raise ValueError('Expected Kepler object response')
+    return data
+
+
+def kepler_state(model: str) -> dict:
+    result = {'reachable': False, 'loaded': False, 'model': model}
+    try:
+        health = _get_kepler_json('/health')
+        result['reachable'] = health.get('status') == 'ok'
+        result['backend'] = health.get('backend')
+        ps = _get_kepler_json('/api/ps')
+        loaded = next((item for item in ps.get('models', [])
+                       if isinstance(item, dict) and item.get('name') == model), None)
+        result['loaded'] = loaded is not None
+        if loaded:
+            result['context_window'] = loaded.get('context_window')
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        result['error'] = str(exc)[:180]
+    return result
+
+
 def snapshot(redis_client) -> dict:
     worker = worker_state(redis_client)
     mode = worker.get('ranker', 'unknown') if worker.get('online') else 'unknown'
     model = worker.get('model', os.getenv('OLLAMA_MODEL', 'qwen2.5:3b'))
-    return {'worker': worker, 'ranker': mode, 'ollama': ollama_state(model)}
+    result = {'worker': worker, 'ranker': mode, 'ollama': ollama_state(model)}
+    if os.getenv('KEPLER_BRIDGE_URL'):
+        result['kepler'] = kepler_state(model)
+    return result

@@ -1,0 +1,3 @@
+FROM content-factory-worker:latest
+COPY . /opt/pyscenedetect
+RUN python -m pip install --no-cache-dir /opt/pyscenedetect[opencv-headless]

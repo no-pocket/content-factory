@@ -4,6 +4,7 @@ import os
 import uuid
 from pathlib import Path
 import redis
+from .job_settings import normalize_job_settings
 
 ROOT = Path(os.getenv("DATA_DIR", "data")).resolve()
 JOBS = ROOT / "work"
@@ -17,12 +18,12 @@ def rconn():
     return redis.Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379/0"), decode_responses=True)
 
 
-def new_job(path: Path | None, filename: str, creator: str, license_note: str, *, source_url: str | None = None, platform_permission: bool = False) -> dict:
+def new_job(path: Path | None, filename: str, creator: str, license_note: str, *, source_url: str | None = None, platform_permission: bool = False, settings: dict | None = None) -> dict:
     jid = str(uuid.uuid4())
     record = {"schema_version": "1.0", "id": jid, "source": str(path) if path else None, "source_type": "youtube" if source_url else "upload",
               "source_url": source_url, "platform_permission": platform_permission, "original_name": filename,
               "creator": creator, "license_note": license_note, "status": "QUEUED", "candidates": [], "error": None,
-              "approved": [], "model": os.getenv("WHISPER_MODEL", "base")}
+              "approved": [], "settings": normalize_job_settings(settings), "model": os.getenv("WHISPER_MODEL", "base")}
     save(record)
     return record
 

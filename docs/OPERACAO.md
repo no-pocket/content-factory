@@ -1,0 +1,53 @@
+# Operação diária
+
+O Content Factory recebe um vídeo autorizado, produz candidatos de cortes e aguarda revisão humana. A interface fica em <http://localhost:8501/> e mostra a versão no topo. Este guia usa PowerShell na raiz do repositório.
+
+## Iniciar nesta workstation
+
+Para a instalação já construída, com GPU K4200 e volumes existentes:
+
+```powershell
+docker compose -f compose.yaml -f compose.kepler.yaml up -d --no-build
+docker compose -f compose.yaml -f compose.kepler.yaml ps
+Invoke-RestMethod http://127.0.0.1:11436/health
+```
+
+Abra <http://localhost:8501/>. Em **Doctor**, confirme Worker e GPU online. O Ollama pode aparecer separadamente; cada job escolhe o backend. Se usar somente CPU/Ollama, execute `docker compose up -d --no-build` e selecione Ollama no job. A instalação inicial e o build da K4200 estão em [GPU K4200](GPU_K4200.md).
+
+Não use `down -v` para reiniciar: `data/`, cache do Whisper, modelos Ollama e binários Kepler são dados persistentes. Antes de reconstruir imagens, confira espaço livre em C: e se há job em andamento.
+
+## Produzir e revisar
+
+1. Em **Adicionar um vídeo autorizado**, escolha um MP4/MOV/MKV local ou uma URL individual do YouTube. Informe criador, referência da autorização e marque a confirmação. Download por URL exige também permissão aplicável da plataforma e a opção `ENABLE_YOUTUBE_DOWNLOAD=true`.
+2. Abra **Ajustes de processamento**. Defina quantidade e duração dos cortes, modelo Whisper, análise/direção Qwen, backend Ollama ou GPU K4200 e render. Esses valores são salvos no job; alterações posteriores do `.env` não mudam um job existente.
+3. Clique **Criar job de cortes**. A fila aceita um job por vez nesta implantação. O Doctor mostra a atividade da IA; em **Jobs e aprovação**, use **Atualizar status** para ver mudanças de etapa.
+4. Em `NEEDS_REVIEW`, reproduza cada candidato até o fim. O WebM é a prévia para o navegador; o MP4 é o arquivo mestre para download. Confira também a transcrição, o corte, o áudio, as legendas, o enquadramento e o motor de render registrado.
+5. Marque os candidatos aceitos e clique **Salvar aprovação**, ou use **Rejeitar todos**. A decisão fica no JSON do job. Não há publicação automática.
+
+B-roll só entra no trabalho após cadastro na **Biblioteca de gameplay**, com descrição e prova de direitos. O diretor recebe IDs do catálogo; sugestões de IDs inexistentes são descartadas pelo construtor da timeline.
+
+## Estado e arquivos
+
+Os registros ficam em `data/work/<job_id>.json`, a transcrição em `data/work/<job_id>.transcript.json`, as entradas em `data/input/` e os resultados em `data/output/<job_id>/`. Para cada candidato, há `candidate_N.mp4`, `candidate_N.preview.webm` e `candidate_N.timeline.json`. O diretório `data/` é ignorado pelo Git: mantenha backup separado.
+
+Estados normais: `QUEUED → DOWNLOADING` (só URL) `→ TRANSCRIBING → DIRECTING → RENDERING → NEEDS_REVIEW → APPROVED/REJECTED`. Falhas ficam em `FAILED` com motivo no job. Para detalhes de fallback e recuperação, veja [Processo de produção](PROCESSO.md).
+
+## Diagnóstico rápido
+
+```powershell
+docker compose -f compose.yaml -f compose.kepler.yaml ps
+docker compose -f compose.yaml -f compose.kepler.yaml logs --tail=100 worker kepler-bridge kepler-engine ui
+docker exec content-factory-redis-1 redis-cli LLEN clips:queue
+docker exec content-factory-redis-1 redis-cli LLEN clips:processing
+Invoke-RestMethod http://127.0.0.1:11436/api/ps
+```
+
+| Sintoma | Verificação / ação |
+| --- | --- |
+| Worker offline | Veja `logs worker`, Redis e espaço em disco. Ao reiniciar, o worker recupera jobs da lista de processamento. |
+| GPU offline | Veja `/health`, `logs kepler-engine`, modelo no volume e VRAM. O Ollama/heurística continuam opções do job. |
+| Queda para heurística | Veja `ai_activity.reason` no JSON e logs. Contexto excedido retorna 422; limite de resposta e JSON inválido também acionam fallback. |
+| Job `FAILED` | Leia `error` no JSON; confira entrada, modelo Whisper em cache, logs e espaço. Não apague o registro antes de identificar a etapa. |
+| Vídeo não reproduz | Confira se existe a prévia WebM e decodifique-a com FFmpeg. Veja [Testes e validação](TESTES.md). O MP4 para download permanece separado. |
+
+Para reiniciar uma mudança de código montada pelo override, use `docker compose -f compose.yaml -f compose.kepler.yaml up -d --no-build --force-recreate worker ui kepler-bridge`. Faça isso com a fila vazia ou depois que o job atual terminar.

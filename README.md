@@ -1,8 +1,9 @@
-# Content Factory — Creator Clips MVP v4.0
+# Content Factory — Creator Clips v4.1.0
+
+**Documentação:** [índice de operação, processo, arquitetura, GPU e testes](docs/README.md).
 
 Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in Streamlit. No paid AI API, Hermes account, or autoposting required.
 
-> **Copyright / platform access:** Only use media with documented permission to make derivative clips and intended distribution/monetization rights. The optional YouTube downloader additionally requires applicable platform authorization. No cookies, paywall access, private-video access or bypasses are provided.
 
 ## Start the workstation (Linux / Docker Desktop with WSL2)
 
@@ -13,7 +14,9 @@ docker compose up --build -d
 docker compose logs -f worker
 ```
 
-By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The `EDIT_DIRECTOR=ollama` and `CLIP_RANKER=ollama` settings fall back when Ollama is unavailable. The render step uses the FFmpeg fallback if Remotion fails; **the fallback does not have animated typography or B-roll**. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
+By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The **Ajustes de processamento** panel saves model, beam size, highlight count/duration, Qwen analysis limits and engine choices with each job; `app.submit` accepts the same `settings` object. The render step uses the FFmpeg fallback if Remotion fails; **the fallback does not have animated typography or B-roll**. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
+
+Each finished candidate keeps its 720×1280 MP4 for download and gets a smaller VP8/Opus WebM preview for browser playback. The preview is decoded completely before it appears in the UI. Existing MP4s are used as a fallback when a preview has not been generated yet.
 
 ### Enable local Qwen with Ollama
 
@@ -26,12 +29,26 @@ docker compose up -d --force-recreate worker
 
 For compatible NVIDIA CUDA setup, add `-f compose.ollama-gpu.yaml` for Ollama, and/or `-f compose.gpu.yaml` for the worker. The default image uses CPU and is slower; the NVIDIA path requires Docker NVIDIA runtime and a matching driver.
 
+### Experimental Quadro K4200 path
+
+The K4200 can run Qwen 2.5 through a CUDA 10.2 build of `llama.cpp` even though current Ollama does not use this card. On this workstation, after starting the base services and pulling `qwen2.5:3b`, run:
+
+```powershell
+./research/build-kepler.ps1
+docker compose -f compose.yaml -f compose.kepler.yaml up -d worker ui kepler-engine kepler-bridge
+Invoke-RestMethod http://127.0.0.1:11436/health
+```
+
+Choose **GPU K4200 (experimental)** under **Processamento do Qwen** for each job. `KEPLER_CTX_SIZE`, `KEPLER_BATCH_SIZE`, `KEPLER_UBATCH_SIZE`, `KEPLER_GPU_LAYERS`, `KEPLER_THREADS`, and `KEPLER_REQUEST_TIMEOUT` are adjustable in `.env`. Whisper remains on CPU; the GPU option applies to the Qwen classifier and editing director. See [the measurements and limitations](research/GPU_K4200_EVALUATION_2026-11-04.md).
+
+The GPU bridge checks its live context window before inference and reports when a response reaches its token limit. Those decisions fall back to the deterministic heuristic. The UI shows the release version and GPU health in Doctor. The K4200 path remains optional because the CUDA 10.2/WSL combination is outside NVIDIA's supported WSL GPU range.
+
 ## Editing flow
 
 ```
 Source (uploaded video or permitted YouTube URL)
   -> faster-whisper with word timestamps
-  -> heuristic shortlist, optional Qwen rerank
+  -> heuristic shortlist plus Qwen proposals anchored to transcript segments, then rerank
   -> Qwen Editing Director suggests hook, punch zooms and B-roll placements
   -> timeline.py validates bounds, IDs and source-anchored text
   -> FFmpeg stages center-cropped video and rights-registered B-roll
@@ -55,13 +72,9 @@ The director is not permitted to provide shell commands or arbitrary file paths;
 
 ## Test the code
 
-```bash
-python -m pytest -q
-# Docker tests (source tests are not copied into runtime image):
-docker compose run --rm --no-deps -v "$PWD/tests:/app/tests:ro" ui pytest -q tests
-```
+Use os comandos e critérios em [Testes e validação](docs/TESTES.md). Nesta workstation a suíte roda na imagem existente do worker, com o código montado, sem reconstruir a imagem.
 
-The tests cover timeline bounds and media safety, ranker fallback, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. This project does not currently include automated social posting, word-level forced alignment after text correction, face tracking, or production fault-tolerant job recovery.
+The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. This project does not currently include automated social posting, word-level forced alignment after text correction, face tracking, or multi-worker leases.
 
 ## Operation & safety
 

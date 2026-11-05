@@ -1,47 +1,38 @@
-# Content Factory v4 — technical design
+# Arquitetura técnica — Content Factory 4.1.0
 
-## Components
+## Componentes e fluxo
 
 ```text
-Streamlit :8501  ->  Redis job queue  ->  one worker
-                                          |
-                                          +-> (optional yt-dlp, opt-in licensed URL)
-                                          +-> faster-whisper (VAD + timestamps per word)
-                                          +-> ranker: heuristic or Ollama Qwen2.5
-                                          +-> AI Editing Director: Ollama Qwen2.5
-                                          +-> validated timeline JSON, licensed B-roll catalog
-                                          +-> FFmpeg media staging
-                                          +-> Remotion composition -> MP4
-                                          +-> FFmpeg subtitles fallback on render failure
-                                          +-> status NEEDS_REVIEW -> UI approve/reject
+Streamlit :8501 ──> registro JSON em data/work ──> Redis clips:queue
+                                                └──> worker único
+                                                      ├── ingestão autorizada / yt-dlp opcional
+                                                      ├── faster-whisper (CPU, timestamps por palavra)
+                                                      ├── heurística + Qwen ranker
+                                                      │     ├── Ollama local (CPU nesta máquina)
+                                                      │     └── ponte Kepler -> llama.cpp/CUDA 10.2/K4200
+                                                      ├── Qwen Editing Director + timeline validada
+                                                      ├── FFmpeg + Remotion (fallback FFmpeg)
+                                                      └── MP4 mestre + WebM de prévia -> revisão humana
 ```
 
-**No extra microservices**: one worker, one Redis, one Streamlit, one optional Ollama. Job state + transcripts + media are persisted in `data/`. The timeline (a versioned edit decision list) is saved next to each output; it never contains arbitrary shell code, filesystem paths provided by LLMs or network URLs.
+`compose.yaml` define UI, worker, Redis e Ollama opcional. `compose.kepler.yaml` acrescenta servidor GPU e ponte Ollama compatível, exposta somente em localhost para diagnóstico. A UI é uma camada de apresentação: `app/job_settings.py`, `app/store.py`, `app/queueing.py` e o worker mantêm a lógica e os dados necessários a outro frontend.
 
-## Trust boundaries
+## Dados e contratos
 
-* Source URL is restricted to canonical individual YouTube URLs; rights attestations are recorded. Download disabled by default.
-* Local uploaded assets require a creator description + permission reference and receive a generated ID. Catalog path checks reject traversals and unknown IDs.
-* Model output (`hook`, punch zoom, B-roll requests) is **advice only**. The timeline builder enforces clip bounds, maximum effects, asset whitelist and subtitle timings.
-* Renderer uses pre-staged `base.mp4` / `broll_N.mp4` under a generated static directory. Audio from B-roll is muted.
-* The UI/queue are **not** public-facing services; no publishing authorization is present.
+`data/work/<id>.json` é o estado persistido do job; `data/work/<id>.transcript.json` guarda ASR; `data/input/` contém upload/download; `data/output/<id>/` guarda MP4, WebM e timeline por candidato. Escritas do estado usam troca atômica de arquivo. Redis guarda fila pendente, lista em processamento e heartbeat. `recover_inflight` reenvia jobs interrompidos quando o worker reinicia; a implantação suporta um worker, sem lease multiworker.
 
-## Timeline 2.0
+Cada job salva uma cópia validada de seus ajustes. A UI e `app/submit.py` usam `normalize_job_settings`, portanto mudanças na configuração padrão não alteram a intenção de um job já criado. `contracts/youtube_ingest.schema.json` descreve a entrada de URL para integrações; `contracts/timeline.schema.json` documenta a timeline. `app/timeline.py` é o validador semântico em runtime.
 
-The schema's relevant fields are `schema_version`, fixed `width`/`height`/`fps`, `duration`, `source_range`, and `layers.video`, `layers.audio`, `layers.captions` (word events), `layers.text` (pop banner), `layers.effects` (punch zoom) and `layers.broll` (licensed local media). `caption_style` selects `bold_karaoke_v1`. All times are seconds **relative to the cropped clip**, except `source_range`.
+## Fronteiras e tratamento de falhas
 
-`app/timeline.py` is the canonical validator/builder. The JSON contract under `contracts/` helps external editing agents, but it is not a substitute for the runtime validator.
+- Fonte YouTube restrita a vídeo individual e autorização declarada; download desabilitado por padrão. Assets B-roll exigem registro de direitos e caminho local validado.
+- Transcrição, descrições e saída Qwen são dados não confiáveis. O ranker valida IDs, tempos e respostas completas; o diretor só sugere campos limitados. A timeline impõe limites e não aceita comandos shell nem caminhos arbitrários do modelo.
+- Na GPU, a ponte consulta contexto e tokenizer reais antes da inferência; rejeita estouro de contexto e opções não implementadas. Ranker e diretor descartam resposta limitada ou prompt truncado. Falhas semânticas acionam heurística, com evento no job.
+- Render Remotion pode cair para FFmpeg com legendas simplificadas, se configurado. Cada MP4 recebe prévia VP8/Opus completamente decodificada antes da publicação. O motor efetivo fica registrado por candidato.
+- `NEEDS_REVIEW` exige decisão humana. Não há publicação social, autenticação para exposição pública, edição manual de timeline nem verificação externa de licença.
 
-## Failure and recovery
+## Limites atuais
 
-* Ranker timeout, invalid JSON or unreachable Ollama -> heuristic shortlist.
-* Director timeout, invalid structure -> safe default timeline with captions + spoken-words title.
-* Bad B-roll transcode -> skip that insert and continue to render.
-* Remotion failure -> optional FFmpeg subtitled render; the UI identifies fallback. Set `RENDER_FALLBACK_FFMPEG=false` for strict validation.
-* Worker crash while executing a job may leave the job in an in-progress state; the current MVP does not implement automatic redelivery/recovery. Before 24/7 production, add durable leases and idempotency.
+Whisper continua em CPU nesta workstation. A K4200 acelera leitura de prompts, mas a geração 3B foi mais lenta nos testes pareados; a escolha de backend permanece por job. NVENC funcionou isoladamente no container com a capacidade `video`, mas não foi integrado nem validado em qualidade no pipeline, que usa `libx264`. A fila não oferece vários workers, leases nem idempotência detalhada por etapa. A UI só deve ficar em localhost, túnel SSH ou VPN.
 
-## Non-goals / known gaps
-
-* No account-based access control, no HTTPS edge exposure, no multi-node orchestration, no social uploads, no automatic copyright verification.
-* No speaker/face tracking, scene intelligence or WhisperX forced alignment. B-roll suggestions use written descriptions and ASR only.
-* Default render is 720x1280 to keep CPU cost manageable. You can scale to 1080x1920 after benchmarks and matching validator/Remotion settings.
+Leia [Processo de produção](PROCESSO.md) para a sequência operacional, [GPU K4200](GPU_K4200.md) para o caminho legado e [Testes](TESTES.md) para validação.

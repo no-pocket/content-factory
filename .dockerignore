@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+.pytest_cache
+.pytest_tmp
+**/__pycache__
+data
+docs
+research
+scripts
+tests
+*.mp4
+*.zip
+renderer/node_modules
+renderer/public/jobs

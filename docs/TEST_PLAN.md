@@ -1,25 +1,26 @@
-# Acceptance test plan — v4
+# Plano de aceitação — Content Factory 4.1.0
 
-## Automated
+Use este roteiro ao publicar uma versão ou alterar a seleção, o render, a fila ou a GPU. Os comandos reproduzíveis estão em [Testes e validação](TESTES.md).
 
-* `python -m pytest -q`: validate timed captions, timeline bounds, unauthorized assets, Qwen director fallback, download URL validation, status persistence, audio/video synthetic FFmpeg output.
-* `docker compose config`: check Compose interpolation for local target system.
-* `docker compose build ui worker`: confirm Chromium + Node/Remotion setup in images.
+## Verificações automatizadas
 
-## Manual integrated smoke test (workstation)
+1. Execute a suíte Python na imagem do worker e confira `docker compose -f compose.yaml -f compose.kepler.yaml config --quiet`.
+2. Confirme testes para qualquer bug corrigido ou feature nova; nesta versão, 92 testes passaram.
+3. Confira `git diff --check` e revise o diff antes de commit/push.
 
-1. Preserve and back up your existing `.env`, `data/` and model volumes; update services without deleting volumes.
-2. Start Ollama using the Compose profile and confirm `ollama list` contains `qwen2.5:3b`.
-3. Open the local Streamlit UI; check Doctor reports Worker online and model available.
-4. Submit a **locally stored authorized** 5–15 minute video with clear PT-BR speech; record authorization evidence.
-5. Verify job transitions: `QUEUED -> TRANSCRIBING -> (DIRECTING -> RENDERING) -> NEEDS_REVIEW`.
-6. Confirm three separate candidates when source speech permits; open `candidate_N.timeline.json` and compare word times with audio.
-7. Upload a **licensed** B-roll clip and create a new job; confirm Director never chooses an unregistered ID and any inserted footage is muted.
-8. Inspect an animated subtitle and title, audio continuity, readability within social safe areas, and visual crop. Check `renderer_used` is `remotion` rather than fallback.
-9. Temporarily disable Ollama: new jobs should continue via semantic/director fallback, not crash, with reasons recorded.
-10. Set `RENDER_ENGINE=ffmpeg`; verify output is playable and metadata says `ffmpeg_subtitled`.
-11. Approve one candidate, reject another, refresh the dashboard; confirm persisted decision and **no social posting**.
+## Fluxo real na workstation
 
-### Known environment constraints
+1. Preserve `.env`, `data/` e volumes existentes. Confirme espaço e ausência de job ativo antes de recriar serviços.
+2. Verifique Worker, Ollama e, quando selecionada, a ponte GPU no Doctor. Confira `/health` e `/api/ps` da GPU.
+3. Envie um vídeo local autorizado com fala clara, criador e referência de direitos. Registre os ajustes escolhidos no job.
+4. Acompanhe `QUEUED → TRANSCRIBING → DIRECTING/RENDERING → NEEDS_REVIEW`; para URL autorizada também ocorre `DOWNLOADING`.
+5. Se a fala permitir três cortes, confirme três candidatos e três timelines. Compare trechos, tempos de palavras e áudio com a fonte.
+6. Reproduza cada prévia WebM até `ended` no navegador e abra cada MP4 mestre. Confira resolução, duração, enquadramento, áudio e legendas.
+7. Cadastre um B-roll licenciado e confira que a timeline final usa apenas IDs do catálogo; áudio do B-roll não deve substituir a fala.
+8. Verifique `renderer_used`: Remotion deve mostrar animações; fallback FFmpeg deve ficar identificado e ser revisado como visual simplificado.
+9. Provoque uma indisponibilidade controlada do backend de teste: o job deve registrar o motivo do fallback e continuar pela heurística. Um pedido GPU acima do contexto deve receber 422 antes de gerar.
+10. Salve uma aprovação e uma rejeição; recarregue a UI para confirmar persistência. Nenhum vídeo deve ser publicado automaticamente.
 
-Automated tests do not guarantee Docker/Chromium/Remotion execution. Run the full integration smoke test on the actual workstation with its GPU/driver combination before unattended use. Measure VRAM, transcription speed, rendering latency and subtitle accuracy with real material.
+## Limites da aceitação
+
+Passar nos testes não prova qualidade editorial, licença válida, ausência de erros factuais ou suporte oficial da K4200 em WSL. A pessoa revisora decide sobre publicação. Benchmark CPU/GPU e diagnóstico NVENC estão na [auditoria REA](../research/AUDITORIA_REA_K4200_2026-11-05.md).

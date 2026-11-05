@@ -9,6 +9,25 @@
     "creator": {"type": "string", "minLength": 1},
     "license_note": {"type": "string", "minLength": 1},
     "rights_confirmed": {"const": true},
-    "platform_permission": {"const": true}
+    "platform_permission": {"const": true},
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clip_count": {"type": "integer", "minimum": 1, "maximum": 6},
+        "target_seconds": {"type": "integer", "minimum": 8, "maximum": 60},
+        "min_seconds": {"type": "integer", "minimum": 8, "maximum": 60},
+        "max_seconds": {"type": "integer", "minimum": 15, "maximum": 60},
+        "proposal_max_chunks": {"type": "integer", "minimum": 1, "maximum": 32},
+        "shortlist": {"type": "integer", "minimum": 3, "maximum": 32},
+        "ollama_timeout": {"type": "integer", "minimum": 15, "maximum": 600},
+        "whisper_model": {"enum": ["tiny", "base", "small", "medium", "large-v3-turbo", "large-v3"]},
+        "whisper_beam_size": {"type": "integer", "minimum": 1, "maximum": 10},
+        "ranker_mode": {"enum": ["ollama", "heuristic"]},
+        "llm_backend": {"enum": ["ollama", "kepler_gpu"]},
+        "director_mode": {"enum": ["ollama", "heuristic"]},
+        "render_engine": {"enum": ["remotion", "ffmpeg"]}
+      }
+    }
   }
 }

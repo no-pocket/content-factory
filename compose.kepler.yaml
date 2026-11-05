@@ -1,0 +1,51 @@
+services:
+  kepler-engine:
+    image: content-factory-kepler-lab:cuda10.2
+    entrypoint: ["/bin/sh", "/opt/kepler-engine.sh"]
+    environment:
+      LD_LIBRARY_PATH: /build/bin:/usr/local/cuda-10.2/lib64
+      KEPLER_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      KEPLER_CTX_SIZE: ${KEPLER_CTX_SIZE:-4096}
+      KEPLER_BATCH_SIZE: ${KEPLER_BATCH_SIZE:-512}
+      KEPLER_UBATCH_SIZE: ${KEPLER_UBATCH_SIZE:-256}
+      KEPLER_GPU_LAYERS: ${KEPLER_GPU_LAYERS:-99}
+      KEPLER_THREADS: ${KEPLER_THREADS:-4}
+    volumes:
+      - cf_kepler_b4300:/build:ro
+      - ollama_models:/models:ro
+      - ./research/kepler-engine.sh:/opt/kepler-engine.sh:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+  kepler-bridge:
+    image: content-factory-worker:latest
+    entrypoint: ["python", "/opt/kepler_bridge.py", "bridge"]
+    environment:
+      KEPLER_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      KEPLER_ENGINE_URL: http://kepler-engine:8080
+      KEPLER_REQUEST_TIMEOUT: ${KEPLER_REQUEST_TIMEOUT:-300}
+      KEPLER_CONTEXT_MARGIN: ${KEPLER_CONTEXT_MARGIN:-16}
+    volumes:
+      - ./app/kepler_bridge.py:/opt/kepler_bridge.py:ro
+    ports:
+      - "127.0.0.1:11436:11434"
+    depends_on: [kepler-engine]
+    restart: unless-stopped
+  worker:
+    environment:
+      KEPLER_BRIDGE_URL: http://kepler-bridge:11434
+    volumes:
+      - ./app:/app/app:ro
+  ui:
+    environment:
+      KEPLER_BRIDGE_URL: http://kepler-bridge:11434
+    volumes:
+      - ./app:/app/app:ro
+volumes:
+  cf_kepler_b4300:
+    external: true

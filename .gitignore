@@ -4,6 +4,13 @@
 data/
 **/__pycache__/
 .pytest_cache/
+.pytest_tmp/
+research/upstream/
+research/lab_binaries/
+research/frame-*.jpg
+research/pytest_temp*/
+research/browser_*.png
+research/geckodriver.log
 *.pyc
 *.egg-info/
 renderer/node_modules/

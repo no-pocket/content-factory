@@ -7,13 +7,11 @@ import json
 import os
 import subprocess
 import logging
-import logging
+import uuid
 from pathlib import Path
 
 from .core import render
 from .timeline import ASSET_ID, validate_timeline, write_timeline
-
-log = logging.getLogger(__name__)
 
 log = logging.getLogger(__name__)
 
@@ -49,14 +47,40 @@ def read_assets() -> dict:
     return result
 
 
-def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path) -> str:
+def browser_preview(source: Path) -> tuple[Path, str]:
+    """Prefer the browser-native preview, retaining MP4 as the download master."""
+    preview = source.with_suffix('.preview.webm')
+    return (preview, 'video/webm') if preview.is_file() else (source, 'video/mp4')
+
+
+def make_web_preview(source: Path) -> Path:
+    """Write a VP8/Opus preview only after the complete file decodes successfully."""
+    preview = source.with_suffix('.preview.webm')
+    pending = source.with_name(f'{source.stem}.preview.{uuid.uuid4().hex}.webm')
+    try:
+        subprocess.run([
+            'ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', str(source),
+            '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'scale=540:-2',
+            '-c:v', 'libvpx', '-deadline', 'realtime', '-cpu-used', '8',
+            '-b:v', '1500k', '-threads', '4', '-pix_fmt', 'yuv420p',
+            '-c:a', 'libopus', '-b:a', '96k', str(pending),
+        ], check=True, capture_output=True, text=True)
+        subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-xerror',
+                        '-i', str(pending), '-f', 'null', '-'],
+                       check=True, capture_output=True, text=True)
+        os.replace(pending, preview)
+        return preview
+    finally:
+        pending.unlink(missing_ok=True)
+
+
+def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None) -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
     output_dir = PUBLIC / job_id / str(ordinal)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Existing renderer is reliable and handles source media variations.
     render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False)
-    staged_broll = []
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
         asset = assets.get(piece["asset_id"])
@@ -82,9 +106,10 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     # Manifest is also copied to Remotion's static directory so Chrome can load media.
     write_timeline(output_dir / "timeline.json", timeline)
     target.parent.mkdir(parents=True, exist_ok=True)
-    engine = os.getenv("RENDER_ENGINE", "remotion").lower()
+    engine = (engine if engine is not None else os.getenv("RENDER_ENGINE", "remotion")).lower()
     if engine == "ffmpeg":
         render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True)
+        make_web_preview(target)
         return "ffmpeg_subtitled"
     props = {"jobId": job_id, "clipNo": str(ordinal), "timeline": timeline}
     props_path = output_dir / "props.json"
@@ -94,9 +119,11 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
         subprocess.run(["./node_modules/.bin/remotion", "render", "src/index.tsx", "VerticalClip", str(target.resolve()),
                         "--props=" + str(props_path.resolve()), "--codec=h264", "--log=error"], cwd=RENDERER,
                        check=True, capture_output=True, text=True, timeout=int(os.getenv("RENDER_TIMEOUT", "900")))
-        return "remotion"
+        renderer_used = "remotion"
     except (subprocess.SubprocessError, OSError) as exc:
         if os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
             raise
         render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True)
-        return f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
+        renderer_used = f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
+    make_web_preview(target)
+    return renderer_used

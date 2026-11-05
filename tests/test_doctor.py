@@ -2,6 +2,20 @@ import json
 import time
 from app import doctor
 
+
+def test_kepler_health_reports_loaded_model_and_context(monkeypatch):
+    monkeypatch.setattr(doctor, '_get_kepler_json', lambda path: (
+        {'status': 'ok', 'backend': 'cuda10.2'} if path == '/health' else
+        {'models': [{'name': 'qwen2.5:3b', 'context_window': 4096}]}))
+    state = doctor.kepler_state('qwen2.5:3b')
+    assert state['reachable'] and state['loaded']
+    assert state['context_window'] == 4096
+
+
+def test_kepler_health_reports_offline(monkeypatch):
+    monkeypatch.setattr(doctor, '_get_kepler_json', lambda path: (_ for _ in ()).throw(OSError('offline')))
+    assert not doctor.kepler_state('qwen2.5:3b')['reachable']
+
 class FakeRedis:
     def __init__(self, data=None):
         self.data = data
