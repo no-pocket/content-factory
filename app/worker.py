@@ -7,6 +7,7 @@ import threading
 from pathlib import Path
 from faster_whisper import WhisperModel
 from .core import get_duration, propose_clips
+from .errors import describe_failure
 from .timeline import build_timeline
 from .director import direct_edit
 from .edit_render import render_edited, read_assets
@@ -144,7 +145,7 @@ def process(jid: str) -> None:
         if job.get('ai_activity', {}).get('state') in ('queued', 'analyzing'):
             record_ai_event(job, 'failed', {'reason': str(exc)[:200]})
         job["status"] = "FAILED"
-        job["error"] = str(exc)[:1500]
+        job["error"] = describe_failure(exc)
         save(job)
 
 

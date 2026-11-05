@@ -19,10 +19,14 @@ services:
     restart: unless-stopped
   worker:
     build: .
-    command: ["python", "-m", "app.worker"]
+    # Trust optional local root CAs before the worker contacts Hugging Face.
+    command: ["sh", "-ec", "update-ca-certificates >/dev/null && exec python -m app.worker"]
     environment:
       REDIS_URL: redis://redis:6379/0
       DATA_DIR: /data
+      # HTTPX/Hugging Face uses this combined system + custom trust store.
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
       WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
       WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
       WHISPER_MODEL: ${WHISPER_MODEL:-base}
@@ -44,6 +48,8 @@ services:
     volumes:
       - ./data:/data
       - hf_cache:/root/.cache/huggingface
+      # Optional CA PEM certificate(s) exported from the trusted issuing authority.
+      - ./certs:/usr/local/share/ca-certificates/content-factory:ro
     depends_on: [redis]
     restart: unless-stopped
   ollama:

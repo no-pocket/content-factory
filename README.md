@@ -76,6 +76,10 @@ Use os comandos e critérios em [Testes e validação](docs/TESTES.md). Nesta wo
 
 The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. This project does not currently include automated social posting, word-level forced alignment after text correction, face tracking, or multi-worker leases.
 
+## Troubleshooting — Hugging Face certificate verification
+
+If a job fails during `TRANSCRIBING` with `CERTIFICATE_VERIFY_FAILED`, read [`docs/tls-certificates.md`](docs/tls-certificates.md). The worker supports a mounted `certs/*.crt` root-CA bundle for legitimate TLS inspection; it keeps HTTPS verification enabled.
+
 ## Operation & safety
 
 - UI is bound to localhost. Use SSH tunnel or a trusted VPN rather than making it publicly accessible.
