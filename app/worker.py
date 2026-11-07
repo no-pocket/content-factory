@@ -151,6 +151,8 @@ def process(jid: str) -> None:
             if job.get('editorial_versions'):
                 job['editorial_versions']['component_snapshot_id'] = snapshot['snapshot_id']
         for index, clip in enumerate(clips):
+            if settings['framing_preset'] != 'legacy' and 'timeline' not in clip:
+                clip.setdefault('framing', {'preset': settings['framing_preset'], 'roi': settings['framing_roi']})
             if 'editorial_context' not in clip:
                 clip['editorial_context'] = build_candidate_context(job, index, transcript)
                 # Older persisted candidates keep their selection, but direction gets a

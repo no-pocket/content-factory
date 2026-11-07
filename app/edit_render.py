@@ -99,10 +99,17 @@ def apply_finishing(target: Path, timeline: dict, *, quality: str = 'standard') 
 def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard') -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
+    framing_options = {}
+    if timeline.get('framing'):
+        from .framing import validate_framing
+        size = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+                         '-show_entries', 'stream=width,height', '-of', 'json', str(source)]))['streams'][0]
+        timeline['framing_resolved'] = validate_framing(timeline['framing'], (size['width'],size['height']), (720,1280))
+        framing_options = {'framing': timeline['framing_resolved']}
     output_dir = PUBLIC / job_id / str(ordinal)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Existing renderer is reliable and handles source media variations.
-    render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24)
+    render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
         asset = assets.get(piece["asset_id"])
@@ -130,7 +137,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     target.parent.mkdir(parents=True, exist_ok=True)
     engine = (engine if engine is not None else os.getenv("RENDER_ENGINE", "remotion")).lower()
     if engine == "ffmpeg":
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24)
+        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
         apply_finishing(target, timeline, quality=quality)
         make_web_preview(target, quality=quality)
         return "ffmpeg_subtitled"
@@ -146,7 +153,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     except (subprocess.SubprocessError, OSError) as exc:
         if quality == "high" or os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
             raise
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24)
+        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
         renderer_used = f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
     apply_finishing(target, timeline, quality=quality)
     make_web_preview(target, quality=quality)

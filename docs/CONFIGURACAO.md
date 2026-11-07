@@ -65,6 +65,20 @@ O backend GPU exige `compose.kepler.yaml`. Alterações de ambiente do Compose e
 
 ## Perfil de fidelidade e revisão compacta
 
+`framing_preset` em novos jobs aceita `legacy` (padrão), `face`, `gameplay`, `web`,
+`tweet` e `document`. `framing_roi` é opcional, com `x`, `y`, `width`, `height` entre
+0 e 1, dentro da fonte. O formulário aceita o objeto JSON; entradas inválidas são
+recusadas na submissão. Presets de documento preservam a fonte inteira sobre fundo,
+com título/legendas fora da área de prova. Rosto usa foco da ROI e recorre a fit
+quando crop ou legendas perderiam a região importante. Timelines sem framing
+preservam o render anterior. A seleção manual é um snapshot por job; não altera
+renders existentes. Sem detecção visual/OCR automática.
+
+Presets explícitos protegem a região de prova contra punch zoom e B-roll que a
+cobririam; a animação karaoke, tipografia, cores e fidelidade continuam no Remotion.
+Este opt-in exige conferir legibilidade da fonte: fit preserva conteúdo, mas não
+cria detalhe que não existe na imagem original.
+
 Novos formulários começam com Qwen/GPU K4200, Remotion e `render_quality=high`; CPU e perfil standard continuam selecionáveis. A API conserva suas escolhas explícitas e os snapshots dos jobs existentes. Jobs antigos sem `render_quality` são processados como standard.
 
 High mantém mestre 720×1280, usa CRF 16 na base e 18 no mestre; prévia WebM 720×1280, CRF 10/4 Mbit/s. Standard conserva a prévia 540×960. High exige Remotion sem troca silenciosa para FFmpeg se falhar. A UI limita o player a 340 px e oferece MP4 mestre. Fonte horizontal 1280×720 perde detalhe ao recortar para vertical; aumentar resolução de saída não recupera detalhe ausente.

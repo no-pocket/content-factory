@@ -35,7 +35,10 @@
       "properties": {
         "editorial_protocol": {
           "type": "integer",
-          "enum": [1, 2],
+          "enum": [
+            1,
+            2
+          ],
           "default": 1
         },
         "clip_count": {
@@ -127,6 +130,60 @@
             "high"
           ],
           "default": "high"
+        },
+        "framing_preset": {
+          "enum": [
+            "legacy",
+            "face",
+            "gameplay",
+            "web",
+            "tweet",
+            "document"
+          ],
+          "default": "legacy"
+        },
+        "framing_roi": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "width": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 1000
+            }
+          ]
         }
       }
     }

@@ -102,7 +102,7 @@ def get_duration(source: Path) -> float:
     return float(cp.stdout.strip())
 
 
-def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True, crf: int = 24) -> None:
+def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True, crf: int = 24, framing: dict | None = None) -> None:
     """Center-crop landscape to 9:16. Produces a preview, not automatic face tracking."""
     if start < 0 or end <= start or end - start > 60.01:
         raise ValueError("Interval must be between 0 and 60 seconds")
@@ -110,6 +110,9 @@ def render(source: Path, start: float, end: float, segments: list[dict], target:
     subtitle = target.with_suffix(".srt")
     write_srt(segments, start, end, subtitle)
     vf = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1"
+    if framing:
+        from .framing import video_filter
+        vf = video_filter(framing, width, height)+',setsar=1'
     # Use the local SRT filename relative to CWD to avoid FFmpeg filter path escaping.
     if burn_subtitles and subtitle.stat().st_size > 0:
         vf += ",subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'"

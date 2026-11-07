@@ -71,6 +71,24 @@ def test_high_fidelity_preview_keeps_master_resolution(tmp_path):
     assert (streams[0]['width'],streams[0]['height'])==(720,1280)
 
 
+def test_web_framing_preserves_both_source_edges(tmp_path):
+    from app.core import render
+    from app.framing import validate_framing
+    if not shutil.which('ffmpeg'):
+        return
+    source = tmp_path/'page.mp4'
+    subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',
+                    'color=white:size=640x360:rate=30:duration=1,drawbox=x=0:y=0:w=30:h=360:color=red:t=fill,drawbox=x=610:y=0:w=30:h=360:color=blue:t=fill',
+                    '-c:v','libx264',str(source)],check=True)
+    target = tmp_path/'framed.mp4'
+    framing = validate_framing({'preset':'web'}, (640,360), (720,1280))
+    render(source, 0, 1, [], target, burn_subtitles=False, framing=framing)
+    for x, channel in ((10,0),(700,2)):
+        raw = subprocess.check_output(['ffmpeg','-v','error','-i',str(target),'-frames:v','1',
+                                       '-vf',f'crop=2:2:{x}:440,scale=1:1','-pix_fmt','rgb24','-f','rawvideo','-'])
+        assert raw[channel] > 180 and raw[1] < 80
+
+
 def test_finishing_preserves_spoken_audio_then_adds_fading_tail(tmp_path):
     from app.core import get_duration
     from app.edit_render import apply_finishing

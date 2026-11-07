@@ -1,4 +1,5 @@
 """Streamlit controls for the versioned per-job processing settings."""
+import json
 
 from .job_settings import DEFAULTS, RANGES
 
@@ -20,6 +21,19 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'framing_preset':
+            result[key] = st.selectbox('Conteúdo visual', ['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'],
+                                       index=['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'].index(initial[key]),
+                                       format_func={'legacy':'Enquadramento original', 'face':'Rosto', 'gameplay':'Gameplay',
+                                                    'web':'Página web', 'tweet':'Publicação / tweet', 'document':'Documento'}.__getitem__,
+                                       key=key_prefix+key)
+            continue
+        if key == 'framing_roi':
+            result[key] = st.text_input('Região importante (opcional: x,y,largura,altura em JSON)',
+                value=json.dumps(initial[key]) if initial[key] else '',
+                placeholder='{"x":0,"y":0,"width":1,"height":1}', max_chars=1000, key=key_prefix+key)
+            result[key] = result[key] or None
+            continue
         if key in {'whisper_model', 'ranker_mode', 'llm_backend', 'llm_model', 'director_mode', 'render_engine', 'render_quality'}:
             labels_and_options = {
                 'whisper_model': ('Modelo Whisper', ['tiny', 'base', 'small', 'medium', 'large-v3-turbo', 'large-v3']),

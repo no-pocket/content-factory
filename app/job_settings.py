@@ -1,7 +1,10 @@
 """Validated processing controls shared by all frontends and workers."""
+import json
 
 DEFAULTS = {
     'editorial_protocol': 1,
+    'framing_preset': 'legacy',
+    'framing_roi': None,
     'clip_count': 3,
     'target_seconds': 40,
     'min_seconds': 15,
@@ -43,6 +46,21 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    from .framing import PRESETS, validate_scene
+    if settings['framing_preset'] not in ('legacy', *PRESETS):
+        raise ValueError('Unsupported framing_preset')
+    roi = settings['framing_roi']
+    if isinstance(roi, str):
+        if len(roi) > 1000:
+            raise ValueError('ROI JSON too large')
+        roi = json.loads(roi) if roi.strip() else None
+    if settings['framing_preset'] == 'legacy':
+        if roi is not None:
+            raise ValueError('Select a framing preset before supplying ROI')
+    else:
+        scene = validate_scene({'preset': settings['framing_preset'], 'roi': roi})
+        roi = scene['roi']
+    settings['framing_roi'] = roi
     for key, (low, high) in RANGES.items():
         value = settings[key]
         if type(value) is not int or not low <= value <= high:

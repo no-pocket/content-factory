@@ -109,6 +109,11 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         "caption_style": "bold_karaoke_v1",
         "finishing": {"tail_seconds": 0.35, "fade_seconds": 0.25},
     }
+    if clip.get('framing'):
+        from .framing import validate_scene
+        timeline['framing'] = validate_scene(clip['framing'])
+        if timeline['framing']['preset'] in {'web', 'tweet', 'document'}:
+            timeline['layers']['broll'] = []
     validate_timeline(timeline)
     return timeline
 
@@ -123,6 +128,13 @@ def candidate_duration(clip: dict) -> float:
 
 
 def validate_timeline(timeline: dict) -> None:
+    if 'framing' in timeline:
+        from .framing import validate_scene, validate_framing
+        validate_scene(timeline['framing'])
+        if 'framing_resolved' in timeline:
+            resolved = timeline['framing_resolved']
+            if resolved != validate_framing(timeline['framing'], tuple(resolved['source_size']), (720,1280)):
+                raise ValueError('Invalid resolved framing')
     if timeline.get("schema_version") != "2.0" or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
         raise ValueError("Unsupported timeline schema or output settings")
     duration = as_float(timeline.get("duration"))
