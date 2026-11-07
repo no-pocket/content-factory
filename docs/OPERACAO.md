@@ -62,6 +62,37 @@ Estados normais: `QUEUED → DOWNLOADING` (só URL) `→ TRANSCRIBING → DIRECT
 
 ## Diagnóstico rápido
 
+### Integrações em dry-run
+
+Telegram e Hermes permanecem em **dry-run por escolha do proprietário** nesta
+execução. Não houve envio de vídeo/transcrição nem mensagem a conversa externa.
+
+O crítico opcional (`app.editorial_critic`) só retorna recomendações com evidência
+temporal/literal. Não altera timeline ou decisão humana. O MCP Hermes disponível
+é ponte de mensagens; execução estruturada, visão, modelo/provedor, custo e timeout
+não foram confirmados. `python -m research.compare_hermes_direction --input arquivo.json`
+gera diagnóstico sem envio; não é comparação editorial realizada.
+
+O adaptador Telegram (`app.telegram_review`) mantém outbox JSON local, tokens opacos
+curtos, allowlists de destino/ator, expiração, até três tentativas e estado de
+polling persistido. `queue_review_delivery` apenas prepara o cartão. `deliver_review`
+e `poll_once` não chamam transporte em dry-run. Um transporte privado explicitamente
+configurado deve oferecer `send_review_card`, `get_updates` e `answer_callback_query`;
+nenhum transporte de rede foi conectado/ativado nesta entrega. O exemplo de ambiente
+mantém allowlists vazias. Não coloque token em job, log ou contrato.
+
+O callback usa o mesmo serviço v2 da interface e recusa versão/artefato antigos.
+Para recusa/ajustes, o polling solicita comentário em resposta ao cartão. Revisão
+limpa pode dispensar nota/comentário. Mensagens são dados literais; não são comandos.
+Envio com resposta perdida pode repetir o cartão, mas o evento humano é idempotente.
+O anexo MP4 é ligado ao mestre exato; tamanho acima do limite gera erro explícito e
+preserva o mestre, sem trocar por link público ou reduzir a qualidade silenciosamente.
+Parar polling/entrega não apaga avaliações nem arquivos.
+
+Referência consultada em 07/11/2026: [Telegram Bot API](https://core.telegram.org/bots/api),
+`sendVideo` (MPEG4/multipart, limite documentado de 50 MB), `InlineKeyboardButton`
+e `getUpdates`. Testes usam transporte sintético, não a conta do proprietário.
+
 Para resultados legados, use **Verificar arquivos existentes (sem renderizar)**.
 Apenas candidatos `VALID`/`WARNING` são disponibilizados para nova revisão. Use
 **Salvar avaliação editorial** após informar notas, motivo e retrabalho; aprovações

@@ -313,7 +313,7 @@ def get_editorial_view(job: dict) -> dict:
             'review_status': 'COMPLETED' if rows and reviewed == len(rows) else 'PARTIAL' if reviewed else 'PENDING'}
 
 
-def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: str = 'streamlit') -> dict:
+def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: str = 'streamlit', actor_id: str = 'local-owner') -> dict:
     """One lock, one atomic JSON write: event, receipt and projections commit together."""
     from datetime import datetime, timezone
     from .artifacts import artifact_manifest, digest
@@ -331,7 +331,7 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
             raise ValueError('Invalid request ID')
     except (TypeError, AttributeError) as exc:
         raise ValueError('Invalid request ID') from exc
-    request_hash = digest({'candidate_id': candidate_id, 'request': request, 'channel': channel})
+    request_hash = digest({'candidate_id': candidate_id, 'request': request, 'channel': channel, 'actor_id': actor_id})
     with store.job_lock(jid):
         job = store.load(jid)
         if job.get('editorial_protocol', 1) != 2:
@@ -365,7 +365,7 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
             'candidate_version': clip['candidate_version'], 'render_revision': clip['render_revision'],
             'artifact_id': actual, 'editorial_revision': revision + 1,
             'supersedes_event_id': previous['event_id'] if previous else None,
-            'actor': {'kind': 'human', 'id': 'local-owner', 'channel': channel},
+            'actor': {'kind': 'human', 'id': actor_id, 'channel': channel},
             'decision': request['decision'], 'rejection_domain': request.get('rejection_domain'),
             'comment_raw': request['comment_raw'], 'reasons': request.get('reasons', []),
             'dimensions': request.get('dimensions', {}), 'content_grade': request.get('content_grade'),
