@@ -129,6 +129,9 @@ else:
     st.caption(f"Licença/registro: {job['license_note']}")
     if job.get('language'):
         st.caption(f"Idioma detectado na transcrição: {job['language']} · fala original preservada")
+    if job.get('comparison'):
+        comparison=job['comparison']
+        st.info(f"Comparação editorial · {comparison['label']} · decisões do motor sem complemento heurístico · aguardando sua avaliação")
     if job.get('settings'):
         with st.expander('Ajustes salvos deste job'):
             st.json(job['settings'])
@@ -166,7 +169,10 @@ else:
                         st.write(f"{piece['source_in']:.2f}s a {piece['source_out']:.2f}s → a partir de {piece['output_start']:.2f}s na montagem")
             else:
                 st.markdown(f"#### Candidato {idx+1} — {clip['start']:.1f}s a {clip['end']:.1f}s")
-            st.caption(f"Sinal heurístico: {clip.get('score', 'n/d')} · {clip.get('reason', '')}")
+            if job.get('comparison'):
+                st.caption(f"Ordem escolhida pelo motor: {clip.get('selection_rank','n/d')} · {clip.get('reason','')}")
+            else:
+                st.caption(f"Sinal heurístico: {clip.get('score', 'n/d')} · {clip.get('reason', '')}")
             if clip.get("ai_reason"):
                 st.info("Análise local: " + clip["ai_reason"])
             if clip.get('story_assessment', {}).get('quality_uncertain'):

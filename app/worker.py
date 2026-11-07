@@ -70,6 +70,8 @@ def process(jid: str) -> None:
         raw_settings = dict(job.get('settings') or {})
         raw_settings.setdefault('render_quality', 'standard')  # preserve pre-profile job intent
         settings = job['settings'] = normalize_job_settings(raw_settings)
+        if settings['ranker_mode'] == 'external' and not job.get('candidates'):
+            raise ValueError('External model plan missing; heuristic selection is forbidden for external replay')
         job['qc_settings'] = normalize_qc(job.get('qc_settings'))
         job['run_started_at'] = time.time()
         close_interrupted_run(job)

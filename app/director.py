@@ -43,11 +43,8 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
     ]}
     context = clip.get('editorial_context')
     if context:
-        brief['nearby_context'] = {key: context[key] for key in ('before', 'after', 'source_range')}
-        # Segment IDs suffice for temporal evidence; word timestamps stay in the
-        # stored source context rather than consuming the generation budget.
-        brief['source_segments'] = [{key: segment[key] for key in ('segment_id', 'source_start', 'source_end', 'text')}
-                                    for segment in context['segments']]
+        from .editorial_context import compact_source_context
+        brief['source_context'] = compact_source_context(context)
         del brief['transcript']
     if clip.get('editorial_policy', {}).get('brief'):
         brief['editorial_policy'] = clip['editorial_policy']['brief']
@@ -58,10 +55,11 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         "Sugira 0 a 3 punch_zoom nos instantes de destaque (segundos relativos ao corte), "
         "e 0 a 2 inserções B-roll de 2-5s apenas com asset_id listado; nunca invente IDs. "
         "Mantenha a fala original audível e evite sobrecarregar de efeitos. "
-        "Quando houver source_segments, inclua story com closure COMPLETE/INCOMPLETE/UNCERTAIN, "
+        "source_context contém tabelas com colunas fields e grupos before/segments/after; use segment_id como evidência. "
+        "Quando houver source_context, inclua story com closure COMPLETE/INCOMPLETE/UNCERTAIN, "
         "evidence [{segment_id,quote literal}] incluindo o final e parts {hook,setup,proof,payoff} por ID. "
         "Pausa ou fade não provam conclusão; promessa precisa de demonstração. Não preencha avaliação humana. "
-        "Responda SOMENTE JSON com hook, effects e broll. Fonte: " + json.dumps(brief, ensure_ascii=False)
+        "Responda SOMENTE JSON com hook, effects e broll. Fonte: " + json.dumps(brief, ensure_ascii=False, separators=(',', ':'))
     )
     options = {"temperature": 0, "num_predict": 450}
     if llm_backend == 'ollama':

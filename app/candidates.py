@@ -64,9 +64,11 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             job['status'] = 'RENDERING'
             save(job)
             try:
+                if settings['director_mode'] == 'external' and 'timeline' not in clip:
+                    raise ValueError('External model timeline missing; heuristic direction is forbidden')
                 if clip.get('editorial_context'):
                     from .editorial_story import assess_story, validate_story_boundary
-                    story = assess_story(clip['editorial_context'], {}, None)
+                    story = assess_story(clip['editorial_context'], {}, clip.get('model_story'))
                     clip['story_assessment'] = story
                     # Historical v2 windows were rounded to centiseconds. Keep their
                     # saved bytes/timing; this allowance never applies to new/v3 plans.
