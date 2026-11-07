@@ -74,7 +74,12 @@
             "required": [
               "text",
               "start",
-              "end"
+              "end",
+              "source_start",
+              "source_end",
+              "word_id",
+              "segment_id",
+              "output_segment_end"
             ],
             "properties": {
               "text": {
@@ -86,6 +91,24 @@
                 "minimum": 0
               },
               "end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "source_start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "source_end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "word_id": {
+                "type": "string"
+              },
+              "segment_id": {
+                "type": "string"
+              },
+              "output_segment_end": {
                 "type": "number",
                 "exclusiveMinimum": 0
               }
@@ -332,6 +355,19 @@
                 }
               }
             }
+          },
+          "framing_resolved": {
+            "type": "object",
+            "required": [
+              "mode",
+              "roi",
+              "source_size",
+              "caption_safe_area",
+              "title_safe_area",
+              "projected_roi",
+              "content_box"
+            ],
+            "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
           }
         }
       }

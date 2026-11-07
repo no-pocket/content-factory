@@ -109,9 +109,22 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     output_dir = PUBLIC / job_id / str(ordinal)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Existing renderer is reliable and handles source media variations.
-    render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
+    multisegment = timeline['schema_version'] == '3.0'
+    if multisegment:
+        from .assembly import render_assembly
+        fields = ('schema_version','fps','duration','source_duration','segments','reorder_approval')
+        plan = render_assembly(source, {key: timeline[key] for key in fields if key in timeline},
+                               output_dir / 'base.mp4', quality=quality, **framing_options)
+        timeline['segments'] = plan['segments']
+    else:
+        render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
+        if multisegment and any(s.get('framing', {}).get('preset') in {'web','tweet','document'} and
+                               max(piece['at'],s['output_start']) < min(piece['at']+piece['duration'],s['output_start']+s['duration'])
+                               for s in timeline['segments']):
+            log.warning('Skipping B-roll over protected source evidence')
+            continue
         asset = assets.get(piece["asset_id"])
         if not asset:
             log.warning("Skipping unregistered asset: %s", piece["asset_id"])
@@ -136,8 +149,21 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     write_timeline(output_dir / "timeline.json", timeline)
     target.parent.mkdir(parents=True, exist_ok=True)
     engine = (engine if engine is not None else os.getenv("RENDER_ENGINE", "remotion")).lower()
+    def subtitled_output():
+        if multisegment:
+            from .core import write_srt
+            subtitle = target.with_suffix('.srt')
+            write_srt([{'start':0,'end':timeline['duration'],'words':timeline['layers']['captions']}],0,timeline['duration'],subtitle)
+            args = ['ffmpeg','-nostdin','-v','error','-y','-i',str((output_dir/'base.mp4').resolve()),'-map','0:v:0','-map','0:a?']
+            if subtitle.stat().st_size:
+                args += ['-vf',"subtitles="+subtitle.name+":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'"]
+            args += ['-c:v','libx264','-preset','veryfast','-crf','18' if quality=='high' else '24',
+                     '-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-movflags','+faststart',str(target.resolve())]
+            subprocess.run(args,check=True,capture_output=True,text=True,cwd=target.parent)
+        else:
+            render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
     if engine == "ffmpeg":
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
+        subtitled_output()
         apply_finishing(target, timeline, quality=quality)
         make_web_preview(target, quality=quality)
         return "ffmpeg_subtitled"
@@ -153,7 +179,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     except (subprocess.SubprocessError, OSError) as exc:
         if quality == "high" or os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
             raise
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
+        subtitled_output()
         renderer_used = f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
     apply_finishing(target, timeline, quality=quality)
     make_web_preview(target, quality=quality)

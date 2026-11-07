@@ -3,6 +3,7 @@ import json
 
 DEFAULTS = {
     'editorial_protocol': 1,
+    'timeline_v3': False,
     'framing_preset': 'legacy',
     'framing_roi': None,
     'clip_count': 3,
@@ -46,6 +47,10 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    if type(settings['timeline_v3']) is not bool:
+        raise ValueError('timeline_v3 must be boolean')
+    if settings['timeline_v3'] and settings['editorial_protocol'] != 2:
+        raise ValueError('timeline_v3 requires editorial_protocol=2')
     from .framing import PRESETS, validate_scene
     if settings['framing_preset'] not in ('legacy', *PRESETS):
         raise ValueError('Unsupported framing_preset')

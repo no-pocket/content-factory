@@ -2,6 +2,14 @@
 
 ## Suíte automatizada
 
+Montagem: `tests/test_assembly.py` verifica relógio, fonte, limites, sobreposição,
+reordenação explícita e palavras parciais; `tests/test_multisegment_render.py`
+concatena marcadores de cor/tom e verifica duração dentro de um frame, remapeamento
+de palavras, ordem audiovisual e rejeição de plano inválido antes de subprocesso.
+Esses testes não demonstram coesão narrativa. Os ensaios Remotion e de navegador
+isolados são registrados em [EXECUTION](planning/content-factory-next/EXECUTION.md);
+revisão humana de variantes reais continua separada de QC.
+
 As verificações desta sprint também cobrem QC MP4/WebM, decisões versionadas, retry
 direcionado, interrupções sintéticas, métricas por idioma e API HTTP autenticada.
 Evidências atuais e limitações: [relatório da sprint](../research/SPRINT_QUALIDADE_RESULTADOS.md).

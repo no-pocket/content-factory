@@ -117,6 +117,17 @@ def process(jid: str) -> None:
             os.replace(pending, transcript_path)
         if job.get('candidates'):
             clips = job['candidates']
+        elif job.get('assembly_plan'):
+            if not settings['timeline_v3']:
+                raise ValueError('Assembly requires saved timeline_v3 opt-in')
+            from .assembly import validate_assembly, build_assembly_context
+            plan = validate_assembly(job['assembly_plan'], duration)
+            context = build_assembly_context(plan, segments)
+            clips = [{'start':context['source_range']['start'],'end':context['source_range']['end'],
+                      'text':context['text'],'assembly':plan,'editorial_context':context,
+                      'editorial_policy':job.get('editorial_policy',{'brief':None}),
+                      'score':0,'reason':'Montagem solicitada pelo editor; requer revisão humana'}]
+            job['ranker_used'] = 'human_assembly'
         else:
             mode = settings['ranker_mode']
             if mode == "ollama":

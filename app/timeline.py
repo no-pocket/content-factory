@@ -47,12 +47,20 @@ def normalized_words(segments: list[dict], start: float, end: float) -> list[dic
 def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None, assets: dict | None = None,
                    editorial_title: str | None = None) -> dict:
     """Build validated timeline from ASR + constrained director hints."""
-    start = as_float(clip["start"])
-    end = as_float(clip["end"])
+    assembly = None
+    if clip.get('assembly'):
+        from .assembly import validate_assembly, map_words
+        assembly = validate_assembly(clip['assembly'], clip['assembly']['source_duration'])
+        words = map_words(assembly, [word for segment in segments for word in segment.get('words', [])])
+        start, end = 0, assembly['duration']
+    else:
+        start = as_float(clip["start"])
+        end = as_float(clip["end"])
     duration = round(end - start, 3)
-    if not (0 < duration <= MAX_CLIP_SECONDS):
+    if not (0 < duration <= (120 if assembly else MAX_CLIP_SECONDS)):
         raise ValueError("Clip duration must be within 0..60 seconds")
-    words = normalized_words(segments, start, end)
+    if not assembly:
+        words = normalized_words(segments, start, end)
     edit = edit if isinstance(edit, dict) else {}
     assets = assets or {}
     text = str(clip.get("text", ""))
@@ -114,6 +122,12 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         timeline['framing'] = validate_scene(clip['framing'])
         if timeline['framing']['preset'] in {'web', 'tweet', 'document'}:
             timeline['layers']['broll'] = []
+    if assembly:
+        timeline.pop('source_range')
+        timeline.update(schema_version='3.0', segments=assembly['segments'],
+                        source_duration=assembly['source_duration'], duration=assembly['duration'])
+        if 'reorder_approval' in assembly:
+            timeline['reorder_approval'] = assembly['reorder_approval']
     validate_timeline(timeline)
     return timeline
 
@@ -135,10 +149,15 @@ def validate_timeline(timeline: dict) -> None:
             resolved = timeline['framing_resolved']
             if resolved != validate_framing(timeline['framing'], tuple(resolved['source_size']), (720,1280)):
                 raise ValueError('Invalid resolved framing')
-    if timeline.get("schema_version") != "2.0" or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
+    version = timeline.get('schema_version')
+    if version == '3.0':
+        from .assembly import validate_assembly
+        fields = ('schema_version','fps','duration','source_duration','segments','reorder_approval')
+        validate_assembly({key: timeline[key] for key in fields if key in timeline}, timeline['source_duration'])
+    if version not in ("2.0", "3.0") or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
         raise ValueError("Unsupported timeline schema or output settings")
     duration = as_float(timeline.get("duration"))
-    if not 0 < duration <= MAX_CLIP_SECONDS:
+    if not 0 < duration <= (120 if version == '3.0' else MAX_CLIP_SECONDS):
         raise ValueError("Invalid timeline duration")
     if 'finishing' in timeline:
         finishing = timeline['finishing']
@@ -157,6 +176,18 @@ def validate_timeline(timeline: dict) -> None:
     for word in layers["captions"]:
         if not 0 <= as_float(word.get("start"), -1) < as_float(word.get("end"), -1) <= duration + 0.002:
             raise ValueError("Invalid subtitle timings")
+        if version == '3.0':
+            piece=next((s for s in timeline['segments'] if s['segment_id']==word.get('segment_id')),None)
+            values=[word.get(k) for k in ('start','end','source_start','source_end','output_segment_end')]
+            if piece is None or any(type(v) not in (int,float) or not math.isfinite(v) for v in values):
+                raise ValueError('Missing v3 caption source provenance')
+            if not piece['source_in']<=word['source_start']<word['source_end']<=piece['source_out']:
+                raise ValueError('V3 caption outside its source segment')
+            expected_start=piece['output_start']+word['source_start']-piece['source_in']
+            expected_end=piece['output_start']+word['source_end']-piece['source_in']
+            if (abs(word['start']-expected_start)>1e-7 or abs(word['end']-expected_end)>1e-7 or
+                    abs(word['output_segment_end']-(piece['output_start']+piece['duration']))>1e-7):
+                raise ValueError('V3 caption clock disagrees with source provenance')
     for item in layers["broll"]:
         if not ASSET_ID.fullmatch(item.get("asset_id", "")) or not 0 <= item["at"] < item["at"]+item["duration"] <= duration:
             raise ValueError("Invalid B-roll event")

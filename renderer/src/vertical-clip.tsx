@@ -2,14 +2,16 @@ import React from 'react';
 import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { OffthreadVideo } from 'remotion';
 
-type Word = { start: number; end: number; text: string };
+type Word = { start: number; end: number; text: string; segment_id?: string; output_segment_end?: number };
 type Banner = { text: string; at: number; duration: number; style?: string };
 type FX = { type: string; at: number; duration: number };
 type Broll = { asset_id: string; at: number; duration: number; path: string };
 type Region = { x: number; y: number; width: number; height: number };
+type Framing = { mode: 'contain' | 'cover'; caption_safe_area: Region; title_safe_area: Region };
 export type Timeline = {
   schema_version: string; duration: number; width: number; height: number; fps: number;
-  framing_resolved?: { mode: 'contain' | 'cover'; caption_safe_area: Region; title_safe_area: Region };
+  framing_resolved?: Framing;
+  segments?: { output_start: number; duration: number; frame_count: number; framing_resolved?: Framing }[];
   layers: { video: { path: string }; audio: { from: string }; captions: Word[]; text: Banner[]; effects: FX[]; broll: Broll[] };
 };
 export type ClipProps = { jobId: string; clipNo: string; timeline: Timeline };
@@ -22,7 +24,7 @@ const groupWords = (words: Word[]): Word[][] => {
   const groups: Word[][] = [];
   let current: Word[] = [];
   for (const word of words) {
-    if (current.length && (current.length >= 3 || word.start - current[current.length - 1].end > 0.6 || word.end - current[0].start > 1.6)) {
+    if (current.length && (current.length >= 3 || word.start - current[current.length - 1].end > 0.6 || word.end - current[0].start > 1.6 || word.segment_id !== current[0].segment_id)) {
       groups.push(current); current = [];
     }
     current.push(word);
@@ -36,9 +38,11 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline }) =
   const time = frame / 30;
   const root = `jobs/${jobId}/${clipNo}/`;
   const groups = groupWords(timeline.layers.captions);
-  const active = groups.find((g) => g[0].start <= time && time < g[g.length - 1].end + 0.10);
+  const active = groups.find((g, index) => g[0].start <= time && time < Math.min(
+    g[g.length - 1].end + 0.10, groups[index + 1]?.[0].start ?? Infinity, g[0].output_segment_end ?? Infinity));
   const effect = timeline.layers.effects.find((e) => e.type === 'punch_zoom' && e.at <= time && time < e.at + e.duration);
-  const framing = timeline.framing_resolved;
+  const scene = timeline.segments?.find(s => s.output_start <= time && time < s.output_start+s.duration);
+  const framing = scene?.framing_resolved ?? timeline.framing_resolved;
   const zoom = effect && !framing ? interpolate(time - effect.at, [0, 0.12, effect.duration], [1, 1.13, 1.06], { extrapolateRight: 'clamp' }) : 1;
   const safe = framing?.caption_safe_area;
 

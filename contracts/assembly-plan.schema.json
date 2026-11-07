@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Single-source assembly proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_duration",
+    "segments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "3.0"
+    },
+    "source_duration": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "segment_id",
+          "source_in",
+          "source_out",
+          "purpose"
+        ],
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,50}$"
+          },
+          "source_in": {
+            "type": "number",
+            "minimum": 0
+          },
+          "source_out": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "output_start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "frame_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duration": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "framing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "preset",
+              "roi"
+            ],
+            "properties": {
+              "preset": {
+                "enum": [
+                  "face",
+                  "gameplay",
+                  "web",
+                  "tweet",
+                  "document"
+                ]
+              },
+              "roi": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "width",
+                  "height"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          },
+          "framing_resolved": {
+            "type": "object",
+            "required": [
+              "mode",
+              "roi",
+              "source_size",
+              "caption_safe_area",
+              "title_safe_area",
+              "projected_roi",
+              "content_box"
+            ],
+            "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+          }
+        }
+      }
+    },
+    "fps": {
+      "const": 30
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 120
+    },
+    "reorder_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "actor"
+      ],
+      "properties": {
+        "kind": {
+          "const": "human"
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    }
+  }
+}

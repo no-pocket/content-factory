@@ -2,6 +2,21 @@
 
 ## Ajustes na interface
 
+Montagem multitrecho é opt-in: `settings.timeline_v3=true` exige protocolo editorial
+2. O plano opcional do editor entra como `assembly_plan` na criação do job (também
+no campo avançado do formulário), com `schema_version=3.0`, `source_duration` e
+`segments` contendo `segment_id`, `source_in`, `source_out`, `purpose` e framing
+opcional. Os tempos são segundos da mesma fonte autorizada; `output_start`,
+`duration` e `frame_count` são derivados e conferidos pelo backend. Não se aceitam
+paths nem comandos no plano. Sem plano de montagem, a seleção existente permanece.
+
+O máximo v3 é 120 segundos de fala montada, mais a cauda explícita. Não há padding
+para atingir um minuto; cada junção pode arredondar até um frame para acomodar o
+relógio de saída. Fronteira sobre palavra e timestamp sem duração dentro dos trechos
+selecionados são recusados. Problemas em palavras fora da montagem ficam registrados
+no contexto e não são inseridos nas legendas. A timeline v2 conserva teto de 60 s.
+Rollback desativa criação v3, sem remover suporte de leitura ou arquivos antigos.
+
 Novos jobs guardam snapshots de política e componentes (`editorial_policy`,
 `component_snapshot`, `processing_snapshot`), com hashes do código/prompts disponíveis,
 Git/patch local, modelos solicitados e dependências conhecidas. Dados indisponíveis

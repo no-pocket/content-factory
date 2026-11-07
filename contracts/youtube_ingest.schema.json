@@ -184,8 +184,15 @@
               "maxLength": 1000
             }
           ]
+        },
+        "timeline_v3": {
+          "type": "boolean",
+          "default": false
         }
       }
+    },
+    "assembly_plan": {
+      "$ref": "./assembly-plan.schema.json"
     }
   }
 }

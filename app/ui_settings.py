@@ -21,6 +21,10 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'timeline_v3':
+            result[key] = st.selectbox('Montagem multitrecho', [False, True], index=int(initial[key]),
+                                       format_func=lambda enabled: 'Ativada (revisão versionada)' if enabled else 'Desativada', key=key_prefix+key)
+            continue
         if key == 'framing_preset':
             result[key] = st.selectbox('Conteúdo visual', ['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'],
                                        index=['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'].index(initial[key]),

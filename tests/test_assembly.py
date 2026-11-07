@@ -15,6 +15,7 @@ def test_maps_second_segment_words_to_output():
     words = map_words(validated,[{'start':31,'end':32,'text':'payoff'}])
     assert words[0]['start'] == 11 and words[0]['end'] == 12
     assert words[0]['source_start'] == 31
+    assert words[0]['output_segment_end'] == 20
     assert validated['duration'] == 20
 
 
@@ -50,3 +51,12 @@ def test_v2_single_segment_is_unchanged():
     before=copy.deepcopy(timeline)
     assert validate_assembly(timeline,60) == before
     assert timeline == before
+
+
+def test_zero_duration_outside_selected_story_is_excluded_but_inside_fails():
+    from app.assembly import map_words, validate_assembly
+    validated=validate_assembly(plan(),60)
+    words=[{'start':31,'end':32,'text':'payoff'}, {'start':20,'end':20,'text':'unselected'}]
+    assert map_words(validated,words)[0]['source_start']==31
+    with pytest.raises(ValueError,match='timing'):
+        map_words(validated,[{'start':35,'end':35,'text':'selected'}])

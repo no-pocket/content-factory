@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import shutil
 import uuid
+import json
 from pathlib import Path
 import streamlit as st
 from app.store import INPUT, OUTPUT, all_jobs, load, new_job, rconn, save
@@ -42,6 +43,8 @@ with st.expander("Adicionar um vídeo autorizado", expanded=True):
         with st.expander('Ajustes de processamento'):
             st.caption('Estes valores são salvos por job e também podem ser enviados pela entrada JSON.')
             processing_settings = render_settings_controls(st, preferred={'llm_backend':'kepler_gpu'}, key_prefix='production_v2_')
+            assembly_json = st.text_area('Plano de montagem opcional (JSON avançado)', max_chars=16000,
+                                         help='Uma fonte, intervalos source_in/source_out e propósito por trecho. Requer montagem multitrecho e protocolo editorial 2.')
         permitted = st.checkbox("Confirmo que possuo permissão para editar este vídeo e gerar cortes (e para os usos posteriores pretendidos)")
         submitted = st.form_submit_button("Criar job de cortes", type="primary")
         if submitted:
@@ -58,6 +61,8 @@ with st.expander("Adicionar um vídeo autorizado", expanded=True):
                                'settings': processing_settings}
                     if source_type == "URL do YouTube":
                         payload['source_url'] = youtube_url
+                    if assembly_json.strip():
+                        payload['assembly_plan'] = json.loads(assembly_json)
                     job = create_job(payload, upload=uploaded,
                                      filename=uploaded.name if uploaded else None)
                     st.success(f"Job {job['id']} enfileirado. Atualize a página para acompanhar.")
@@ -153,7 +158,14 @@ else:
                 continue
             row = visible[idx]
             file = Path(clip.get("file", ""))
-            st.markdown(f"#### Candidato {idx+1} — {clip['start']:.1f}s a {clip['end']:.1f}s")
+            assembly = clip.get('assembly')
+            if assembly:
+                st.markdown(f"#### Candidato {idx+1} — montagem de {assembly['duration']:.1f}s · {len(assembly['segments'])} trechos")
+                with st.expander('Trechos usados da fonte'):
+                    for piece in assembly['segments']:
+                        st.write(f"{piece['source_in']:.2f}s a {piece['source_out']:.2f}s → a partir de {piece['output_start']:.2f}s na montagem")
+            else:
+                st.markdown(f"#### Candidato {idx+1} — {clip['start']:.1f}s a {clip['end']:.1f}s")
             st.caption(f"Sinal heurístico: {clip.get('score', 'n/d')} · {clip.get('reason', '')}")
             if clip.get("ai_reason"):
                 st.info("Análise local: " + clip["ai_reason"])
