@@ -55,6 +55,18 @@ def require_prompt_budget(prompt: str, *, context_window: int = 4096, reserve: i
             'context_window': context_window, 'prefix_truncated': False}
 
 
+def compact_source_context(context: dict) -> dict:
+    """Lossless segment table for models; word timing stays in stored context.
+
+    All before/candidate/after text, source times and IDs remain available. Arrays
+    avoid repeating long field names and per-word metadata in every neighbor.
+    """
+    fields = ('segment_id', 'source_start', 'source_end', 'text')
+    return {'fields': list(fields), 'source_range': dict(context['source_range']),
+            **{group: [[segment[key] for key in fields] for segment in context[group]]
+               for group in ('before', 'segments', 'after')}}
+
+
 def _tokens(text):
     text = unicodedata.normalize('NFKD', text.casefold())
     return re.findall(r'\w+', ''.join(c for c in text if not unicodedata.combining(c)))

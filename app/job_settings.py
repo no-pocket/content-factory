@@ -76,14 +76,17 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
             raise ValueError(f'{key} must be an integer from {low} to {high}')
     if settings['whisper_model'] not in WHISPER_MODELS:
         raise ValueError('Unsupported whisper_model')
-    for key, allowed in {'ranker_mode': {'heuristic', 'ollama'},
-                         'llm_model': {'qwen2.5:1.5b', 'qwen2.5:3b'},
-                         'llm_backend': {'ollama', 'kepler_gpu'},
-                         'director_mode': {'heuristic', 'ollama'},
+    for key, allowed in {'ranker_mode': {'heuristic', 'ollama', 'external'},
+                         'llm_model': {'qwen2.5:1.5b', 'qwen2.5:3b', 'external'},
+                         'llm_backend': {'ollama', 'kepler_gpu', 'external'},
+                         'director_mode': {'heuristic', 'ollama', 'external'},
                          'render_engine': {'ffmpeg', 'remotion'},
                          'render_quality': {'standard', 'high'}}.items():
         if settings[key] not in allowed:
             raise ValueError(f'Unsupported {key}')
+    external = [settings[key] == 'external' for key in ('ranker_mode','director_mode','llm_backend','llm_model')]
+    if any(external) and not all(external):
+        raise ValueError('External plans require explicit external ranker, director, backend and model')
     if not settings['min_seconds'] <= settings['target_seconds'] <= settings['max_seconds']:
         raise ValueError('min_seconds <= target_seconds <= max_seconds is required')
     if settings['shortlist'] < settings['clip_count']:

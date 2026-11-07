@@ -32,7 +32,7 @@ def component_snapshot(settings: dict) -> dict:
     prompts = {}
     for name in ('ranker', 'director'):
         path = ROOT / 'app' / (name+'.py')
-        prompts[name] = {'id': name+'-full-context-v1', 'module_sha256': hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else 'UNKNOWN'}
+        prompts[name] = {'id': 'director-source-table-v2' if name == 'director' else name+'-full-context-v1', 'module_sha256': hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else 'UNKNOWN'}
     packages = {}
     for name in ('streamlit', 'faster-whisper', 'redis'):
         try:
@@ -50,7 +50,7 @@ def component_snapshot(settings: dict) -> dict:
                 'dirty_patch_sha256': patch_hash, 'prompts': prompts, 'dependencies': packages,
                 'component_file_hashes':file_hashes,'build_source_sha256':os.getenv('CONTENT_FACTORY_SOURCE_SHA256','UNKNOWN'),
                 'model_requested': settings['llm_model'], 'model_resolved': 'UNKNOWN',
-                'backend_requested': settings['llm_backend'], 'context_window': 4096 if settings['llm_backend'] == 'kepler_gpu' else 8192,
+                'backend_requested': settings['llm_backend'], 'context_window': None if settings['llm_backend'] == 'external' else 4096 if settings['llm_backend'] == 'kepler_gpu' else 8192,
                 'renderer_requested': settings['render_engine'], 'timeline_schema': '3.0' if settings.get('timeline_v3') else '2.0',
                 'ranker_rules': 'full-context-v1', 'retrieval': None, 'dataset': None}
     return {**snapshot, 'snapshot_id': digest(snapshot)}
