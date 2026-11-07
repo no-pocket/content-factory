@@ -1,6 +1,6 @@
 # Content Factory — plano técnico e handoff
 
-**Estado:** planejamento, sem implementação das funcionalidades. Verificado em 06/11/2026. Skill executada: **superpowers:writing-plans**, incluindo divisão em marcos, interfaces, testes, critérios de aceite e auto-revisão. O diretório foi escolhido pelo usuário em substituição ao caminho padrão da skill.
+**Estado atual (07/11/2026):** execução autorizada em andamento. Produto M0–M6/M11–M13 implementado em `codex/editorial-product`, sem deploy/merge; aceite editorial e rebuild final pendentes. Aprendizado M7–M10 separado em `codex/editorial-learning`. Registro verificável em [EXECUTION](EXECUTION.md). O texto original abaixo descreve o planejamento de06/11/2026. Skill executada: **superpowers:writing-plans**, incluindo divisão em marcos, interfaces, testes, critérios de aceite e auto-revisão. O diretório foi escolhido pelo usuário em substituição ao caminho padrão da skill.
 
 O objetivo é produzir candidatos de conteúdo autorizado, com revisão humana, aprendendo preferências editoriais progressivamente. Preservar a apresentação aprovada: qualidade de imagem, legendas por palavra, cores e efeitos. Manter Streamlit, Python, Redis, JSON, Whisper/CPU, Qwen local, FFmpeg e Remotion. Não há autorização para publicação automática.
 
@@ -8,7 +8,7 @@ O objetivo é produzir candidatos de conteúdo autorizado, com revisão humana, 
 
 1. Leia `AGENTS.md`, o README da raiz e `docs/README.md`.
 2. Leia os documentos abaixo na ordem indicada; confirme os caminhos no worktree antes de editar.
-3. Nesta rodada, produzir somente documentação. O próximo agente começa por **G0: commit do trabalho acumulado, push upstream e PR**, após auditar o conteúdo que será versionado.
+3. A solicitação posterior do proprietário autoriza executar o plano. G0/G1 já realizados; não repetir baseline. Consulte EXECUTION e Git antes de retomar.
 4. Em G1, sincronizar com `origin/main` e criar `codex/editorial-product`. Executar todos os marcos de produto em sequência, com testes e commits por marco. A instrução posterior do usuário substitui a restrição anterior de executar apenas o primeiro marco.
 5. Reservar `codex/editorial-learning` para pesquisa em fontes primárias, dataset/avaliação de aprendizado, recuperação de exemplos, ranker leve e eventual fine-tuning. Não misturar sua implementação ou dependências na branch de produto.
 

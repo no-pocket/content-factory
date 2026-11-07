@@ -20,19 +20,21 @@ def _all_segments(context):
     return context.get('before', []) + context.get('segments', []) + context.get('after', [])
 
 
-def validate_story_boundary(plan: dict, context: dict) -> dict:
+def validate_story_boundary(plan: dict, context: dict, *, tolerance: float = 1e-6) -> dict:
     if set(plan) != {'source_start', 'source_end'}:
         raise ValueError('Invalid story boundary fields')
     start, end = plan['source_start'], plan['source_end']
     if any(type(v) not in (int, float) or not math.isfinite(v) for v in (start, end)) or not 0 <= start < end:
         raise ValueError('Invalid story boundary')
     segments = _all_segments(context)
-    if not segments or start < min(s['source_start'] for s in segments) or end > max(s['source_end'] for s in segments):
+    if not 0 <= tolerance <= .005001:
+        raise ValueError('Invalid boundary compatibility tolerance')
+    if not segments or start < min(s['source_start'] for s in segments)-tolerance or end > max(s['source_end'] for s in segments)+tolerance:
         raise ValueError('Boundary outside observed source context')
     for segment in segments:
         for word in segment.get('words', []):
             if word['source_start'] < end and word['source_end'] > start:
-                if word['source_start'] < start-1e-6 or word['source_end'] > end+1e-6:
+                if word['source_start'] < start-tolerance or word['source_end'] > end+tolerance:
                     raise ValueError('Story boundary cuts a source word')
     return {'valid': True, 'source_start': start, 'source_end': end, 'word_timing_available': any(s.get('words') for s in segments)}
 

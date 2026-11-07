@@ -132,7 +132,7 @@ def propose_from_transcript(segments: list[dict], duration: float, *, on_event=N
                 rejections['empty_text'] += 1
                 continue
             reason = str(item.get('reason', ''))[:250]
-            proposals.append({'start': round(start, 2), 'end': round(end, 2), 'score': 5.0,
+            proposals.append({'start': start, 'end': end, 'score': 5.0,
                               'text': content, 'reason': 'Proposto pelo modelo local',
                               'ai_reason': reason, 'proposal_source': 'transcript'})
             accepted += 1

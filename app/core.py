@@ -44,7 +44,7 @@ def propose_clips(segments: list[dict], duration: float, *, count: int = 3, targ
         word_count = len(content.split())
         density = word_count / max(length, 1)
         score = round(hits * 2 + min(density, 3) + (2 if 28 <= length <= 52 else 0), 2)
-        candidates.append({"start": round(start, 2), "end": round(end, 2), "score": score,
+        candidates.append({"start": start, "end": end, "score": score,
                            "text": content, "reason": f"{hits} palavras-chave; {word_count} palavras; {length:.0f}s"})
     chosen = []
     for c in sorted(candidates, key=lambda x: (-x["score"], x["start"])):

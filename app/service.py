@@ -342,7 +342,12 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
             raise Conflict('Job requires explicit editorial v2 opt-in')
         receipt = job.get('review_receipts', {}).get(request['request_id'])
         if receipt:
-            if receipt['request_hash'] != request_hash:
+            original_actor = receipt.get('result',{}).get('event',{}).get('actor',{})
+            legacy_match = (receipt.get('hash_version',1)==1 and actor_id=='local-owner'
+                            and channel in {'streamlit','api'} and original_actor.get('id')==actor_id
+                            and original_actor.get('channel')==channel
+                            and receipt['request_hash']==digest({'candidate_id':candidate_id,'request':request,'channel':channel}))
+            if receipt['request_hash'] != request_hash and not legacy_match:
                 raise Conflict('Request ID reused with different content')
             return receipt['result']
         if job['status'] not in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED'}:
@@ -387,6 +392,6 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
         if any(c.get('state') not in {'VALID', 'WARNING'} for c in job['candidates']) and job['status'] != 'REJECTED':
             job['status'] = 'PARTIAL_FAILED'
         result = {'event': event, 'editorial_revision': revision + 1}
-        job.setdefault('review_receipts', {})[request['request_id']] = {'request_hash': request_hash, 'result': result}
+        job.setdefault('review_receipts', {})[request['request_id']] = {'hash_version':2,'request_hash': request_hash, 'result': result}
         store.save(job)
         return result

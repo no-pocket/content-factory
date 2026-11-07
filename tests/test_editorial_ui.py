@@ -55,3 +55,54 @@ def test_fully_reviewed_two_candidate_pool_uses_three_slots(v2job):
     report = summarize_v2([store.load(job['id'])])
     assert report['acceptance_at_3_clean'] == 1/3
     assert report['review_coverage'] == 1
+
+
+def ui_test_session(job):
+    from streamlit.testing.v1 import AppTest
+    code=f'''from app import store,service
+from app.editorial_ui import render_v2_review
+job=store.load({job['id']!r})
+render_v2_review(__import__('streamlit'),job,0,service.get_editorial_view(job)['candidates'][0])
+'''
+    return AppTest.from_string(code,default_timeout=15).run()
+
+
+def test_two_ui_sessions_keep_original_revision_and_preserve_stale_draft(v2job):
+    from app import store
+    a,b=ui_test_session(v2job),ui_test_session(v2job)
+    a.text_area[0].set_value('Session A approved');a.button[0].click().run()
+    assert not a.exception
+    b.text_area[0].set_value('Session B old draft');b.button[0].click().run()
+    assert not b.exception
+    assert len(store.load(v2job['id'])['feedback_events'])==1
+    assert b.error and b.text_area[0].value=='Session B old draft'
+    next(button for button in b.button if button.label.startswith('Recarregar avaliação')).click().run()
+    assert b.text_area[0].value=='Session A approved'
+    next(button for button in b.button if button.label=='Aprovar').click().run()
+    assert len(store.load(v2job['id'])['feedback_events'])==2
+
+
+def test_adding_minor_edit_preserves_existing_major_and_blocks_clean_approval(v2job):
+    import uuid
+    from app import store
+    from test_editorial_service_v2 import review_request
+    edit={'edit_id':str(uuid.uuid4()),'type':'BOUNDARY_END','status':'OPEN','severity':'MAJOR','comment':'SYNTHETIC major ending'}
+    request=review_request(v2job,decision='APPROVED_WITH_ADJUSTMENTS',edit_requests=[edit])
+    service.review_candidate_v2(v2job['id'],v2job['candidates'][0]['candidate_id'],request)
+    view=ui_test_session(v2job)
+    view.text_area[1].set_value('SYNTHETIC minor title')
+    view.selectbox[0].set_value('MINOR')
+    view.button[0].click().run()
+    assert not view.exception
+    assert view.error
+    latest=store.load(v2job['id'])['feedback_events'][-1]
+    assert latest['edit_requests']==[edit] and latest['decision']=='APPROVED_WITH_ADJUSTMENTS'
+    next(button for button in view.button if button.label=='Aprovar com ajustes').click().run()
+    latest=store.load(v2job['id'])['feedback_events'][-1]
+    assert latest['edit_requests'][0]==edit and len(latest['edit_requests'])==2
+    assert view.text_area[1].value==''  # no duplicate request on the next submission
+    next(select for select in view.multiselect if select.label=='Pedidos resolvidos nesta revisão').set_value([edit['edit_id']])
+    next(button for button in view.button if button.label=='Aprovar').click().run()
+    assert not view.error and not view.exception
+    latest=store.load(v2job['id'])['feedback_events'][-1]
+    assert latest['decision']=='APPROVED' and latest['edit_requests'][0]['status']=='RESOLVED'

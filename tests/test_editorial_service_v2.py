@@ -134,3 +134,15 @@ def test_changed_proposal_increments_candidate_version(v2job):
     register_render(job, 0)
     assert job['candidates'][0]['candidate_version'] == 2
     assert job['candidates'][0]['render_history'][0]['candidate_version'] == 1
+
+
+def test_pre_actor_receipt_replays_only_for_original_local_owner(v2job):
+    from app.artifacts import digest
+    request=review_request(v2job);cid=v2job['candidates'][0]['candidate_id']
+    result=service.review_candidate_v2(v2job['id'],cid,request)
+    saved=store.load(v2job['id'])
+    saved['review_receipts'][request['request_id']]['request_hash']=digest({'candidate_id':cid,'request':request,'channel':'streamlit'})
+    saved['review_receipts'][request['request_id']].pop('hash_version',None)
+    store.save(saved)
+    assert service.review_candidate_v2(v2job['id'],cid,request)==result
+    with pytest.raises(service.Conflict):service.review_candidate_v2(v2job['id'],cid,request,actor_id='telegram:someone',channel='telegram')

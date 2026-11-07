@@ -83,3 +83,23 @@ def test_incomplete_story_fails_before_render(monkeypatch, tmp_path):
     assert calls == []
     assert record['candidates'][0]['state'] == 'FAILED'
     assert 'incomplete' in record['candidates'][0]['attempt_history'][0]['error']
+
+
+def test_millisecond_proposals_and_legacy_timeline_process(monkeypatch,tmp_path):
+    from app.core import propose_clips
+    from app.editorial_context import build_candidate_context
+    from app.job_settings import normalize_job_settings
+    segments=[{'start':.006,'end':20.004,'text':'GTA story complete.', 'words':[
+        {'start':.006,'end':1,'text':'GTA'},{'start':19,'end':20.004,'text':'complete.'}]}]
+    clip=propose_clips(segments,21,count=1,target=20)[0]
+    assert clip['start']==.006 and clip['end']==20.004
+    calls,_=setup(monkeypatch,tmp_path)
+    for persisted in (False,True):
+        record=job();record['candidates']=[dict(clip)]
+        if persisted:
+            record['candidates'][0].update(start=.01,end=20.,timeline={'duration':19.99,'schema_version':'2.0','layers':{'captions':[]}})
+        record['candidates'][0]['editorial_context']=build_candidate_context(record,0,{'segments':segments})
+        candidates.render_candidates(record,Path('source'),segments,normalize_job_settings(),False)
+        assert record['status']=='NEEDS_REVIEW',record['candidates'][0].get('attempt_history')
+        if persisted:assert record['candidates'][0]['start']==.01 and record['candidates'][0]['end']==20.
+    assert len(calls)==2

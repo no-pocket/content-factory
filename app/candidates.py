@@ -68,7 +68,12 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                     from .editorial_story import assess_story, validate_story_boundary
                     story = assess_story(clip['editorial_context'], {}, None)
                     clip['story_assessment'] = story
-                    validate_story_boundary({'source_start': clip['start'], 'source_end': clip['end']}, clip['editorial_context'])
+                    # Historical v2 windows were rounded to centiseconds. Keep their
+                    # saved bytes/timing; this allowance never applies to new/v3 plans.
+                    tolerance = .005001 if clip.get('timeline',{}).get('schema_version') == '2.0' else 1e-6
+                    validate_story_boundary({'source_start': clip['start'], 'source_end': clip['end']}, clip['editorial_context'], tolerance=tolerance)
+                    if tolerance > 1e-6:
+                        clip['boundary_compatibility'] = {'centisecond_rounding_tolerance_seconds':tolerance}
                     if story['closure'] == 'INCOMPLETE':
                         raise ValueError('Editorial story incomplete: no validated payoff within selected duration; choose another interval')
                 if 'timeline' not in clip:
