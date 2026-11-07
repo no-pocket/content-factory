@@ -1,0 +1,4 @@
+# Optional OFFLINE research only; never included by the product Dockerfile.
+# Do not install until data/experiment gates pass and the isolated environment is approved.
+# Exact direct version verified in official PyPI metadata on 2026-11-07.
+scikit-learn==1.9.1

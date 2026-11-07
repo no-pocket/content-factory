@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offline editorial logistic artifact v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "preprocessing",
+    "weights",
+    "intercept"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "editorial-logistic-v1"
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "preprocessing": {
+      "type": "object",
+      "required": [
+        "feature_names",
+        "medians",
+        "means",
+        "scales"
+      ],
+      "properties": {
+        "feature_names": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "duration_seconds",
+              "source_position",
+              "word_count",
+              "llm_relevance",
+              "autopromotion_score",
+              "closure_complete",
+              "promise_delivered",
+              "proof_score",
+              "hook_score",
+              "pause_fraction",
+              "visual_protected",
+              "repeat_score"
+            ]
+          }
+        },
+        "medians": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "number"
+          }
+        },
+        "means": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "number"
+          }
+        },
+        "scales": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "weights": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 24,
+      "items": {
+        "type": "number"
+      }
+    },
+    "intercept": {
+      "type": "number"
+    },
+    "status": {
+      "const": "EVALUATION_ONLY"
+    },
+    "promotion": {
+      "const": "NOT_PROMOTED"
+    },
+    "holdout_evaluated": {
+      "const": false
+    }
+  },
+  "description": "Runtime additionally checks hash, finite numbers and lengths (weights=2*feature count). JSON only; never pickle. Not an activation receipt."
+}
