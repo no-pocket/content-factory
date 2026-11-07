@@ -3,6 +3,7 @@
 from .job_settings import DEFAULTS, RANGES
 
 LABELS = {
+    'editorial_protocol': 'Protocolo editorial (1 legado, 2 revisão versionada)',
     'clip_count': 'Quantidade de candidatos',
     'target_seconds': 'Duração alvo (segundos)',
     'min_seconds': 'Duração mínima (segundos)',

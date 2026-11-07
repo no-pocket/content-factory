@@ -13,3 +13,5 @@ M0: RED observado (18 falhas, módulo ausente); contratos/projeção implementad
 Próximo: concluir verificações M0; depois M1–M6 e M11–M13. M7–M10 em branch separada. Integrações externas permanecem dry-run até capacidade/destino autorizado.
 
 M0 concluído: suíte completa 168 passed in 14.09s; projeção não ligada ao runtime. Nenhum registro real migrado.
+
+M1 concluído: RED do endpoint (404) e opt-in ausente observados; serviço/artefatos, persistência atômica, idempotência e concorrência verificados. Teste de versão de proposta falhou antes da implementação e passou na suíte: 181 passed in 14.03s. Contrato de ingestão atualizado após teste detectar falta da nova opção. Módulo artifacts.py concentra identidade/caminhos para evitar duplicação entre serviço e renderer. Nenhum job legado alterado; ativação v2 apenas por job novo. API e protocolo documentados. M2 é o próximo marco.

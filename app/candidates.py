@@ -11,6 +11,7 @@ from .quality import inspect_candidate, normalize_qc
 from .store import OUTPUT, save
 from .service import invalidate_approvals
 from .timeline import build_timeline, candidate_duration
+from .artifacts import register_render, render_target
 
 REVIEWABLE = {'VALID', 'WARNING'}
 
@@ -26,7 +27,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
     for index, clip in enumerate(job['candidates']):
         if only is not None and index != only:
             continue
-        target = folder / f'candidate_{index+1}.mp4'
+        target = Path(clip['file']) if clip.get('file') else folder / f'candidate_{index+1}.mp4'
         if clip.get('state') == 'RENDERING' and clip.get('attempt_history'):
             clip['attempt_history'][-1].update(state='FAILED', error='Worker interrupted', finished_at=time.time())
             clip['state'] = 'FAILED'
@@ -39,6 +40,15 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             clip.update(state='FAILED', qc=current)
             invalidate_approvals(job, {index})
         while clip.get('attempts', 0) < limits['max_attempts']:
+            render_revision = clip.get('render_revision', 0) + 1
+            if job.get('editorial_protocol') == 2:
+                target = render_target(job, index, render_revision)
+                # Interrupted attempts may already have bytes; reserve a new directory.
+                while target.parent.exists():
+                    render_revision += 1
+                    target = render_target(job, index, render_revision)
+                target.parent.mkdir(parents=True, exist_ok=False)
+                clip.update(file=str(target), timeline_file=str(target.with_suffix('.timeline.json')))
             clip['attempts'] = clip.get('attempts', 0) + 1
             attempt = {'number': clip['attempts'], 'started_at': time.time(), 'state': 'RENDERING'}
             clip.setdefault('attempt_history', []).append(attempt)
@@ -72,6 +82,8 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 clip['state'] = 'FAILED'
                 attempt.update(state='FAILED', error=str(exc)[:1500])
             attempt['finished_at'] = time.time()
+            if job.get('editorial_protocol') == 2:
+                register_render(job, index, revision=render_revision)
             save(job)
             # One attempt per dispatch. A human can retry this candidate within the saved limit.
             break

@@ -1,0 +1,687 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Content Factory editorial API",
+    "version": "2.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8510"
+    }
+  ],
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "paths": {
+    "/v2/jobs/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job snapshot and editorial projection; local source/file paths excluded"
+          },
+          "401": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/jobs/{id}/candidates/{candidate_id}/reviews": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                  },
+                  "decision": {
+                    "enum": [
+                      "APPROVED",
+                      "APPROVED_WITH_ADJUSTMENTS",
+                      "REJECTED"
+                    ]
+                  },
+                  "comment_raw": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "rejection_domain": {
+                    "enum": [
+                      "EDITORIAL",
+                      "TECHNICAL",
+                      "ADMINISTRATIVE",
+                      "MIXED",
+                      "UNSPECIFIED",
+                      null
+                    ]
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "IRRELEVANT_CONTENT",
+                            "CREATOR_SELF_PROMOTION",
+                            "WEAK_HOOK",
+                            "MISSING_CONTEXT",
+                            "INCOMPLETE_PAYOFF",
+                            "ABRUPT_ENDING",
+                            "MISSING_DEMONSTRATION",
+                            "BAD_FRAMING",
+                            "IMPORTANT_CONTENT_CROPPED",
+                            "CAPTION_ERROR",
+                            "GOOD_CONTENT_NEEDS_REWORK",
+                            "TECHNICAL_FAILURE"
+                          ]
+                        },
+                        "severity": {
+                          "enum": [
+                            "MINOR",
+                            "MAJOR",
+                            "CRITICAL",
+                            null
+                          ]
+                        },
+                        "confirmed_by": {
+                          "const": "human"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity",
+                        "confirmed_by"
+                      ]
+                    },
+                    "maxItems": 50
+                  },
+                  "dimensions": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "relevance": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "hook": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "context": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "narrative": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "proof": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "closure": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "framing": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "captions": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "editing": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      },
+                      "technical_quality": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 5
+                      }
+                    },
+                    "required": []
+                  },
+                  "content_grade": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 3
+                  },
+                  "relative_assessment": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "comparison_set_id": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "preferred_candidate_id": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                          },
+                          "alternatives": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "candidate_id": {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                                },
+                                "candidate_version": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              },
+                              "required": [
+                                "candidate_id",
+                                "candidate_version"
+                              ]
+                            },
+                            "maxItems": 6,
+                            "minItems": 1
+                          },
+                          "all_options_below_bar": {
+                            "type": "boolean"
+                          },
+                          "comment": {
+                            "type": "string",
+                            "maxLength": 4000
+                          },
+                          "confirmed_by": {
+                            "const": "human"
+                          }
+                        },
+                        "required": [
+                          "comparison_set_id",
+                          "preferred_candidate_id",
+                          "alternatives",
+                          "all_options_below_bar",
+                          "comment",
+                          "confirmed_by"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "edit_requests": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "edit_id": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                        },
+                        "type": {
+                          "enum": [
+                            "BOUNDARY_START",
+                            "BOUNDARY_END",
+                            "FRAMING",
+                            "CAPTIONS",
+                            "TITLE",
+                            "EDITING",
+                            "OTHER"
+                          ]
+                        },
+                        "status": {
+                          "enum": [
+                            "OPEN",
+                            "RESOLVED"
+                          ]
+                        },
+                        "comment": {
+                          "type": "string",
+                          "maxLength": 4000,
+                          "pattern": "\\S"
+                        },
+                        "severity": {
+                          "enum": [
+                            "MINOR",
+                            "MAJOR",
+                            "CRITICAL",
+                            null
+                          ]
+                        }
+                      },
+                      "required": [
+                        "edit_id",
+                        "type",
+                        "status",
+                        "comment"
+                      ]
+                    },
+                    "maxItems": 50
+                  },
+                  "review_timing": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "active_seconds": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      },
+                      "wall_seconds": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "active_seconds",
+                      "wall_seconds"
+                    ]
+                  },
+                  "expected_editorial_revision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "expected_artifact_id": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "request_id",
+                  "expected_editorial_revision",
+                  "expected_artifact_id",
+                  "decision",
+                  "comment_raw"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Immutable human event and committed editorial revision; identical retries return the original result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "event": {
+                      "$ref": "./editorial-feedback-v2.schema.json"
+                    },
+                    "editorial_revision": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request rejected; reload on conflict. No partial review is saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

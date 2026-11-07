@@ -161,3 +161,33 @@ de 457,2 MiB retornou 201 e SHA-256 idêntico; ver
 A aprovação exige QC válido; a recusa aceita candidato falho ou não verificado. Revisão parcial preserva as decisões dos demais candidatos e mantém o job em revisão até concluir todos. Retry invalida somente a decisão do candidato refeito. Histórico preservado.
 
 `POST /v1/jobs/{id}/reject` recebe `reason` e recusa todo um job ocioso, preservando arquivos e histórico. A UI oferece os mesmos botões, comentários, notas opcionais e filtros por status.
+# Revisão editorial v2 (opt-in)
+
+Novos jobs podem salvar `settings.editorial_protocol=2`; o padrão da API continua 1.
+O snapshot do job guarda a escolha. Jobs legados não são migrados nem qualificados
+automaticamente. Antes de ativar v2 na instalação, preserve um backup verificável
+de `data/work` e `data/output`; os testes usam apenas dados temporários.
+
+`GET /v2/jobs/{id}` usa o mesmo Bearer local e retorna `editorial`, com revisão,
+candidatos, contagens e estado `PENDING|PARTIAL|COMPLETED`. A decisão técnica e a
+editorial são independentes. Caminhos absolutos de mídia não são retornados.
+
+`POST /v2/jobs/{id}/candidates/{candidate_id}/reviews` exige UUID `request_id`,
+`expected_editorial_revision`, `expected_artifact_id`, `decision` e `comment_raw`.
+Aceita motivos, dez dimensões opcionais, grau, preferência e pedidos de edição
+conforme [OpenAPI v2](../contracts/api-v2.openapi.json). Ator e data são produzidos
+pelo servidor. A API registra o proprietário local autenticado, não uma identidade
+individual inferida do Bearer compartilhado. Corpo JSON limitado a 64 KiB.
+
+Mesmo request/corpo retorna o evento original. Reuso com corpo diferente, revisão
+desatualizada ou bytes alterados retorna 409: recarregue e confira o render antes
+de reenviar com novo request ID. Evento, recibo e projeção são salvos sob o mesmo
+lock/transação JSON. V1 retorna 409 `editorial_protocol_required` nas operações de
+revisão de jobs v2, inclusive recusa em lote; continua operacional para legado.
+
+Novos renders v2 usam diretórios por candidato/revisão e manifest com hashes do
+mestre, WebM e timeline. Falha/retry preserva saídas anteriores. QC válido continua
+obrigatório para aprovar; recusa técnica não exige reprodução válida. Ajustes não
+entram na lista compatível de aprovações limpas. Rollback desativa criação v2,
+preservando leitor, eventos e arquivos; não converta ajustes em aprovação limpa.
+

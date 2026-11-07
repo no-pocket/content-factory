@@ -81,3 +81,20 @@ Os sinais ficam em `app/editorial.py` e `app/signals.py`, separados de `core/ran
 Não há treino automático nem fontes externas de marketing/tendências. A interface
 de sinais permite acrescentá-las posteriormente com proveniência e avaliações próprias.
 O experimento de limites temporais fica offline até existir comparação humana pareada.
+# Protocolo v2 por artefato
+
+O opt-in `settings.editorial_protocol=2` em novos jobs separa `APPROVED`,
+`APPROVED_WITH_ADJUSTMENTS` e `REJECTED`. Sem decisão atual, o candidato é `PENDING`.
+As dez dimensões são opcionais (1–5 ou null); grau de conteúdo 0–3 também é opcional.
+Não existem notas preenchidas automaticamente. Motivos e severidades vêm da revisão
+humana; recusa informa domínio editorial, técnico, administrativo, misto ou não
+especificado. Aprovação com ajustes exige comentário ou pedido aberto; aprovação
+limpa recusa pendências maiores/críticas. Resolver edição não aprova outro render.
+
+Uma avaliação v2 referencia UUID do candidato, versão da proposta, revisão do render
+e hash do conjunto MP4/WebM/timeline. Substituição de bytes ou nova revisão exige
+nova avaliação. Eventos antigos permanecem no histórico e não aprovam a saída nova.
+Legados preservam decisão/comentário e são projetados como condição não confirmada;
+`rework=false` não vira rótulo de aprovação limpa. Nenhum job é migrado em leitura.
+Veja [API v2](API.md) e [contrato](../contracts/editorial-feedback-v2.schema.json).
+

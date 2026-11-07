@@ -68,6 +68,23 @@ class Handler(BaseHTTPRequestHandler):
         if self.command == 'POST' and self.headers.get('Origin'):
             raise PermissionError('Browser origins are not enabled')
         path = urlsplit(self.path).path.strip('/').split('/')
+        if path[:2] == ['v2', 'jobs']:
+            if len(path) == 3 and self.command == 'GET':
+                job = store.load(path[2])
+                result = public_job(job)
+                result.update(api_version='2', editorial=service.get_editorial_view(job))
+                return self._json(200, result)
+            if len(path) == 6 and path[3] == 'candidates' and path[5] == 'reviews' and self.command == 'POST':
+                if self.headers.get_content_type() != 'application/json':
+                    raise ValueError('Content-Type application/json required')
+                if self.headers.get('Transfer-Encoding') or len(self.headers.get_all('Content-Length', [])) != 1:
+                    raise ValueError('Provide one Content-Length')
+                size = int(self.headers['Content-Length'])
+                if not 0 < size <= 65536:
+                    return self._json(413, {'error': {'code': 'body_limit', 'message': 'Review must be 1..64 KiB'}})
+                request = json.loads(self.rfile.read(size))
+                return self._json(200, service.review_candidate_v2(path[2], path[4], request, channel='api'))
+            return self._json(404, {'error': {'code': 'not_found', 'message': 'Unknown v2 route'}})
         if path[:2] == ['v1', 'metrics'] and len(path) == 2 and self.command == 'GET':
             return self._json(200, summarize(store.all_jobs()))
         if path[:2] != ['v1', 'jobs']:
@@ -143,7 +160,9 @@ class Handler(BaseHTTPRequestHandler):
                 raise service.Conflict('Candidate requires technical verification')
             suffix, mime = {'mp4': ('.mp4', 'video/mp4'), 'webm': ('.preview.webm', 'video/webm'),
                             'timeline': ('.timeline.json', 'application/json')}[kind]
-            target = (store.OUTPUT / jid / f'candidate_{index+1}{suffix}').resolve()
+            clip = job['candidates'][index]
+            target = (Path(clip['file']).with_suffix(suffix) if job.get('editorial_protocol') == 2 else
+                      store.OUTPUT / jid / f'candidate_{index+1}{suffix}').resolve()
             if not target.is_relative_to(store.OUTPUT.resolve()):
                 raise ValueError('Invalid path')
             with target.open('rb') as handle:
@@ -162,7 +181,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._dispatch()
         except service.Conflict as exc:
-            self._json(409, {'error': {'code': 'conflict', 'message': str(exc)}})
+            self._json(409, {'error': {'code': 'editorial_protocol_required' if str(exc) == 'editorial_protocol_required' else 'conflict', 'message': str(exc)}})
         except FileNotFoundError:
             self._json(404, {'error': {'code': 'not_found', 'message': 'Job or artifact not found'}})
         except PermissionError as exc:

@@ -52,3 +52,21 @@ def test_resume_checks_existing_valid_result_without_rerender(monkeypatch, tmp_p
     candidates.render_candidates(record, Path('source'), [], {}, False)
     assert calls == [1, 2]
     assert record['candidates'][0]['qc']['state'] == 'VALID'
+
+
+def test_v2_retry_uses_new_paths_and_preserves_old_bytes(monkeypatch, tmp_path):
+    from app import store
+    calls, _ = setup(monkeypatch, tmp_path, fail=True)
+    monkeypatch.setattr(store, 'OUTPUT', tmp_path)
+    record = job()
+    record.update(id='58924b9a-dedf-4f56-ab6d-10b25f1240b5', editorial_protocol=2)
+    candidates.render_candidates(record, Path('source'), [], {}, False, only=0)
+    first = Path(record['candidates'][0]['file'])
+    first.write_bytes(b'keep earlier failed render for audit')
+    candidates.render_candidates(record, Path('source'), [], {}, False, only=0)
+    second = Path(record['candidates'][0]['file'])
+    assert first != second
+    assert first.read_bytes() == b'keep earlier failed render for audit'
+    assert second.read_bytes() == b'master'
+    assert record['candidates'][0]['render_revision'] == 2
+    assert len(record['candidates'][0]['render_history']) == 1

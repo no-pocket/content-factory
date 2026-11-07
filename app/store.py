@@ -30,6 +30,7 @@ def new_job(path: Path | None, filename: str, creator: str, license_note: str, *
               "approved": [], "created_at": time.time(), "settings_version": 1,
               "qc_settings": normalize_qc(), "decision_history": [],
               "settings": normalize_job_settings(settings), "model": os.getenv("WHISPER_MODEL", "base")}
+    record['editorial_protocol'] = record['settings']['editorial_protocol']
     save(record)
     return record
 

@@ -1,6 +1,7 @@
 """Validated processing controls shared by all frontends and workers."""
 
 DEFAULTS = {
+    'editorial_protocol': 1,
     'clip_count': 3,
     'target_seconds': 40,
     'min_seconds': 15,
@@ -19,6 +20,7 @@ DEFAULTS = {
 }
 
 RANGES = {
+    'editorial_protocol': (1, 2),
     'clip_count': (1, 6),
     'target_seconds': (8, 60),
     'min_seconds': (8, 60),

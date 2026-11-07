@@ -33,6 +33,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "editorial_protocol": {
+          "type": "integer",
+          "enum": [1, 2],
+          "default": 1
+        },
         "clip_count": {
           "type": "integer",
           "minimum": 1,
