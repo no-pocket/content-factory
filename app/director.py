@@ -70,7 +70,13 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
                        "format": EDIT_HINT_SCHEMA, "options": options}).encode()
     try:
         from .editorial_context import require_prompt_budget
+        from .editorial_retrieval import append_prompt_examples
+        examples=clip.get('retrieval_snapshot',{}).get('examples',[])
+        prompt,used=append_prompt_examples(prompt,examples,context_window=4096,reserve=450)
+        if examples and on_event:
+            on_event('retrieval_context',{'used_candidate_ids':used,'reason':'APPLIED' if used else 'CONTEXT_RESERVE_PRESERVED'})
         budget = require_prompt_budget(prompt, context_window=4096, reserve=450)
+        payload=json.loads(body);payload['prompt']=prompt;body=json.dumps(payload).encode('utf-8')
         if on_event:
             on_event("analyzing", {'context_budget': budget})
         request = urllib.request.Request(url + "/api/generate", data=body, headers={"Content-Type": "application/json"}, method="POST")

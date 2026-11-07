@@ -44,3 +44,26 @@ não dependências instaladas.
 - [NDCG e empates](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html): referência para tratamento de ties; ganhos/denominadores são decisões deste projeto.
 - [LoRA, Hu et al., v2](https://arxiv.org/abs/2106.09685v2): adapters treináveis sobre uma base congelada; não prova suporte da workstation.
 - [DPO, Rafailov et al., v3](https://arxiv.org/abs/2305.18290v3): aprendizado de preferências entre saídas comparáveis; não transforma aprovação legada em par elegível.
+
+## M8: recuperação opt-in
+
+`retrieval_mode=off` é o padrão. `lexical` exige protocolo2 e ID de dataset imutável
+em `data/editorial/datasets/<dataset_id>/`. Copiar somente um export local validado
+para esse diretório, sem substituir uma versão já presente. Não há download,
+encoder, banco vetorial, rede ou atualização automática da política.
+
+O worker congela consulta/brief/dataset/IDs/hashes/exemplos uma vez por job.
+Mudança posterior de contexto exige novo job; retirar o arquivo do dataset não
+altera os exemplos já salvos. Ranker/diretor recebem os comentários completos
+como dados delimitados, sem executar suas instruções. Logs registram os IDs
+realmente usados. São no máximo3 exemplos,1 por família e600 tokens pelo limite
+superior conservador de bytes UTF-8; o corpo/fechamento e a reserva de geração têm
+precedência e os exemplos são removidos primeiro se o prompt não couber.
+
+CLI `evaluate_editorial.py <dataset> --retrieval-ablation` foi executada no export
+local. Cinco fontes mantidas fora de sua própria recuperação, nenhum exemplo
+selecionado, zero chamada de modelo e nenhum rótulo de holdout consumido. Baseline
+e contexto assistido têm os mesmos hashes, pois não há exemplo confirmado nem
+brief aprovado ativo. Estado: NOT_EVALUATED_NO_ELIGIBLE_EXAMPLES. Isso verifica
+a ausência de uso indevido dos dados, não uma melhoria editorial ou uma ablação
+com inferência. Embeddings continuam adiados por falta de evidência de necessidade.

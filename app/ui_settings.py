@@ -21,6 +21,13 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key=='retrieval_mode':
+            result[key]=st.selectbox('Exemplos editoriais confirmados',['off','lexical'],index=['off','lexical'].index(initial[key]),
+                format_func={'off':'Desativados (padrão)','lexical':'Busca local no dataset selecionado'}.__getitem__,key=key_prefix+key)
+            continue
+        if key=='retrieval_dataset_id':
+            result[key]=st.text_input('Dataset de exemplos (ID opcional)',value=initial[key] or '',max_chars=64,key=key_prefix+key) or None
+            continue
         if key == 'timeline_v3':
             result[key] = st.selectbox('Montagem multitrecho', [False, True], index=int(initial[key]),
                                        format_func=lambda enabled: 'Ativada (revisão versionada)' if enabled else 'Desativada', key=key_prefix+key)
