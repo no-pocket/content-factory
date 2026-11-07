@@ -94,3 +94,5 @@ instalar a dependência só para simular treino não se justifica com o gate fec
 instalada nem adicionada ao Docker de produto. Antes de futuro treino real,
 validar/fixar todo o ambiente extra e executar integração sintética nele. Não há
 modelo treinado, avaliação de holdout, promoção ou evidência de ganho nesta rodada.
+
+Estudo C/fine-tuning: [decisão NO-GO, fontes, hardware e orçamento](editorial_finetuning_feasibility.md).
