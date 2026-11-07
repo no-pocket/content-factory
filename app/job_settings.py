@@ -3,6 +3,8 @@ import json
 
 DEFAULTS = {
     'editorial_protocol': 1,
+    'retrieval_mode': 'off',
+    'retrieval_dataset_id': None,
     'timeline_v3': False,
     'framing_preset': 'legacy',
     'framing_roi': None,
@@ -48,6 +50,14 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    import re
+    if settings['retrieval_mode'] not in ('off','lexical'):
+        raise ValueError('Unsupported retrieval mode')
+    dataset_id=settings['retrieval_dataset_id']
+    if dataset_id is not None and (not isinstance(dataset_id,str) or not re.fullmatch('[0-9a-f]{64}',dataset_id)):
+        raise ValueError('Invalid retrieval dataset ID')
+    if settings['retrieval_mode']=='lexical' and (dataset_id is None or settings['editorial_protocol']!=2):
+        raise ValueError('Retrieval requires dataset ID and editorial protocol 2')
     if type(settings['timeline_v3']) is not bool:
         raise ValueError('timeline_v3 must be boolean')
     if settings['timeline_v3'] and settings['editorial_protocol'] != 2:

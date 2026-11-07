@@ -129,6 +129,10 @@ def process(jid: str) -> None:
                 pending = transcript_path.with_suffix(".tmp")
                 pending.write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
                 os.replace(pending, transcript_path)
+        if settings.get('retrieval_mode','off')!='off':
+            from .editorial_retrieval import prepare_job_retrieval
+            job['retrieval_snapshot']=prepare_job_retrieval(job,segments)
+            save(job)
         with measure_stage(metrics,'RANKER',job_metric_context(job),requested={'mode':settings['ranker_mode'],'model':settings['llm_model'],'backend':settings['llm_backend']}) as stage:
             if job.get('candidates'):
                 clips = job['candidates']
@@ -149,7 +153,7 @@ def process(jid: str) -> None:
                 if mode == "ollama":
                     record_ai_event(job, 'queued', {'transcript_segments': len(segments)})
                     clips = select_highlights(segments, duration, count=settings['clip_count'], settings=settings,
-                                              policy=job.get('editorial_policy'),
+                                          policy=job.get('editorial_policy'), examples=job.get('retrieval_snapshot',{}).get('examples',[]),
                                               on_event=lambda event, details: record_ai_event(job, event, details))
                     log.info("Ranker=ollama transcript discovery, clips=%s", len(clips))
                 else:
@@ -181,6 +185,8 @@ def process(jid: str) -> None:
             if job.get('editorial_versions'):
                 job['editorial_versions']['component_snapshot_id'] = snapshot['snapshot_id']
         for index, clip in enumerate(clips):
+            if job.get('retrieval_snapshot'):
+                clip.setdefault('retrieval_snapshot',job['retrieval_snapshot'])
             if settings['framing_windows'] and 'timeline' not in clip:
                 from .framing import build_framing_schedule
                 clip['framing_schedule']=build_framing_schedule(clip,settings)

@@ -211,6 +211,21 @@
               }
             }
           }
+        },
+        "retrieval_mode": {
+          "enum": [
+            "off",
+            "lexical"
+          ],
+          "default": "off"
+        },
+        "retrieval_dataset_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$",
+          "default": null
         }
       }
     },

@@ -314,12 +314,28 @@
                                 "candidate_version": {
                                   "type": "integer",
                                   "minimum": 1
+                                },
+                                "render_revision": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "artifact_id": {
+                                  "type": "string",
+                                  "pattern": "^sha256:[0-9a-f]{64}$"
                                 }
                               },
                               "required": [
                                 "candidate_id",
                                 "candidate_version"
-                              ]
+                              ],
+                              "dependentRequired": {
+                                "render_revision": [
+                                  "artifact_id"
+                                ],
+                                "artifact_id": [
+                                  "render_revision"
+                                ]
+                              }
                             },
                             "maxItems": 6,
                             "minItems": 1

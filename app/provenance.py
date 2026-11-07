@@ -42,7 +42,8 @@ def component_snapshot(settings: dict) -> dict:
     import os
     file_hashes={}
     for name in ('app/core.py','app/edit_render.py','app/candidates.py','app/worker.py','app/telemetry.py',
-                 'app/job_settings.py','app/provenance.py','app/timeline.py','app/assembly.py','app/framing.py','renderer/src/vertical-clip.tsx',
+                 'app/job_settings.py','app/provenance.py','app/timeline.py','app/assembly.py','app/framing.py',
+                 'app/editorial_dataset.py','app/editorial_features.py','app/editorial_retrieval.py','renderer/src/vertical-clip.tsx',
                  'renderer/src/index.tsx','requirements.lock','renderer/package-lock.json'):
         path=ROOT/name
         file_hashes[name]=hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else 'UNKNOWN'
@@ -52,5 +53,7 @@ def component_snapshot(settings: dict) -> dict:
                 'model_requested': settings['llm_model'], 'model_resolved': 'UNKNOWN',
                 'backend_requested': settings['llm_backend'], 'context_window': None if settings['llm_backend'] == 'external' else 4096 if settings['llm_backend'] == 'kepler_gpu' else 8192,
                 'renderer_requested': settings['render_engine'], 'timeline_schema': '3.0' if settings.get('timeline_v3') else '2.0',
-                'ranker_rules': 'full-context-v1', 'retrieval': None, 'dataset': None}
+                'ranker_rules': 'full-context-v1',
+                'retrieval': {'mode':settings['retrieval_mode'],'selector':'lexical-v2','dataset_id':settings['retrieval_dataset_id']} if settings.get('retrieval_mode','off')!='off' else None,
+                'dataset': settings.get('retrieval_dataset_id')}
     return {**snapshot, 'snapshot_id': digest(snapshot)}

@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 def select_highlights(segments: list[dict], duration: float, *, count: int = 3, on_event=None, settings: dict | None = None,
-                      policy: dict | None = None) -> list[dict]:
+                      policy: dict | None = None, examples: list | None = None) -> list[dict]:
     """Discover from the full transcript, then rank alongside heuristic coverage."""
     from .core import propose_clips
     if settings:
@@ -43,7 +43,7 @@ def select_highlights(segments: list[dict], duration: float, *, count: int = 3, 
                               shortlist_limit=settings['shortlist'] if settings else None,
                               timeout=settings['ollama_timeout'] if settings else None,
                               model=settings.get('llm_model') if settings else None,
-                              policy=policy,
+                              policy=policy, examples=examples,
                               backend=settings.get('llm_backend', 'ollama') if settings else 'ollama')
 
 
@@ -153,7 +153,7 @@ def propose_from_transcript(segments: list[dict], duration: float, *, on_event=N
 
 def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Callable[[str, dict], None] | None = None,
                        shortlist_limit: int | None = None, timeout: int | None = None,
-                       backend: str = 'ollama', model: str | None = None, policy: dict | None = None) -> list[dict]:
+                       backend: str = 'ollama', model: str | None = None, policy: dict | None = None, examples: list | None = None) -> list[dict]:
     """Return up to `count` contextually ranked, non-overlapping candidates.
 
     Falls back to the deterministic ranked candidates if inference fails.
@@ -200,6 +200,10 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
     try:
         from .editorial_context import require_prompt_budget
         try:
+            from .editorial_retrieval import append_prompt_examples
+            prompt, used = append_prompt_examples(prompt, examples or [], context_window=4096 if backend=='kepler_gpu' else 8192, reserve=700)
+            if examples:
+                emit('retrieval_context', used_candidate_ids=used, reason='APPLIED' if used else 'CONTEXT_RESERVE_PRESERVED')
             budget = require_prompt_budget(prompt, context_window=4096 if backend == 'kepler_gpu' else 8192, reserve=700)
         except ValueError:
             if len(shortlist) < 2:
@@ -208,7 +212,7 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
             emit('context_chunking', reason='Full candidates exceed context budget',
                  candidates=len(shortlist), comparison_scope='within_chunk', prefix_truncated=False)
             batches = [rerank_with_ollama(part, count=count, on_event=on_event, timeout=timeout,
-                                          backend=backend, model=model, policy=policy,
+                                          backend=backend, model=model, policy=policy, examples=examples,
                                           shortlist_limit=len(part))
                        for part in (shortlist[:midpoint], shortlist[midpoint:])]
             # Fair deterministic interleave; never claim global model comparison of
@@ -220,6 +224,7 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
                 candidate['ranking_scope'] = 'within_chunk'
             return chosen
         emit('analyzing', total_candidates=len(brief), model=model, context_budget=budget)
+        payload=json.loads(body);payload['prompt']=prompt;body=json.dumps(payload).encode('utf-8')
         req = urllib.request.Request(url + '/api/generate', body, headers={'Content-Type': 'application/json'}, method='POST')
         with urllib.request.urlopen(req, timeout=timeout if timeout is not None else int(os.getenv('OLLAMA_TIMEOUT', '180'))) as resp:
             result = json.load(resp)
