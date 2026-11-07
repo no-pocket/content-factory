@@ -1,0 +1,532 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Human editorial feedback v2",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "event_type": {
+      "const": "REVIEW_SUBMITTED"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "candidate_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "render_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "editorial_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "supersedes_event_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "human"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "channel": {
+          "enum": [
+            "streamlit",
+            "api",
+            "telegram"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "channel"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "APPROVED",
+        "APPROVED_WITH_ADJUSTMENTS",
+        "REJECTED"
+      ]
+    },
+    "rejection_domain": {
+      "enum": [
+        "EDITORIAL",
+        "TECHNICAL",
+        "ADMINISTRATIVE",
+        "MIXED",
+        "UNSPECIFIED",
+        null
+      ]
+    },
+    "comment_raw": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "IRRELEVANT_CONTENT",
+              "CREATOR_SELF_PROMOTION",
+              "WEAK_HOOK",
+              "MISSING_CONTEXT",
+              "INCOMPLETE_PAYOFF",
+              "ABRUPT_ENDING",
+              "MISSING_DEMONSTRATION",
+              "BAD_FRAMING",
+              "IMPORTANT_CONTENT_CROPPED",
+              "CAPTION_ERROR",
+              "GOOD_CONTENT_NEEDS_REWORK",
+              "TECHNICAL_FAILURE"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "MINOR",
+              "MAJOR",
+              "CRITICAL",
+              null
+            ]
+          },
+          "confirmed_by": {
+            "const": "human"
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "confirmed_by"
+        ]
+      },
+      "maxItems": 50
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "relevance": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "hook": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "context": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "narrative": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "proof": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "closure": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "framing": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "captions": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "editing": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        },
+        "technical_quality": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5
+        }
+      },
+      "required": []
+    },
+    "content_grade": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 3
+    },
+    "relative_assessment": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "comparison_set_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "preferred_candidate_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "candidate_id": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                  },
+                  "candidate_version": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "candidate_id",
+                  "candidate_version"
+                ]
+              },
+              "maxItems": 6,
+              "minItems": 1
+            },
+            "all_options_below_bar": {
+              "type": "boolean"
+            },
+            "comment": {
+              "type": "string",
+              "maxLength": 4000
+            },
+            "confirmed_by": {
+              "const": "human"
+            }
+          },
+          "required": [
+            "comparison_set_id",
+            "preferred_candidate_id",
+            "alternatives",
+            "all_options_below_bar",
+            "comment",
+            "confirmed_by"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "edit_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "edit_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "type": {
+            "enum": [
+              "BOUNDARY_START",
+              "BOUNDARY_END",
+              "FRAMING",
+              "CAPTIONS",
+              "TITLE",
+              "EDITING",
+              "OTHER"
+            ]
+          },
+          "status": {
+            "enum": [
+              "OPEN",
+              "RESOLVED"
+            ]
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "severity": {
+            "enum": [
+              "MINOR",
+              "MAJOR",
+              "CRITICAL",
+              null
+            ]
+          }
+        },
+        "required": [
+          "edit_id",
+          "type",
+          "status",
+          "comment"
+        ]
+      },
+      "maxItems": 50
+    },
+    "review_timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "active_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wall_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "active_seconds",
+        "wall_seconds"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "brief_id": {
+          "type": "string",
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "brief_sha256": {
+          "type": "string",
+          "pattern": "^(UNKNOWN|[0-9a-f]{64})$"
+        },
+        "component_snapshot_id": {
+          "type": "string",
+          "pattern": "^(UNKNOWN|[0-9a-f]{64})$"
+        }
+      },
+      "required": [
+        "brief_id",
+        "brief_sha256",
+        "component_snapshot_id"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "request_id",
+    "event_type",
+    "job_id",
+    "candidate_id",
+    "candidate_version",
+    "render_revision",
+    "artifact_id",
+    "editorial_revision",
+    "supersedes_event_id",
+    "actor",
+    "decision",
+    "rejection_domain",
+    "comment_raw",
+    "reasons",
+    "dimensions",
+    "content_grade",
+    "relative_assessment",
+    "edit_requests",
+    "review_timing",
+    "versions",
+    "created_at"
+  ],
+  "$comment": "Runtime additionally checks finite numbers, canonical UUIDs, unique edit IDs, relative pool membership and active time <= wall time.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "REJECTED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "comment_raw": {
+            "type": "string",
+            "maxLength": 4000,
+            "pattern": "\\S"
+          },
+          "rejection_domain": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "rejection_domain": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "APPROVED_WITH_ADJUSTMENTS"
+          }
+        }
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "comment_raw": {
+                "type": "string",
+                "maxLength": 4000,
+                "pattern": "\\S"
+              }
+            }
+          },
+          {
+            "properties": {
+              "edit_requests": {
+                "contains": {
+                  "properties": {
+                    "status": {
+                      "const": "OPEN"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "APPROVED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "edit_requests": {
+            "not": {
+              "contains": {
+                "required": [
+                  "severity"
+                ],
+                "properties": {
+                  "status": {
+                    "const": "OPEN"
+                  },
+                  "severity": {
+                    "enum": [
+                      "MAJOR",
+                      "CRITICAL"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
