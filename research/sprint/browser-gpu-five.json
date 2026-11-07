@@ -1,0 +1,196 @@
+{
+  "browser": "Installed Edge via agent-browser",
+  "url": "http://workstation.taild835d6.ts.net:8501/",
+  "previews_ended": 15,
+  "errors": 0,
+  "muted": true,
+  "playback_rate": 4,
+  "jobs": [
+    {
+      "job_id": "58924b9a-dedf-4f56-ab6d-10b25f1240b5",
+      "previews": [
+        {
+          "connected": true,
+          "duration": 27.573,
+          "error": null,
+          "index": 0,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 30.673,
+          "error": null,
+          "index": 1,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 33.107,
+          "error": null,
+          "index": 2,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        }
+      ]
+    },
+    {
+      "job_id": "ae34ddee-0e98-4bba-9984-0ce95fd48abe",
+      "previews": [
+        {
+          "connected": true,
+          "duration": 25.586,
+          "error": null,
+          "index": 0,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 35.24,
+          "error": null,
+          "index": 1,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 34.653,
+          "error": null,
+          "index": 2,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        }
+      ]
+    },
+    {
+      "job_id": "4cb53aa0-ad5f-4762-8c44-5fbface0f77f",
+      "previews": [
+        {
+          "connected": true,
+          "duration": 37.021,
+          "error": null,
+          "index": 0,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 35.25,
+          "error": null,
+          "index": 1,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "connected": true,
+          "duration": 31.645,
+          "error": null,
+          "index": 2,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        }
+      ]
+    },
+    {
+      "job_id": "b82453d3-e032-482c-80cc-f5e782622cdb",
+      "previews": [
+        {
+          "duration": 30.307,
+          "error": null,
+          "index": 0,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "duration": 40.373,
+          "error": null,
+          "index": 1,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "duration": 43.976,
+          "error": null,
+          "index": 2,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        }
+      ]
+    },
+    {
+      "job_id": "f6b1c5c5-fb6b-429a-8b79-819fb86097bc",
+      "previews": [
+        {
+          "duration": 36.173,
+          "error": null,
+          "index": 0,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "duration": 44.274,
+          "error": null,
+          "index": 1,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        },
+        {
+          "duration": 32.882,
+          "error": null,
+          "index": 2,
+          "outcome": "ended",
+          "resolution": [
+            720,
+            1280
+          ]
+        }
+      ]
+    }
+  ],
+  "physical_phone_test": false,
+  "harness_note": "Initial rapid job switches captured stale third video elements. Affected cases rerun after matching all three metadata durations to QC; initial evidence retained separately."
+}

@@ -1,0 +1,8 @@
+{
+  "synthetic": true,
+  "production_mutated": false,
+  "job": "6d1cfba1-a7c7-4f9e-b3a6-aca1e0d258db",
+  "qa_directory": "E:\\CodexFiles\\content-factory\\content-factory\\research\\pytest_temp_recovery_real\\ac0de3720dc6476690734aa4ab95b296",
+  "passed": false,
+  "error": "Missed render interruption checkpoint: FAILED"
+}

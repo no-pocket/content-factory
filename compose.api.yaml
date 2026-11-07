@@ -1,0 +1,15 @@
+services:
+  api:
+    image: content-factory-worker:latest
+    command: ["python", "-m", "app.api"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /data
+      CONTENT_FACTORY_API_BIND: 0.0.0.0
+      CONTENT_FACTORY_API_TOKEN: ${CONTENT_FACTORY_API_TOKEN:-}
+    volumes:
+      - ./app:/app/app:ro
+      - ./data:/data
+    ports: ["127.0.0.1:8510:8510"]
+    depends_on: [redis]
+    restart: unless-stopped

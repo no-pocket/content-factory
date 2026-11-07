@@ -1,0 +1,180 @@
+{
+  "job": "530ade0e-7027-46ff-8173-5da8e5166ef4",
+  "prompt_sha256": "5c82c88b356fe9b52ce7060f59c5463c1423f0d23f7e7d4ef1d2043969c544b8",
+  "segment_count": 12,
+  "available": [
+    {
+      "name": "qwen2.5:1.5b",
+      "model": "qwen2.5:1.5b",
+      "modified_at": "2026-11-05T01:48:17.924319628Z",
+      "size": 986061892,
+      "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 1536,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    },
+    {
+      "name": "qwen2.5:3b",
+      "model": "qwen2.5:3b",
+      "modified_at": "2026-11-03T22:35:26.510977743Z",
+      "size": 1929912432,
+      "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "3.1B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 2048,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 0,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 0.59,\n  \"end_segment\": 8.93,\n  \"hook\": \"Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro\",\n  \"reason\": \"The speaker is introducing the topic of the month of GTA VI and mentioning that they are recording it for the first time.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 13236389818,
+      "load_duration": 2319078992,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 7157896000,
+      "eval_count": 85,
+      "eval_duration": 3753173000,
+      "contract_valid": false,
+      "wall_seconds": 13.24
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 1,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 0.59,\n  \"end_segment\": 8.93,\n  \"hook\": \"Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro\",\n  \"reason\": \"The speaker is introducing the month of GTA VI and explaining that they are recording it, indicating that the content is related to the game.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 3700931191,
+      "load_duration": 840348,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 64254999,
+      "eval_count": 88,
+      "eval_duration": 3630259000,
+      "contract_valid": false,
+      "wall_seconds": 3.705
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 2,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 0.59,\n  \"end_segment\": 8.93,\n  \"hook\": \"Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro\",\n  \"reason\": \"The speaker is introducing the month of GTA VI and explaining that they are recording it, indicating that the content is related to the game.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 4423149941,
+      "load_duration": 1979514,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 66550000,
+      "eval_count": 88,
+      "eval_duration": 4348840000,
+      "contract_valid": false,
+      "wall_seconds": 4.428
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 0,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 20,\n  \"end_segment\": 34,\n  \"text\": \"E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada.\",\n  \"hook\": \"E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada.\",\n  \"reason\": \"Este corte contém o principal ponto de interesse do vídeo, que é a confirmação da data de lançamento de GTA VI e a promessa de uma transmissão ao vivo. Este segmento também inclui a ansiedade do apresentador, que é um elemento emocional importante para o público.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 31622275390,
+      "load_duration": 4352045619,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 13117357000,
+      "eval_count": 210,
+      "eval_duration": 14147828000,
+      "contract_valid": false,
+      "wall_seconds": 31.627
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 1,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 26,\n  \"end_segment\": 34,\n  \"text\": \"E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada.\",\n  \"hook\": \"E assim, como é que dá ansiedade aí pra vocês?\",\n  \"reason\": \"O segmento escolhido contém o momento em que o speaker menciona a ansiedade relacionada ao lançamento de GTA VI, que é um ponto de interesse para o público. Além disso, ele também menciona que vai jogar o jogo ao vivo com os espectadores, o que cria um sentido de imersão e ansiedade para o público.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 13040904132,
+      "load_duration": 885451,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 90923000,
+      "eval_count": 182,
+      "eval_duration": 12943246000,
+      "contract_valid": false,
+      "wall_seconds": 13.046
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 2,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 4096
+      },
+      "response": "{\n  \"start_segment\": 26,\n  \"end_segment\": 34,\n  \"text\": \"E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada.\",\n  \"hook\": \"E assim, como é que dá ansiedade aí pra vocês?\",\n  \"reason\": \"O segmento escolhido contém o momento em que o speaker menciona a ansiedade relacionada ao lançamento de GTA VI, que é um ponto de interesse para o público. Além disso, ele também menciona que vai jogar o jogo ao vivo com os espectadores, o que cria um sentido de imersão e ansiedade para o público.\"\n}",
+      "done_reason": "stop",
+      "total_duration": 14089250313,
+      "load_duration": 1102866,
+      "prompt_eval_count": 615,
+      "prompt_eval_duration": 100032000,
+      "eval_count": 182,
+      "eval_duration": 13982699000,
+      "contract_valid": false,
+      "wall_seconds": 14.093
+    }
+  ],
+  "editorial_verdict": null,
+  "default_changed": false,
+  "limits": "One video, one task prompt. No quality verdict or general reliability estimate."
+}

@@ -3,7 +3,7 @@ import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from
 import { OffthreadVideo } from 'remotion';
 
 type Word = { start: number; end: number; text: string };
-type Banner = { text: string; at: number; duration: number };
+type Banner = { text: string; at: number; duration: number; style?: string };
 type FX = { type: string; at: number; duration: number };
 type Broll = { asset_id: string; at: number; duration: number; path: string };
 export type Timeline = {
@@ -57,7 +57,7 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline }) =
         const duration = Math.max(1, Math.round(banner.duration * 30));
         return (
           <Sequence key={`t${i}`} from={start} durationInFrames={duration}>
-            <PopBanner text={banner.text} />
+            <PopBanner text={banner.text} compact={banner.style === 'compact_editorial_v1'} />
           </Sequence>
         );
       })}
@@ -76,12 +76,12 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline }) =
   );
 };
 
-const PopBanner: React.FC<{ text: string }> = ({ text }) => {
+const PopBanner: React.FC<{ text: string; compact: boolean }> = ({ text, compact }) => {
   const frame = useCurrentFrame();
   const scale = interpolate(frame, [0, 4, 8], [0.55, 1.14, 1], { extrapolateRight: 'clamp' });
   return (
-    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: 130, pointerEvents: 'none' }}>
-      <div style={{ maxWidth: '85%', fontWeight: 950, fontSize: 55, lineHeight: 1.1, padding: '15px 20px', textAlign: 'center', color: '#fff', textTransform: 'uppercase', background: 'rgba(12,16,26,0.74)', borderBottom: '5px solid #f5dc45', borderRadius: 12, transform: `scale(${scale})`, textShadow: '1px 3px #050505' }}>{text}</div>
+    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: compact ? 95 : 130, pointerEvents: 'none' }}>
+      <div style={{ maxWidth: compact ? '82%' : '85%', fontWeight: 950, fontSize: compact ? 38 : 55, lineHeight: 1.1, padding: '15px 20px', textAlign: 'center', color: '#fff', textTransform: 'uppercase', background: 'rgba(12,16,26,0.74)', borderBottom: '5px solid #f5dc45', borderRadius: 12, transform: `scale(${scale})`, textShadow: '1px 3px #050505', ...(compact ? {display:'-webkit-box', WebkitBoxOrient:'vertical' as const, WebkitLineClamp:3, overflow:'hidden', overflowWrap:'anywhere' as const} : {}) }}>{text}</div>
     </AbsoluteFill>
   );
 };

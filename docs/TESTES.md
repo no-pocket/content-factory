@@ -2,6 +2,10 @@
 
 ## Suíte automatizada
 
+As verificações desta sprint também cobrem QC MP4/WebM, decisões versionadas, retry
+direcionado, interrupções sintéticas, métricas por idioma e API HTTP autenticada.
+Evidências atuais e limitações: [relatório da sprint](../research/SPRINT_QUALIDADE_RESULTADOS.md).
+
 Na workstation, a imagem já construída do worker contém pytest e dependências. Rode os testes sem build novo:
 
 ```powershell

@@ -1,0 +1,131 @@
+{
+  "cohort": "bilingual-pilot-12-2026-11-05",
+  "settings": {
+    "clip_count": 3,
+    "target_seconds": 40,
+    "min_seconds": 15,
+    "max_seconds": 60,
+    "proposal_max_chunks": 12,
+    "shortlist": 12,
+    "ollama_timeout": 180,
+    "whisper_model": "base",
+    "whisper_beam_size": 5,
+    "ranker_mode": "heuristic",
+    "llm_backend": "ollama",
+    "llm_model": "qwen2.5:3b",
+    "director_mode": "heuristic",
+    "render_engine": "ffmpeg"
+  },
+  "videos": [
+    {
+      "source": "GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "sha256": "864f0c0e41860afa774adc75feb422b9925f6edb7f3db15685ca354a17b1d1e3",
+      "job_id": "255f7f42-5d82-45ae-9707-0fa142c2d985"
+    },
+    {
+      "source": "GTA 6 no PC PANTERA GARANTIDA e PINTURA NOVA.mp4",
+      "sha256": "bd3447a4d0fee8aad64bd6f8d00368bdfa0c2889f17635570fdb7658eb63a910",
+      "job_id": "df57ad76-3234-4110-9619-372f06ed7579"
+    },
+    {
+      "source": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+      "sha256": "3169beab40846c986679ecddd3443ae14b10722d71141357633d4f0ceb16121b",
+      "job_id": "3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741"
+    },
+    {
+      "source": "GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "sha256": "6621553cc6b92449d5c111ed0258b731aad1b8e405bc3d1d46beb6a46def6047",
+      "job_id": "a5f108ff-c572-42db-905a-a73def7c4ba1"
+    },
+    {
+      "source": "GTA-6-GANHA-SnapYT.App.mp4",
+      "sha256": "d743c13c259fc6ea0ba6499d24c4d44f71eb83488050952a56484ee016e2f6b4",
+      "job_id": "551502d9-fcc5-4a66-9175-b7077c89194b"
+    },
+    {
+      "source": "GTA-6-SnapYT.App.mp4",
+      "sha256": "3d6d1fb2f99dd47fdc84e3023f20705d86e0ae492e54c2eb8ba888e80e2887be",
+      "job_id": "526f20e5-4cf3-4055-95af-161a20dfebd7"
+    },
+    {
+      "source": "JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "sha256": "a6c0ebcf8c23b18d8795000f5fa36168ad2bf7e11674c23797d1cf22ce3563fb",
+      "job_id": "583bd5d7-6373-4e21-8926-7fd1b02dc914"
+    },
+    {
+      "source": "RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "sha256": "08aa1360694d1741b5654355b1da261ddffbfc17c4308fa5ba060a6f2aa2138b",
+      "job_id": "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39"
+    },
+    {
+      "source": "Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "sha256": "17c08cb765d03de43328cd88beba1e0dbb177fc3f553c365ff7e1947be1856e4",
+      "job_id": "7256c7f7-ab16-464b-8314-ce84e138f0e1"
+    },
+    {
+      "source": "SAIU A INFORMAÇÃO DE GTA 6 MAIS IMPRESSIONANTE DO DIA E TIVEMOS ADIAMENTO.mp4",
+      "sha256": "2513f2e6c0178ffc10fc568def0916770153d002f70ffd6b879968f708d7447f",
+      "job_id": "91714be6-b6f3-4076-95f5-0893cd062002"
+    },
+    {
+      "source": "YTDown.com_YouTube_Media_mOIvpOm1J9U_GTA-6-Is-BIGGER-Than-We-Think-Downloading-EARLY-The-FINAL-Update-Surprise-Announ_003_720p.mp4",
+      "sha256": "eed7665bc19aa85fb291a5cd6f4c8479b85913a1be1485fcb7c5fe9aa6ee278c",
+      "job_id": "87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb"
+    },
+    {
+      "source": "videoplayback.mp4",
+      "sha256": "87eb81abc5f248511a3c594136085aa0a5d7cf19bc22dabd4a2e9c1d9f8b532f",
+      "job_id": "0d0714a6-aca1-41d6-b5b8-7fd983358887"
+    }
+  ],
+  "corpus": [
+    {
+      "source": "GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "sha256": "864f0c0e41860afa774adc75feb422b9925f6edb7f3db15685ca354a17b1d1e3"
+    },
+    {
+      "source": "GTA 6 no PC PANTERA GARANTIDA e PINTURA NOVA.mp4",
+      "sha256": "bd3447a4d0fee8aad64bd6f8d00368bdfa0c2889f17635570fdb7658eb63a910"
+    },
+    {
+      "source": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+      "sha256": "3169beab40846c986679ecddd3443ae14b10722d71141357633d4f0ceb16121b"
+    },
+    {
+      "source": "GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "sha256": "6621553cc6b92449d5c111ed0258b731aad1b8e405bc3d1d46beb6a46def6047"
+    },
+    {
+      "source": "GTA-6-GANHA-SnapYT.App.mp4",
+      "sha256": "d743c13c259fc6ea0ba6499d24c4d44f71eb83488050952a56484ee016e2f6b4"
+    },
+    {
+      "source": "GTA-6-SnapYT.App.mp4",
+      "sha256": "3d6d1fb2f99dd47fdc84e3023f20705d86e0ae492e54c2eb8ba888e80e2887be"
+    },
+    {
+      "source": "JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "sha256": "a6c0ebcf8c23b18d8795000f5fa36168ad2bf7e11674c23797d1cf22ce3563fb"
+    },
+    {
+      "source": "RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "sha256": "08aa1360694d1741b5654355b1da261ddffbfc17c4308fa5ba060a6f2aa2138b"
+    },
+    {
+      "source": "Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "sha256": "17c08cb765d03de43328cd88beba1e0dbb177fc3f553c365ff7e1947be1856e4"
+    },
+    {
+      "source": "SAIU A INFORMAÇÃO DE GTA 6 MAIS IMPRESSIONANTE DO DIA E TIVEMOS ADIAMENTO.mp4",
+      "sha256": "2513f2e6c0178ffc10fc568def0916770153d002f70ffd6b879968f708d7447f"
+    },
+    {
+      "source": "YTDown.com_YouTube_Media_mOIvpOm1J9U_GTA-6-Is-BIGGER-Than-We-Think-Downloading-EARLY-The-FINAL-Update-Surprise-Announ_003_720p.mp4",
+      "sha256": "eed7665bc19aa85fb291a5cd6f4c8479b85913a1be1485fcb7c5fe9aa6ee278c"
+    },
+    {
+      "source": "videoplayback.mp4",
+      "sha256": "87eb81abc5f248511a3c594136085aa0a5d7cf19bc22dabd4a2e9c1d9f8b532f"
+    }
+  ]
+}

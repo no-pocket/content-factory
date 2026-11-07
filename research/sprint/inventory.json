@@ -1,0 +1,123 @@
+{
+  "videos": [
+    {
+      "file": "GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "bytes": 129628934,
+      "sha256": "864f0c0e41860afa774adc75feb422b9925f6edb7f3db15685ca354a17b1d1e3",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 663.146
+    },
+    {
+      "file": "GTA 6 no PC PANTERA GARANTIDA e PINTURA NOVA.mp4",
+      "bytes": 269252708,
+      "sha256": "bd3447a4d0fee8aad64bd6f8d00368bdfa0c2889f17635570fdb7658eb63a910",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 674.823
+    },
+    {
+      "file": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+      "bytes": 479409962,
+      "sha256": "3169beab40846c986679ecddd3443ae14b10722d71141357633d4f0ceb16121b",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 835.143
+    },
+    {
+      "file": "GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "bytes": 291081750,
+      "sha256": "6621553cc6b92449d5c111ed0258b731aad1b8e405bc3d1d46beb6a46def6047",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 510.584
+    },
+    {
+      "file": "GTA-6-GANHA-SnapYT.App.mp4",
+      "bytes": 111238788,
+      "sha256": "d743c13c259fc6ea0ba6499d24c4d44f71eb83488050952a56484ee016e2f6b4",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 554.47
+    },
+    {
+      "file": "GTA-6-SnapYT.App.mp4",
+      "bytes": 293793950,
+      "sha256": "3d6d1fb2f99dd47fdc84e3023f20705d86e0ae492e54c2eb8ba888e80e2887be",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 980.658
+    },
+    {
+      "file": "JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "bytes": 92383482,
+      "sha256": "a6c0ebcf8c23b18d8795000f5fa36168ad2bf7e11674c23797d1cf22ce3563fb",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 377.58
+    },
+    {
+      "file": "RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "bytes": 27956569,
+      "sha256": "08aa1360694d1741b5654355b1da261ddffbfc17c4308fa5ba060a6f2aa2138b",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 248.57
+    },
+    {
+      "file": "Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "bytes": 79140394,
+      "sha256": "17c08cb765d03de43328cd88beba1e0dbb177fc3f553c365ff7e1947be1856e4",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 237.564
+    },
+    {
+      "file": "SAIU A INFORMAÇÃO DE GTA 6 MAIS IMPRESSIONANTE DO DIA E TIVEMOS ADIAMENTO.mp4",
+      "bytes": 155107337,
+      "sha256": "2513f2e6c0178ffc10fc568def0916770153d002f70ffd6b879968f708d7447f",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 435.579
+    },
+    {
+      "file": "YTDown.com_YouTube_Media_mOIvpOm1J9U_GTA-6-Is-BIGGER-Than-We-Think-Downloading-EARLY-The-FINAL-Update-Surprise-Announ_003_720p.mp4",
+      "bytes": 112364178,
+      "sha256": "eed7665bc19aa85fb291a5cd6f4c8479b85913a1be1485fcb7c5fe9aa6ee278c",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 619.323
+    },
+    {
+      "file": "videoplayback.mp4",
+      "bytes": 32237282,
+      "sha256": "87eb81abc5f248511a3c594136085aa0a5d7cf19bc22dabd4a2e9c1d9f8b532f",
+      "authorization": "confirm per submission; presence on disk is not permission",
+      "duration": 612.217
+    }
+  ],
+  "unique_videos": 12,
+  "round_target": 12,
+  "additional_for_round": 0,
+  "additional_for_20": 8,
+  "additional_for_30": 18,
+  "editorial": {
+    "reviewed_videos": 0,
+    "reviewed_candidates": 0,
+    "approved_candidates": 0,
+    "approved_per_video": null,
+    "rework_rate": null,
+    "processing_mean_seconds": null,
+    "processing_measured_videos": 0,
+    "video_configuration_pairs": 0,
+    "interrupted_timing_jobs": 0,
+    "unreviewed_jobs": 19,
+    "by_configuration": {},
+    "conclusion": "Descriptive only; requires paired videos and human review before changing selection",
+    "paired_comparisons": [],
+    "by_language": {},
+    "technical_failed_candidates": 0,
+    "legacy_approved_jobs": 1,
+    "refinement": {
+      "dimension_means": {
+        "hook": null,
+        "context": null,
+        "closure": null,
+        "captions": null
+      },
+      "reviewed_sources": 0,
+      "sufficient_for_general_rule": false,
+      "automatic_selection_update": false,
+      "next_step": "Collect 20–30 authorized videos and paired human reviews; inspect low dimensions and reasons before proposing a rule"
+    }
+  }
+}

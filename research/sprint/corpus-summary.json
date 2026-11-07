@@ -1,0 +1,229 @@
+{
+  "videos": 12,
+  "candidates": 36,
+  "states": {
+    "WARNING": 10,
+    "VALID": 26
+  },
+  "languages": {
+    "pt": {
+      "videos": 9,
+      "candidates": 27,
+      "valid": 17,
+      "warning": 10,
+      "source_seconds": 5382.186,
+      "processing_seconds": 2078.429
+    },
+    "en": {
+      "videos": 3,
+      "candidates": 9,
+      "valid": 9,
+      "warning": 0,
+      "source_seconds": 1367.471,
+      "processing_seconds": 806.5699999999999
+    }
+  },
+  "source_seconds": 6749.657,
+  "processing_seconds": 2884.999,
+  "signals_seconds": 546.143,
+  "experimental_windows_changed": 21,
+  "source_fingerprints_verified": true,
+  "baseline_windows_match_rendered_jobs": true,
+  "editorial_assessment": null,
+  "production_selection_changed": false,
+  "rows": [
+    {
+      "job_id": "255f7f42-5d82-45ae-9707-0fa142c2d985",
+      "filename": "GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "language": "pt",
+      "source_seconds": 663.146,
+      "processing_seconds": 184.9,
+      "candidate_states": {
+        "WARNING": 3
+      },
+      "signal_seconds": 53.96,
+      "silence_intervals": 141,
+      "energy_windows": 1327,
+      "scenes": 13,
+      "experimental_windows_changed": 2,
+      "signals_report": "signals-255f7f42-5d82-45ae-9707-0fa142c2d985.json"
+    },
+    {
+      "job_id": "df57ad76-3234-4110-9619-372f06ed7579",
+      "filename": "GTA 6 no PC PANTERA GARANTIDA e PINTURA NOVA.mp4",
+      "language": "pt",
+      "source_seconds": 674.823,
+      "processing_seconds": 299.526,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 65.142,
+      "silence_intervals": 16,
+      "energy_windows": 1350,
+      "scenes": 178,
+      "experimental_windows_changed": 0,
+      "signals_report": "signals-df57ad76-3234-4110-9619-372f06ed7579.json"
+    },
+    {
+      "job_id": "3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741",
+      "filename": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+      "language": "pt",
+      "source_seconds": 835.143,
+      "processing_seconds": 271.15,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 86.354,
+      "silence_intervals": 2,
+      "energy_windows": 1671,
+      "scenes": 418,
+      "experimental_windows_changed": 3,
+      "signals_report": "signals-3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741.json"
+    },
+    {
+      "job_id": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "filename": "GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "language": "en",
+      "source_seconds": 510.584,
+      "processing_seconds": 227.888,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 49.46,
+      "silence_intervals": 2,
+      "energy_windows": 1022,
+      "scenes": 185,
+      "experimental_windows_changed": 2,
+      "signals_report": "signals-a5f108ff-c572-42db-905a-a73def7c4ba1.json"
+    },
+    {
+      "job_id": "551502d9-fcc5-4a66-9175-b7077c89194b",
+      "filename": "GTA-6-GANHA-SnapYT.App.mp4",
+      "language": "pt",
+      "source_seconds": 554.47,
+      "processing_seconds": 235.515,
+      "candidate_states": {
+        "WARNING": 3
+      },
+      "signal_seconds": 45.561,
+      "silence_intervals": 132,
+      "energy_windows": 1109,
+      "scenes": 86,
+      "experimental_windows_changed": 2,
+      "signals_report": "signals-551502d9-fcc5-4a66-9175-b7077c89194b.json"
+    },
+    {
+      "job_id": "526f20e5-4cf3-4055-95af-161a20dfebd7",
+      "filename": "GTA-6-SnapYT.App.mp4",
+      "language": "pt",
+      "source_seconds": 980.658,
+      "processing_seconds": 228.147,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 93.607,
+      "silence_intervals": 3,
+      "energy_windows": 1962,
+      "scenes": 43,
+      "experimental_windows_changed": 2,
+      "signals_report": "signals-526f20e5-4cf3-4055-95af-161a20dfebd7.json"
+    },
+    {
+      "job_id": "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+      "filename": "JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "language": "pt",
+      "source_seconds": 377.58,
+      "processing_seconds": 294.97,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 36.05,
+      "silence_intervals": 14,
+      "energy_windows": 756,
+      "scenes": 4,
+      "experimental_windows_changed": 1,
+      "signals_report": "signals-583bd5d7-6373-4e21-8926-7fd1b02dc914.json"
+    },
+    {
+      "job_id": "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39",
+      "filename": "RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "language": "pt",
+      "source_seconds": 248.57,
+      "processing_seconds": 102.716,
+      "candidate_states": {
+        "WARNING": 3
+      },
+      "signal_seconds": 11.56,
+      "silence_intervals": 59,
+      "energy_windows": 498,
+      "scenes": 1,
+      "experimental_windows_changed": 3,
+      "signals_report": "signals-127b2a1a-c5c5-451e-88bf-f4ad3cb22a39.json"
+    },
+    {
+      "job_id": "7256c7f7-ab16-464b-8314-ce84e138f0e1",
+      "filename": "Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "language": "en",
+      "source_seconds": 237.564,
+      "processing_seconds": 336.232,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 20.959,
+      "silence_intervals": 1,
+      "energy_windows": 476,
+      "scenes": 25,
+      "experimental_windows_changed": 1,
+      "signals_report": "signals-7256c7f7-ab16-464b-8314-ce84e138f0e1.json"
+    },
+    {
+      "job_id": "91714be6-b6f3-4076-95f5-0893cd062002",
+      "filename": "SAIU A INFORMAÇÃO DE GTA 6 MAIS IMPRESSIONANTE DO DIA E TIVEMOS ADIAMENTO.mp4",
+      "language": "pt",
+      "source_seconds": 435.579,
+      "processing_seconds": 303.404,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 39.202,
+      "silence_intervals": 1,
+      "energy_windows": 872,
+      "scenes": 21,
+      "experimental_windows_changed": 1,
+      "signals_report": "signals-91714be6-b6f3-4076-95f5-0893cd062002.json"
+    },
+    {
+      "job_id": "87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb",
+      "filename": "YTDown.com_YouTube_Media_mOIvpOm1J9U_GTA-6-Is-BIGGER-Than-We-Think-Downloading-EARLY-The-FINAL-Update-Surprise-Announ_003_720p.mp4",
+      "language": "en",
+      "source_seconds": 619.323,
+      "processing_seconds": 242.45,
+      "candidate_states": {
+        "VALID": 3
+      },
+      "signal_seconds": 33.22,
+      "silence_intervals": 27,
+      "energy_windows": 1239,
+      "scenes": 33,
+      "experimental_windows_changed": 1,
+      "signals_report": "signals-87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb.json"
+    },
+    {
+      "job_id": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+      "filename": "videoplayback.mp4",
+      "language": "pt",
+      "source_seconds": 612.217,
+      "processing_seconds": 158.101,
+      "candidate_states": {
+        "VALID": 2,
+        "WARNING": 1
+      },
+      "signal_seconds": 11.068,
+      "silence_intervals": 152,
+      "energy_windows": 1225,
+      "scenes": 0,
+      "experimental_windows_changed": 3,
+      "signals_report": "signals-0d0714a6-aca1-41d6-b5b8-7fd983358887.json"
+    }
+  ]
+}

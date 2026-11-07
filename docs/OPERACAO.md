@@ -14,6 +14,25 @@ Invoke-RestMethod http://127.0.0.1:11436/health
 
 Abra <http://localhost:8501/>. Em **Doctor**, confirme Worker e GPU online. O Ollama pode aparecer separadamente; cada job escolhe o backend. Se usar somente CPU/Ollama, execute `docker compose up -d --no-build` e selecione Ollama no job. A instalação inicial e o build da K4200 estão em [GPU K4200](GPU_K4200.md).
 
+## Acessar pelo celular via Tailscale
+
+Com o Tailscale conectado no celular ao mesmo tailnet, abra:
+
+- Nome completo: <http://workstation.taild835d6.ts.net:8501/>
+- IP privado: <http://100.78.0.122:8501/>
+- Nome curto, quando MagicDNS estiver ativo: <http://workstation:8501/>
+
+O Docker continua publicando somente `127.0.0.1:8501`. O acesso remoto usa um encaminhamento TCP persistente do Tailscale para esse endereço, restrito ao tailnet e suas permissões. Não foi habilitado Funnel nem aberto acesso público/LAN. HTTP trafega dentro do túnel Tailscale; não usar HTTPS nesses links da porta 8501.
+
+Configuração usada na workstation, sem recriar containers:
+
+```powershell
+& 'C:\Program Files\Tailscale\tailscale.exe' serve --bg --tcp=8501 tcp://127.0.0.1:8501
+& 'C:\Program Files\Tailscale\tailscale.exe' serve status
+```
+
+Para desfazer somente este encaminhamento: `tailscale serve --tcp=8501 off`. Não usar `serve reset` para não apagar encaminhamentos de outros projetos. Se não abrir no aparelho, conferir Tailscale conectado, mesmo tailnet/permissões e URL com `http://` e `:8501`; testar o IP para distinguir problema de DNS. A API/Redis continuam locais. WebM e MP4 mestre estão disponíveis no seletor do player; a reprodução no celular real deve ser confirmada em seu navegador.
+
 Não use `down -v` para reiniciar: `data/`, cache do Whisper, modelos Ollama e binários Kepler são dados persistentes. Antes de reconstruir imagens, confira espaço livre em C: e se há job em andamento.
 
 ## Produzir e revisar
@@ -22,7 +41,7 @@ Não use `down -v` para reiniciar: `data/`, cache do Whisper, modelos Ollama e b
 2. Abra **Ajustes de processamento**. Defina quantidade e duração dos cortes, modelo Whisper, análise/direção Qwen, backend Ollama ou GPU K4200 e render. Esses valores são salvos no job; alterações posteriores do `.env` não mudam um job existente.
 3. Clique **Criar job de cortes**. A fila aceita um job por vez nesta implantação. O Doctor mostra a atividade da IA; em **Jobs e aprovação**, use **Atualizar status** para ver mudanças de etapa.
 4. Em `NEEDS_REVIEW`, reproduza cada candidato até o fim. O WebM é a prévia para o navegador; o MP4 é o arquivo mestre para download. Confira também a transcrição, o corte, o áudio, as legendas, o enquadramento e o motor de render registrado.
-5. Marque os candidatos aceitos e clique **Salvar aprovação**, ou use **Rejeitar todos**. A decisão fica no JSON do job. Não há publicação automática.
+5. Para cada candidato, informe um comentário e clique **Aprovar candidato** ou **Recusar candidato**. Notas de gancho, contexto, fechamento e legendas são opcionais no expander. Arquivos com falha podem ser recusados, mas só os tecnicamente válidos podem ser aprovados. O expander **Recusar o job inteiro** registra uma recusa com comentário para todos. O histórico fica no JSON do job; não há publicação automática.
 
 B-roll só entra no trabalho após cadastro na **Biblioteca de gameplay**, com descrição e prova de direitos. O diretor recebe IDs do catálogo; sugestões de IDs inexistentes são descartadas pelo construtor da timeline.
 
@@ -33,6 +52,14 @@ Os registros ficam em `data/work/<job_id>.json`, a transcrição em `data/work/<
 Estados normais: `QUEUED → DOWNLOADING` (só URL) `→ TRANSCRIBING → DIRECTING → RENDERING → NEEDS_REVIEW → APPROVED/REJECTED`. Falhas ficam em `FAILED` com motivo no job. Para detalhes de fallback e recuperação, veja [Processo de produção](PROCESSO.md).
 
 ## Diagnóstico rápido
+
+Para resultados legados, use **Verificar arquivos existentes (sem renderizar)**.
+Apenas candidatos `VALID`/`WARNING` são disponibilizados para nova revisão. Use
+**Salvar avaliação editorial** após informar notas, motivo e retrabalho; aprovações
+anteriores são preservadas, sem notas inventadas. `PARTIAL_FAILED` mantém visíveis
+as falhas. O botão por candidato tenta novamente dentro do limite salvo (padrão 2,
+incluindo a tentativa original); os outros resultados não são renderizados novamente.
+`QUEUE_FAILED` oferece reenvio explícito. Consulte [QC](CONTROLE_QUALIDADE.md).
 
 ```powershell
 docker compose -f compose.yaml -f compose.kepler.yaml ps
