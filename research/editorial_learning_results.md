@@ -67,3 +67,30 @@ e contexto assistido têm os mesmos hashes, pois não há exemplo confirmado nem
 brief aprovado ativo. Estado: NOT_EVALUATED_NO_ELIGIBLE_EXAMPLES. Isso verifica
 a ausência de uso indevido dos dados, não uma melhoria editorial ou uma ablação
 com inferência. Embeddings continuam adiados por falta de evidência de necessidade.
+
+## M9: ranker leve bloqueado por dados
+
+CLI `train_editorial_ranker.py <dataset>` executada sobre o export real retornou
+`status=BLOCKED`, `trained=false`, `model_downloaded=false`, exit2. Contagens
+absolutas confirmadas:0 famílias/0 candidatos/0 positivos/0 negativos/0 holdout,
+com cobertura PT/EN elegível ausente. As cinco fontes legadas continuam visíveis
+na auditoria, mas não preenchem esses contadores. Falta também configuração de
+experimento aprovada por humano; não foi criada uma aprovação para passar o gate.
+
+Os limites propostos50famílias/150graduados/30porclasse/10famíliasporclasse e
+15holdout são fixos nesta versão, junto de cobertura de classes nos folds. Esses
+limites não garantem poder estatístico. O alvo é `content_grade>=2`; preferência
+relativa nunca preenche grau ausente. Preprocessamento usa apenas treino, com
+missingness explícito; logística opcional pondera cada família e usa CV agrupada.
+Holdout não é avaliado automaticamente. Artefato é JSON com coeficientes,
+preprocessamento, features, dataset/config, dependências e hashes, para avaliação.
+O worker não importa o trainer ou ativa o artefato.
+
+Gates, ausência de vazamento, fallback e inferência JSON foram testados com casos
+sintéticos. O caminho opcional de fit via scikit-learn **não foi executado**:
+instalar a dependência só para simular treino não se justifica com o gate fechado.
+`requirements-editorial-ml.txt` é separado; a versão direta1.9.1 foi conferida em
+[metadados oficiais PyPI](https://pypi.org/pypi/scikit-learn/1.9.1/json), mas não foi
+instalada nem adicionada ao Docker de produto. Antes de futuro treino real,
+validar/fixar todo o ambiente extra e executar integração sintética nele. Não há
+modelo treinado, avaliação de holdout, promoção ou evidência de ganho nesta rodada.
