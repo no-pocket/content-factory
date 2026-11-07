@@ -1,0 +1,2109 @@
+{
+  "job": "7256c7f7-ab16-464b-8314-ce84e138f0e1",
+  "source_sha256": "17c08cb765d03de43328cd88beba1e0dbb177fc3f553c365ff7e1947be1856e4",
+  "settings": {
+    "clip_count": 3,
+    "target_seconds": 40,
+    "min_seconds": 15,
+    "max_seconds": 60,
+    "proposal_max_chunks": 12,
+    "shortlist": 12,
+    "ollama_timeout": 180,
+    "whisper_model": "base",
+    "whisper_beam_size": 5,
+    "ranker_mode": "heuristic",
+    "llm_backend": "ollama",
+    "llm_model": "qwen2.5:3b",
+    "director_mode": "heuristic",
+    "render_engine": "ffmpeg"
+  },
+  "signals": {
+    "silence": [
+      {
+        "start": 237.562,
+        "end": 238.0
+      }
+    ],
+    "energy": [
+      {
+        "time": 0.0,
+        "rms_db": -17.286092
+      },
+      {
+        "time": 0.5,
+        "rms_db": -17.366396
+      },
+      {
+        "time": 1.0,
+        "rms_db": -19.973212
+      },
+      {
+        "time": 1.5,
+        "rms_db": -17.689814
+      },
+      {
+        "time": 2.0,
+        "rms_db": -17.345327
+      },
+      {
+        "time": 2.5,
+        "rms_db": -15.904815
+      },
+      {
+        "time": 3.0,
+        "rms_db": -18.512024
+      },
+      {
+        "time": 3.5,
+        "rms_db": -18.776523
+      },
+      {
+        "time": 4.0,
+        "rms_db": -19.682489
+      },
+      {
+        "time": 4.5,
+        "rms_db": -17.476567
+      },
+      {
+        "time": 5.0,
+        "rms_db": -18.939358
+      },
+      {
+        "time": 5.5,
+        "rms_db": -18.264949
+      },
+      {
+        "time": 6.0,
+        "rms_db": -21.72369
+      },
+      {
+        "time": 6.5,
+        "rms_db": -20.406072
+      },
+      {
+        "time": 7.0,
+        "rms_db": -21.742987
+      },
+      {
+        "time": 7.5,
+        "rms_db": -15.894112
+      },
+      {
+        "time": 8.0,
+        "rms_db": -18.622898
+      },
+      {
+        "time": 8.5,
+        "rms_db": -17.479848
+      },
+      {
+        "time": 9.0,
+        "rms_db": -19.634434
+      },
+      {
+        "time": 9.5,
+        "rms_db": -17.315447
+      },
+      {
+        "time": 10.0,
+        "rms_db": -19.438138
+      },
+      {
+        "time": 10.5,
+        "rms_db": -20.041701
+      },
+      {
+        "time": 11.0,
+        "rms_db": -16.563342
+      },
+      {
+        "time": 11.5,
+        "rms_db": -19.466426
+      },
+      {
+        "time": 12.0,
+        "rms_db": -19.423361
+      },
+      {
+        "time": 12.5,
+        "rms_db": -19.770388
+      },
+      {
+        "time": 13.0,
+        "rms_db": -20.476988
+      },
+      {
+        "time": 13.5,
+        "rms_db": -16.811132
+      },
+      {
+        "time": 14.0,
+        "rms_db": -16.569904
+      },
+      {
+        "time": 14.5,
+        "rms_db": -19.49652
+      },
+      {
+        "time": 15.0,
+        "rms_db": -18.9515
+      },
+      {
+        "time": 15.5,
+        "rms_db": -18.580807
+      },
+      {
+        "time": 16.0,
+        "rms_db": -18.450262
+      },
+      {
+        "time": 16.5,
+        "rms_db": -20.930564
+      },
+      {
+        "time": 17.0,
+        "rms_db": -18.87832
+      },
+      {
+        "time": 17.5,
+        "rms_db": -18.892967
+      },
+      {
+        "time": 18.0,
+        "rms_db": -18.900165
+      },
+      {
+        "time": 18.5,
+        "rms_db": -19.901306
+      },
+      {
+        "time": 19.0,
+        "rms_db": -19.380239
+      },
+      {
+        "time": 19.5,
+        "rms_db": -17.394351
+      },
+      {
+        "time": 20.0,
+        "rms_db": -17.889835
+      },
+      {
+        "time": 20.5,
+        "rms_db": -16.702291
+      },
+      {
+        "time": 21.0,
+        "rms_db": -18.285791
+      },
+      {
+        "time": 21.5,
+        "rms_db": -17.813201
+      },
+      {
+        "time": 22.0,
+        "rms_db": -20.379638
+      },
+      {
+        "time": 22.5,
+        "rms_db": -19.034317
+      },
+      {
+        "time": 23.0,
+        "rms_db": -19.089628
+      },
+      {
+        "time": 23.5,
+        "rms_db": -18.593545
+      },
+      {
+        "time": 24.0,
+        "rms_db": -18.81917
+      },
+      {
+        "time": 24.5,
+        "rms_db": -16.768797
+      },
+      {
+        "time": 25.0,
+        "rms_db": -17.694023
+      },
+      {
+        "time": 25.5,
+        "rms_db": -17.422167
+      },
+      {
+        "time": 26.0,
+        "rms_db": -20.703371
+      },
+      {
+        "time": 26.5,
+        "rms_db": -17.852208
+      },
+      {
+        "time": 27.0,
+        "rms_db": -20.19389
+      },
+      {
+        "time": 27.5,
+        "rms_db": -19.188457
+      },
+      {
+        "time": 28.0,
+        "rms_db": -18.423423
+      },
+      {
+        "time": 28.5,
+        "rms_db": -19.93606
+      },
+      {
+        "time": 29.0,
+        "rms_db": -19.79909
+      },
+      {
+        "time": 29.5,
+        "rms_db": -19.164611
+      },
+      {
+        "time": 30.0,
+        "rms_db": -20.665401
+      },
+      {
+        "time": 30.5,
+        "rms_db": -18.163538
+      },
+      {
+        "time": 31.0,
+        "rms_db": -19.992064
+      },
+      {
+        "time": 31.5,
+        "rms_db": -20.671647
+      },
+      {
+        "time": 32.0,
+        "rms_db": -17.598514
+      },
+      {
+        "time": 32.5,
+        "rms_db": -18.396463
+      },
+      {
+        "time": 33.0,
+        "rms_db": -20.00707
+      },
+      {
+        "time": 33.5,
+        "rms_db": -16.969463
+      },
+      {
+        "time": 34.0,
+        "rms_db": -24.63024
+      },
+      {
+        "time": 34.5,
+        "rms_db": -19.918599
+      },
+      {
+        "time": 35.0,
+        "rms_db": -19.935437
+      },
+      {
+        "time": 35.5,
+        "rms_db": -18.520101
+      },
+      {
+        "time": 36.0,
+        "rms_db": -18.778817
+      },
+      {
+        "time": 36.5,
+        "rms_db": -18.97106
+      },
+      {
+        "time": 37.0,
+        "rms_db": -17.002909
+      },
+      {
+        "time": 37.5,
+        "rms_db": -20.260775
+      },
+      {
+        "time": 38.0,
+        "rms_db": -21.427609
+      },
+      {
+        "time": 38.5,
+        "rms_db": -18.553384
+      },
+      {
+        "time": 39.0,
+        "rms_db": -17.955614
+      },
+      {
+        "time": 39.5,
+        "rms_db": -19.260926
+      },
+      {
+        "time": 40.0,
+        "rms_db": -30.717843
+      },
+      {
+        "time": 40.5,
+        "rms_db": -16.180323
+      },
+      {
+        "time": 41.0,
+        "rms_db": -17.228553
+      },
+      {
+        "time": 41.5,
+        "rms_db": -16.547098
+      },
+      {
+        "time": 42.0,
+        "rms_db": -18.62821
+      },
+      {
+        "time": 42.5,
+        "rms_db": -16.945422
+      },
+      {
+        "time": 43.0,
+        "rms_db": -17.863962
+      },
+      {
+        "time": 43.5,
+        "rms_db": -19.942847
+      },
+      {
+        "time": 44.0,
+        "rms_db": -18.195025
+      },
+      {
+        "time": 44.5,
+        "rms_db": -17.265226
+      },
+      {
+        "time": 45.0,
+        "rms_db": -16.943298
+      },
+      {
+        "time": 45.5,
+        "rms_db": -17.967308
+      },
+      {
+        "time": 46.0,
+        "rms_db": -18.447218
+      },
+      {
+        "time": 46.5,
+        "rms_db": -17.486512
+      },
+      {
+        "time": 47.0,
+        "rms_db": -18.131162
+      },
+      {
+        "time": 47.5,
+        "rms_db": -19.280265
+      },
+      {
+        "time": 48.0,
+        "rms_db": -23.011492
+      },
+      {
+        "time": 48.5,
+        "rms_db": -18.114798
+      },
+      {
+        "time": 49.0,
+        "rms_db": -22.742968
+      },
+      {
+        "time": 49.5,
+        "rms_db": -19.726636
+      },
+      {
+        "time": 50.0,
+        "rms_db": -20.066556
+      },
+      {
+        "time": 50.5,
+        "rms_db": -19.489745
+      },
+      {
+        "time": 51.0,
+        "rms_db": -17.096048
+      },
+      {
+        "time": 51.5,
+        "rms_db": -16.988912
+      },
+      {
+        "time": 52.0,
+        "rms_db": -21.898907
+      },
+      {
+        "time": 52.5,
+        "rms_db": -16.255646
+      },
+      {
+        "time": 53.0,
+        "rms_db": -16.811266
+      },
+      {
+        "time": 53.5,
+        "rms_db": -20.786075
+      },
+      {
+        "time": 54.0,
+        "rms_db": -20.45937
+      },
+      {
+        "time": 54.5,
+        "rms_db": -17.15076
+      },
+      {
+        "time": 55.0,
+        "rms_db": -23.220248
+      },
+      {
+        "time": 55.5,
+        "rms_db": -18.320747
+      },
+      {
+        "time": 56.0,
+        "rms_db": -16.626404
+      },
+      {
+        "time": 56.5,
+        "rms_db": -18.831956
+      },
+      {
+        "time": 57.0,
+        "rms_db": -22.130154
+      },
+      {
+        "time": 57.5,
+        "rms_db": -17.887644
+      },
+      {
+        "time": 58.0,
+        "rms_db": -16.473788
+      },
+      {
+        "time": 58.5,
+        "rms_db": -20.423991
+      },
+      {
+        "time": 59.0,
+        "rms_db": -20.800784
+      },
+      {
+        "time": 59.5,
+        "rms_db": -18.396449
+      },
+      {
+        "time": 60.0,
+        "rms_db": -18.656909
+      },
+      {
+        "time": 60.5,
+        "rms_db": -19.125264
+      },
+      {
+        "time": 61.0,
+        "rms_db": -20.152076
+      },
+      {
+        "time": 61.5,
+        "rms_db": -17.143742
+      },
+      {
+        "time": 62.0,
+        "rms_db": -19.55011
+      },
+      {
+        "time": 62.5,
+        "rms_db": -16.841966
+      },
+      {
+        "time": 63.0,
+        "rms_db": -20.360056
+      },
+      {
+        "time": 63.5,
+        "rms_db": -18.335295
+      },
+      {
+        "time": 64.0,
+        "rms_db": -19.755996
+      },
+      {
+        "time": 64.5,
+        "rms_db": -16.87676
+      },
+      {
+        "time": 65.0,
+        "rms_db": -21.584879
+      },
+      {
+        "time": 65.5,
+        "rms_db": -20.149457
+      },
+      {
+        "time": 66.0,
+        "rms_db": -19.037493
+      },
+      {
+        "time": 66.5,
+        "rms_db": -18.223718
+      },
+      {
+        "time": 67.0,
+        "rms_db": -20.065468
+      },
+      {
+        "time": 67.5,
+        "rms_db": -18.456377
+      },
+      {
+        "time": 68.0,
+        "rms_db": -17.305839
+      },
+      {
+        "time": 68.5,
+        "rms_db": -18.657626
+      },
+      {
+        "time": 69.0,
+        "rms_db": -18.977579
+      },
+      {
+        "time": 69.5,
+        "rms_db": -18.034666
+      },
+      {
+        "time": 70.0,
+        "rms_db": -16.442054
+      },
+      {
+        "time": 70.5,
+        "rms_db": -18.383191
+      },
+      {
+        "time": 71.0,
+        "rms_db": -16.199703
+      },
+      {
+        "time": 71.5,
+        "rms_db": -19.985027
+      },
+      {
+        "time": 72.0,
+        "rms_db": -18.0418
+      },
+      {
+        "time": 72.5,
+        "rms_db": -18.455477
+      },
+      {
+        "time": 73.0,
+        "rms_db": -17.363514
+      },
+      {
+        "time": 73.5,
+        "rms_db": -19.186002
+      },
+      {
+        "time": 74.0,
+        "rms_db": -18.971488
+      },
+      {
+        "time": 74.5,
+        "rms_db": -20.240279
+      },
+      {
+        "time": 75.0,
+        "rms_db": -18.059457
+      },
+      {
+        "time": 75.5,
+        "rms_db": -18.131916
+      },
+      {
+        "time": 76.0,
+        "rms_db": -20.312138
+      },
+      {
+        "time": 76.5,
+        "rms_db": -19.237949
+      },
+      {
+        "time": 77.0,
+        "rms_db": -17.578235
+      },
+      {
+        "time": 77.5,
+        "rms_db": -16.639914
+      },
+      {
+        "time": 78.0,
+        "rms_db": -20.420335
+      },
+      {
+        "time": 78.5,
+        "rms_db": -22.201886
+      },
+      {
+        "time": 79.0,
+        "rms_db": -20.625775
+      },
+      {
+        "time": 79.5,
+        "rms_db": -20.491808
+      },
+      {
+        "time": 80.0,
+        "rms_db": -20.479442
+      },
+      {
+        "time": 80.5,
+        "rms_db": -16.830612
+      },
+      {
+        "time": 81.0,
+        "rms_db": -18.436007
+      },
+      {
+        "time": 81.5,
+        "rms_db": -17.565466
+      },
+      {
+        "time": 82.0,
+        "rms_db": -18.973376
+      },
+      {
+        "time": 82.5,
+        "rms_db": -19.734321
+      },
+      {
+        "time": 83.0,
+        "rms_db": -17.023267
+      },
+      {
+        "time": 83.5,
+        "rms_db": -19.079305
+      },
+      {
+        "time": 84.0,
+        "rms_db": -19.549649
+      },
+      {
+        "time": 84.5,
+        "rms_db": -20.697141
+      },
+      {
+        "time": 85.0,
+        "rms_db": -18.481092
+      },
+      {
+        "time": 85.5,
+        "rms_db": -21.396585
+      },
+      {
+        "time": 86.0,
+        "rms_db": -18.191968
+      },
+      {
+        "time": 86.5,
+        "rms_db": -18.86292
+      },
+      {
+        "time": 87.0,
+        "rms_db": -17.806559
+      },
+      {
+        "time": 87.5,
+        "rms_db": -21.806601
+      },
+      {
+        "time": 88.0,
+        "rms_db": -18.980398
+      },
+      {
+        "time": 88.5,
+        "rms_db": -21.06789
+      },
+      {
+        "time": 89.0,
+        "rms_db": -20.775339
+      },
+      {
+        "time": 89.5,
+        "rms_db": -19.609416
+      },
+      {
+        "time": 90.0,
+        "rms_db": -21.929167
+      },
+      {
+        "time": 90.5,
+        "rms_db": -17.299921
+      },
+      {
+        "time": 91.0,
+        "rms_db": -23.896959
+      },
+      {
+        "time": 91.5,
+        "rms_db": -17.438879
+      },
+      {
+        "time": 92.0,
+        "rms_db": -18.57817
+      },
+      {
+        "time": 92.5,
+        "rms_db": -19.063276
+      },
+      {
+        "time": 93.0,
+        "rms_db": -17.746175
+      },
+      {
+        "time": 93.5,
+        "rms_db": -17.482456
+      },
+      {
+        "time": 94.0,
+        "rms_db": -17.318442
+      },
+      {
+        "time": 94.5,
+        "rms_db": -18.789461
+      },
+      {
+        "time": 95.0,
+        "rms_db": -18.323481
+      },
+      {
+        "time": 95.5,
+        "rms_db": -18.759607
+      },
+      {
+        "time": 96.0,
+        "rms_db": -20.856455
+      },
+      {
+        "time": 96.5,
+        "rms_db": -19.184658
+      },
+      {
+        "time": 97.0,
+        "rms_db": -17.736261
+      },
+      {
+        "time": 97.5,
+        "rms_db": -22.349817
+      },
+      {
+        "time": 98.0,
+        "rms_db": -20.148726
+      },
+      {
+        "time": 98.5,
+        "rms_db": -20.939831
+      },
+      {
+        "time": 99.0,
+        "rms_db": -18.654459
+      },
+      {
+        "time": 99.5,
+        "rms_db": -18.754684
+      },
+      {
+        "time": 100.0,
+        "rms_db": -19.951951
+      },
+      {
+        "time": 100.5,
+        "rms_db": -18.314601
+      },
+      {
+        "time": 101.0,
+        "rms_db": -17.831518
+      },
+      {
+        "time": 101.5,
+        "rms_db": -17.286822
+      },
+      {
+        "time": 102.0,
+        "rms_db": -17.91692
+      },
+      {
+        "time": 102.5,
+        "rms_db": -18.985968
+      },
+      {
+        "time": 103.0,
+        "rms_db": -21.006022
+      },
+      {
+        "time": 103.5,
+        "rms_db": -19.857375
+      },
+      {
+        "time": 104.0,
+        "rms_db": -17.116905
+      },
+      {
+        "time": 104.5,
+        "rms_db": -18.026476
+      },
+      {
+        "time": 105.0,
+        "rms_db": -19.61979
+      },
+      {
+        "time": 105.5,
+        "rms_db": -21.42756
+      },
+      {
+        "time": 106.0,
+        "rms_db": -20.12641
+      },
+      {
+        "time": 106.5,
+        "rms_db": -21.607183
+      },
+      {
+        "time": 107.0,
+        "rms_db": -19.572957
+      },
+      {
+        "time": 107.5,
+        "rms_db": -22.53833
+      },
+      {
+        "time": 108.0,
+        "rms_db": -20.663886
+      },
+      {
+        "time": 108.5,
+        "rms_db": -20.155051
+      },
+      {
+        "time": 109.0,
+        "rms_db": -28.808076
+      },
+      {
+        "time": 109.5,
+        "rms_db": -16.299445
+      },
+      {
+        "time": 110.0,
+        "rms_db": -17.705432
+      },
+      {
+        "time": 110.5,
+        "rms_db": -22.531118
+      },
+      {
+        "time": 111.0,
+        "rms_db": -19.336346
+      },
+      {
+        "time": 111.5,
+        "rms_db": -21.77565
+      },
+      {
+        "time": 112.0,
+        "rms_db": -20.211585
+      },
+      {
+        "time": 112.5,
+        "rms_db": -16.664071
+      },
+      {
+        "time": 113.0,
+        "rms_db": -17.437878
+      },
+      {
+        "time": 113.5,
+        "rms_db": -16.613244
+      },
+      {
+        "time": 114.0,
+        "rms_db": -19.599906
+      },
+      {
+        "time": 114.5,
+        "rms_db": -22.616223
+      },
+      {
+        "time": 115.0,
+        "rms_db": -17.713123
+      },
+      {
+        "time": 115.5,
+        "rms_db": -18.348381
+      },
+      {
+        "time": 116.0,
+        "rms_db": -20.569729
+      },
+      {
+        "time": 116.5,
+        "rms_db": -19.216643
+      },
+      {
+        "time": 117.0,
+        "rms_db": -19.135067
+      },
+      {
+        "time": 117.5,
+        "rms_db": -19.077292
+      },
+      {
+        "time": 118.0,
+        "rms_db": -18.64413
+      },
+      {
+        "time": 118.5,
+        "rms_db": -17.436036
+      },
+      {
+        "time": 119.0,
+        "rms_db": -18.261467
+      },
+      {
+        "time": 119.5,
+        "rms_db": -19.753338
+      },
+      {
+        "time": 120.0,
+        "rms_db": -16.100169
+      },
+      {
+        "time": 120.5,
+        "rms_db": -20.111455
+      },
+      {
+        "time": 121.0,
+        "rms_db": -24.346183
+      },
+      {
+        "time": 121.5,
+        "rms_db": -22.385657
+      },
+      {
+        "time": 122.0,
+        "rms_db": -20.986947
+      },
+      {
+        "time": 122.5,
+        "rms_db": -22.382247
+      },
+      {
+        "time": 123.0,
+        "rms_db": -22.307681
+      },
+      {
+        "time": 123.5,
+        "rms_db": -18.804407
+      },
+      {
+        "time": 124.0,
+        "rms_db": -19.269402
+      },
+      {
+        "time": 124.5,
+        "rms_db": -18.773548
+      },
+      {
+        "time": 125.0,
+        "rms_db": -18.63337
+      },
+      {
+        "time": 125.5,
+        "rms_db": -17.85704
+      },
+      {
+        "time": 126.0,
+        "rms_db": -17.236761
+      },
+      {
+        "time": 126.5,
+        "rms_db": -17.180173
+      },
+      {
+        "time": 127.0,
+        "rms_db": -20.052702
+      },
+      {
+        "time": 127.5,
+        "rms_db": -18.3586
+      },
+      {
+        "time": 128.0,
+        "rms_db": -18.276299
+      },
+      {
+        "time": 128.5,
+        "rms_db": -20.671257
+      },
+      {
+        "time": 129.0,
+        "rms_db": -18.687622
+      },
+      {
+        "time": 129.5,
+        "rms_db": -21.233521
+      },
+      {
+        "time": 130.0,
+        "rms_db": -18.479354
+      },
+      {
+        "time": 130.5,
+        "rms_db": -18.87251
+      },
+      {
+        "time": 131.0,
+        "rms_db": -16.244902
+      },
+      {
+        "time": 131.5,
+        "rms_db": -20.154836
+      },
+      {
+        "time": 132.0,
+        "rms_db": -19.023946
+      },
+      {
+        "time": 132.5,
+        "rms_db": -20.105611
+      },
+      {
+        "time": 133.0,
+        "rms_db": -19.316401
+      },
+      {
+        "time": 133.5,
+        "rms_db": -18.588689
+      },
+      {
+        "time": 134.0,
+        "rms_db": -18.258491
+      },
+      {
+        "time": 134.5,
+        "rms_db": -17.621688
+      },
+      {
+        "time": 135.0,
+        "rms_db": -17.325704
+      },
+      {
+        "time": 135.5,
+        "rms_db": -16.998687
+      },
+      {
+        "time": 136.0,
+        "rms_db": -17.214228
+      },
+      {
+        "time": 136.5,
+        "rms_db": -16.916719
+      },
+      {
+        "time": 137.0,
+        "rms_db": -18.195058
+      },
+      {
+        "time": 137.5,
+        "rms_db": -17.771352
+      },
+      {
+        "time": 138.0,
+        "rms_db": -20.235889
+      },
+      {
+        "time": 138.5,
+        "rms_db": -18.671694
+      },
+      {
+        "time": 139.0,
+        "rms_db": -16.396535
+      },
+      {
+        "time": 139.5,
+        "rms_db": -21.029752
+      },
+      {
+        "time": 140.0,
+        "rms_db": -17.695323
+      },
+      {
+        "time": 140.5,
+        "rms_db": -20.267724
+      },
+      {
+        "time": 141.0,
+        "rms_db": -21.451824
+      },
+      {
+        "time": 141.5,
+        "rms_db": -19.343015
+      },
+      {
+        "time": 142.0,
+        "rms_db": -19.753019
+      },
+      {
+        "time": 142.5,
+        "rms_db": -19.61406
+      },
+      {
+        "time": 143.0,
+        "rms_db": -21.439704
+      },
+      {
+        "time": 143.5,
+        "rms_db": -18.706443
+      },
+      {
+        "time": 144.0,
+        "rms_db": -35.845613
+      },
+      {
+        "time": 144.5,
+        "rms_db": -17.718503
+      },
+      {
+        "time": 145.0,
+        "rms_db": -21.361618
+      },
+      {
+        "time": 145.5,
+        "rms_db": -17.117824
+      },
+      {
+        "time": 146.0,
+        "rms_db": -19.35368
+      },
+      {
+        "time": 146.5,
+        "rms_db": -17.498054
+      },
+      {
+        "time": 147.0,
+        "rms_db": -19.325114
+      },
+      {
+        "time": 147.5,
+        "rms_db": -19.479849
+      },
+      {
+        "time": 148.0,
+        "rms_db": -18.460296
+      },
+      {
+        "time": 148.5,
+        "rms_db": -17.95989
+      },
+      {
+        "time": 149.0,
+        "rms_db": -23.140834
+      },
+      {
+        "time": 149.5,
+        "rms_db": -16.878098
+      },
+      {
+        "time": 150.0,
+        "rms_db": -24.296177
+      },
+      {
+        "time": 150.5,
+        "rms_db": -25.033456
+      },
+      {
+        "time": 151.0,
+        "rms_db": -25.198972
+      },
+      {
+        "time": 151.5,
+        "rms_db": -17.74922
+      },
+      {
+        "time": 152.0,
+        "rms_db": -17.840852
+      },
+      {
+        "time": 152.5,
+        "rms_db": -18.453985
+      },
+      {
+        "time": 153.0,
+        "rms_db": -18.634981
+      },
+      {
+        "time": 153.5,
+        "rms_db": -17.156311
+      },
+      {
+        "time": 154.0,
+        "rms_db": -19.344946
+      },
+      {
+        "time": 154.5,
+        "rms_db": -16.795274
+      },
+      {
+        "time": 155.0,
+        "rms_db": -18.785074
+      },
+      {
+        "time": 155.5,
+        "rms_db": -20.218338
+      },
+      {
+        "time": 156.0,
+        "rms_db": -19.691705
+      },
+      {
+        "time": 156.5,
+        "rms_db": -18.207843
+      },
+      {
+        "time": 157.0,
+        "rms_db": -19.052736
+      },
+      {
+        "time": 157.5,
+        "rms_db": -18.975478
+      },
+      {
+        "time": 158.0,
+        "rms_db": -16.681645
+      },
+      {
+        "time": 158.5,
+        "rms_db": -17.956166
+      },
+      {
+        "time": 159.0,
+        "rms_db": -16.136677
+      },
+      {
+        "time": 159.5,
+        "rms_db": -17.247569
+      },
+      {
+        "time": 160.0,
+        "rms_db": -16.82005
+      },
+      {
+        "time": 160.5,
+        "rms_db": -29.670797
+      },
+      {
+        "time": 161.0,
+        "rms_db": -19.587948
+      },
+      {
+        "time": 161.5,
+        "rms_db": -23.270503
+      },
+      {
+        "time": 162.0,
+        "rms_db": -21.066518
+      },
+      {
+        "time": 162.5,
+        "rms_db": -19.759912
+      },
+      {
+        "time": 163.0,
+        "rms_db": -17.843905
+      },
+      {
+        "time": 163.5,
+        "rms_db": -19.239059
+      },
+      {
+        "time": 164.0,
+        "rms_db": -19.654238
+      },
+      {
+        "time": 164.5,
+        "rms_db": -18.915987
+      },
+      {
+        "time": 165.0,
+        "rms_db": -19.40222
+      },
+      {
+        "time": 165.5,
+        "rms_db": -19.12809
+      },
+      {
+        "time": 166.0,
+        "rms_db": -18.025655
+      },
+      {
+        "time": 166.5,
+        "rms_db": -18.103577
+      },
+      {
+        "time": 167.0,
+        "rms_db": -19.757851
+      },
+      {
+        "time": 167.5,
+        "rms_db": -19.103959
+      },
+      {
+        "time": 168.0,
+        "rms_db": -20.712261
+      },
+      {
+        "time": 168.5,
+        "rms_db": -18.365028
+      },
+      {
+        "time": 169.0,
+        "rms_db": -20.023322
+      },
+      {
+        "time": 169.5,
+        "rms_db": -21.650136
+      },
+      {
+        "time": 170.0,
+        "rms_db": -19.870142
+      },
+      {
+        "time": 170.5,
+        "rms_db": -17.659884
+      },
+      {
+        "time": 171.0,
+        "rms_db": -19.828792
+      },
+      {
+        "time": 171.5,
+        "rms_db": -17.112753
+      },
+      {
+        "time": 172.0,
+        "rms_db": -19.523304
+      },
+      {
+        "time": 172.5,
+        "rms_db": -17.804131
+      },
+      {
+        "time": 173.0,
+        "rms_db": -21.636621
+      },
+      {
+        "time": 173.5,
+        "rms_db": -19.960995
+      },
+      {
+        "time": 174.0,
+        "rms_db": -21.948197
+      },
+      {
+        "time": 174.5,
+        "rms_db": -21.939248
+      },
+      {
+        "time": 175.0,
+        "rms_db": -18.356438
+      },
+      {
+        "time": 175.5,
+        "rms_db": -20.191764
+      },
+      {
+        "time": 176.0,
+        "rms_db": -18.001902
+      },
+      {
+        "time": 176.5,
+        "rms_db": -24.663304
+      },
+      {
+        "time": 177.0,
+        "rms_db": -16.766943
+      },
+      {
+        "time": 177.5,
+        "rms_db": -18.346218
+      },
+      {
+        "time": 178.0,
+        "rms_db": -23.852425
+      },
+      {
+        "time": 178.5,
+        "rms_db": -26.351952
+      },
+      {
+        "time": 179.0,
+        "rms_db": -19.590304
+      },
+      {
+        "time": 179.5,
+        "rms_db": -20.524145
+      },
+      {
+        "time": 180.0,
+        "rms_db": -19.734609
+      },
+      {
+        "time": 180.5,
+        "rms_db": -19.269922
+      },
+      {
+        "time": 181.0,
+        "rms_db": -18.177549
+      },
+      {
+        "time": 181.5,
+        "rms_db": -19.455538
+      },
+      {
+        "time": 182.0,
+        "rms_db": -20.022914
+      },
+      {
+        "time": 182.5,
+        "rms_db": -18.769796
+      },
+      {
+        "time": 183.0,
+        "rms_db": -22.016132
+      },
+      {
+        "time": 183.5,
+        "rms_db": -19.368771
+      },
+      {
+        "time": 184.0,
+        "rms_db": -19.258356
+      },
+      {
+        "time": 184.5,
+        "rms_db": -19.171182
+      },
+      {
+        "time": 185.0,
+        "rms_db": -24.404854
+      },
+      {
+        "time": 185.5,
+        "rms_db": -19.965176
+      },
+      {
+        "time": 186.0,
+        "rms_db": -21.685882
+      },
+      {
+        "time": 186.5,
+        "rms_db": -18.696954
+      },
+      {
+        "time": 187.0,
+        "rms_db": -18.658073
+      },
+      {
+        "time": 187.5,
+        "rms_db": -19.073362
+      },
+      {
+        "time": 188.0,
+        "rms_db": -19.354572
+      },
+      {
+        "time": 188.5,
+        "rms_db": -19.58536
+      },
+      {
+        "time": 189.0,
+        "rms_db": -18.439967
+      },
+      {
+        "time": 189.5,
+        "rms_db": -18.557401
+      },
+      {
+        "time": 190.0,
+        "rms_db": -19.134811
+      },
+      {
+        "time": 190.5,
+        "rms_db": -21.154774
+      },
+      {
+        "time": 191.0,
+        "rms_db": -19.868468
+      },
+      {
+        "time": 191.5,
+        "rms_db": -22.888939
+      },
+      {
+        "time": 192.0,
+        "rms_db": -21.685425
+      },
+      {
+        "time": 192.5,
+        "rms_db": -20.771506
+      },
+      {
+        "time": 193.0,
+        "rms_db": -19.874808
+      },
+      {
+        "time": 193.5,
+        "rms_db": -20.654336
+      },
+      {
+        "time": 194.0,
+        "rms_db": -18.664316
+      },
+      {
+        "time": 194.5,
+        "rms_db": -18.949327
+      },
+      {
+        "time": 195.0,
+        "rms_db": -20.801489
+      },
+      {
+        "time": 195.5,
+        "rms_db": -17.146459
+      },
+      {
+        "time": 196.0,
+        "rms_db": -17.394815
+      },
+      {
+        "time": 196.5,
+        "rms_db": -17.928028
+      },
+      {
+        "time": 197.0,
+        "rms_db": -19.30986
+      },
+      {
+        "time": 197.5,
+        "rms_db": -17.517338
+      },
+      {
+        "time": 198.0,
+        "rms_db": -19.797247
+      },
+      {
+        "time": 198.5,
+        "rms_db": -18.058022
+      },
+      {
+        "time": 199.0,
+        "rms_db": -16.697176
+      },
+      {
+        "time": 199.5,
+        "rms_db": -18.426391
+      },
+      {
+        "time": 200.0,
+        "rms_db": -17.355907
+      },
+      {
+        "time": 200.5,
+        "rms_db": -16.788491
+      },
+      {
+        "time": 201.0,
+        "rms_db": -16.580427
+      },
+      {
+        "time": 201.5,
+        "rms_db": -17.755874
+      },
+      {
+        "time": 202.0,
+        "rms_db": -16.318346
+      },
+      {
+        "time": 202.5,
+        "rms_db": -30.538887
+      },
+      {
+        "time": 203.0,
+        "rms_db": -18.239068
+      },
+      {
+        "time": 203.5,
+        "rms_db": -19.495778
+      },
+      {
+        "time": 204.0,
+        "rms_db": -19.304962
+      },
+      {
+        "time": 204.5,
+        "rms_db": -22.171398
+      },
+      {
+        "time": 205.0,
+        "rms_db": -22.278659
+      },
+      {
+        "time": 205.5,
+        "rms_db": -21.92871
+      },
+      {
+        "time": 206.0,
+        "rms_db": -17.546431
+      },
+      {
+        "time": 206.5,
+        "rms_db": -19.875657
+      },
+      {
+        "time": 207.0,
+        "rms_db": -17.769202
+      },
+      {
+        "time": 207.5,
+        "rms_db": -21.598259
+      },
+      {
+        "time": 208.0,
+        "rms_db": -19.122592
+      },
+      {
+        "time": 208.5,
+        "rms_db": -22.919772
+      },
+      {
+        "time": 209.0,
+        "rms_db": -31.473015
+      },
+      {
+        "time": 209.5,
+        "rms_db": -17.226986
+      },
+      {
+        "time": 210.0,
+        "rms_db": -17.273026
+      },
+      {
+        "time": 210.5,
+        "rms_db": -20.149402
+      },
+      {
+        "time": 211.0,
+        "rms_db": -21.553024
+      },
+      {
+        "time": 211.5,
+        "rms_db": -18.144215
+      },
+      {
+        "time": 212.0,
+        "rms_db": -18.300357
+      },
+      {
+        "time": 212.5,
+        "rms_db": -19.461583
+      },
+      {
+        "time": 213.0,
+        "rms_db": -18.382798
+      },
+      {
+        "time": 213.5,
+        "rms_db": -19.983661
+      },
+      {
+        "time": 214.0,
+        "rms_db": -21.806246
+      },
+      {
+        "time": 214.5,
+        "rms_db": -19.964291
+      },
+      {
+        "time": 215.0,
+        "rms_db": -19.291966
+      },
+      {
+        "time": 215.5,
+        "rms_db": -18.979662
+      },
+      {
+        "time": 216.0,
+        "rms_db": -19.32025
+      },
+      {
+        "time": 216.5,
+        "rms_db": -39.501539
+      },
+      {
+        "time": 217.0,
+        "rms_db": -20.12676
+      },
+      {
+        "time": 217.5,
+        "rms_db": -19.839978
+      },
+      {
+        "time": 218.0,
+        "rms_db": -21.469548
+      },
+      {
+        "time": 218.5,
+        "rms_db": -20.402582
+      },
+      {
+        "time": 219.0,
+        "rms_db": -18.762214
+      },
+      {
+        "time": 219.5,
+        "rms_db": -20.156544
+      },
+      {
+        "time": 220.0,
+        "rms_db": -25.637522
+      },
+      {
+        "time": 220.5,
+        "rms_db": -21.041804
+      },
+      {
+        "time": 221.0,
+        "rms_db": -16.939426
+      },
+      {
+        "time": 221.5,
+        "rms_db": -24.159382
+      },
+      {
+        "time": 222.0,
+        "rms_db": -25.110173
+      },
+      {
+        "time": 222.5,
+        "rms_db": -24.017044
+      },
+      {
+        "time": 223.0,
+        "rms_db": -22.991837
+      },
+      {
+        "time": 223.5,
+        "rms_db": -20.648631
+      },
+      {
+        "time": 224.0,
+        "rms_db": -19.43231
+      },
+      {
+        "time": 224.5,
+        "rms_db": -26.171211
+      },
+      {
+        "time": 225.0,
+        "rms_db": -23.080054
+      },
+      {
+        "time": 225.5,
+        "rms_db": -24.741816
+      },
+      {
+        "time": 226.0,
+        "rms_db": -21.460698
+      },
+      {
+        "time": 226.5,
+        "rms_db": -21.093592
+      },
+      {
+        "time": 227.0,
+        "rms_db": -20.805323
+      },
+      {
+        "time": 227.5,
+        "rms_db": -24.829129
+      },
+      {
+        "time": 228.0,
+        "rms_db": -18.051644
+      },
+      {
+        "time": 228.5,
+        "rms_db": -21.043987
+      },
+      {
+        "time": 229.0,
+        "rms_db": -21.862796
+      },
+      {
+        "time": 229.5,
+        "rms_db": -21.731009
+      },
+      {
+        "time": 230.0,
+        "rms_db": -25.651249
+      },
+      {
+        "time": 230.5,
+        "rms_db": -22.890168
+      },
+      {
+        "time": 231.0,
+        "rms_db": -19.04488
+      },
+      {
+        "time": 231.5,
+        "rms_db": -18.103083
+      },
+      {
+        "time": 232.0,
+        "rms_db": -24.815546
+      },
+      {
+        "time": 232.5,
+        "rms_db": -19.166459
+      },
+      {
+        "time": 233.0,
+        "rms_db": -27.563598
+      },
+      {
+        "time": 233.5,
+        "rms_db": -23.146907
+      },
+      {
+        "time": 234.0,
+        "rms_db": -23.818964
+      },
+      {
+        "time": 234.5,
+        "rms_db": -19.209635
+      },
+      {
+        "time": 235.0,
+        "rms_db": -18.470681
+      },
+      {
+        "time": 235.5,
+        "rms_db": -21.647624
+      },
+      {
+        "time": 236.0,
+        "rms_db": -19.788889
+      },
+      {
+        "time": 236.5,
+        "rms_db": -38.062919
+      },
+      {
+        "time": 237.0,
+        "rms_db": -28.221198
+      },
+      {
+        "time": 237.5,
+        "rms_db": -52.040106
+      }
+    ],
+    "scenes": [
+      {
+        "time": 7.35,
+        "score": 0.461884
+      },
+      {
+        "time": 35.5833,
+        "score": 0.590016
+      },
+      {
+        "time": 42.75,
+        "score": 0.659079
+      },
+      {
+        "time": 56.4167,
+        "score": 0.427899
+      },
+      {
+        "time": 60.3167,
+        "score": 0.433865
+      },
+      {
+        "time": 90.3333,
+        "score": 0.7305
+      },
+      {
+        "time": 93.8833,
+        "score": 0.743835
+      },
+      {
+        "time": 96.9333,
+        "score": 0.383117
+      },
+      {
+        "time": 99.8833,
+        "score": 0.600073
+      },
+      {
+        "time": 102.467,
+        "score": 0.484837
+      },
+      {
+        "time": 105.883,
+        "score": 0.761454
+      },
+      {
+        "time": 109.05,
+        "score": 0.777579
+      },
+      {
+        "time": 111.8,
+        "score": 0.474335
+      },
+      {
+        "time": 113.617,
+        "score": 0.397701
+      },
+      {
+        "time": 115.633,
+        "score": 0.599787
+      },
+      {
+        "time": 117.3,
+        "score": 0.375279
+      },
+      {
+        "time": 120.65,
+        "score": 0.777009
+      },
+      {
+        "time": 122.05,
+        "score": 0.303159
+      },
+      {
+        "time": 122.367,
+        "score": 1.0
+      },
+      {
+        "time": 126.417,
+        "score": 0.332336
+      },
+      {
+        "time": 144.517,
+        "score": 0.556024
+      },
+      {
+        "time": 151.85,
+        "score": 0.639125
+      },
+      {
+        "time": 186.467,
+        "score": 0.364803
+      },
+      {
+        "time": 193.25,
+        "score": 0.307799
+      },
+      {
+        "time": 219.533,
+        "score": 0.476694
+      }
+    ],
+    "version": 1,
+    "elapsed_seconds": 20.959,
+    "audio_seconds": 1.515,
+    "parameters": {
+      "silence_db": -40,
+      "silence_seconds": 0.3,
+      "rms_window_seconds": 0.5,
+      "scene_threshold": 0.3,
+      "scene_width": 320
+    }
+  },
+  "baseline": [
+    {
+      "start": 0.0,
+      "end": 59.62,
+      "score": 19,
+      "text": "What's up guys? We are just two weeks away from the release of Grand Theft Auto 6 and Rockstar just made a brand new announcement and gave us this beautiful new screenshot. So the main bit is going to be this newswire article which details new information about the preload and there's actually been a pretty big update here. So they say the arrival of Grand Theft Auto 6 on PlayStation 5 and Xbox Series X and S consoles is now only a few weeks away. There's still time to pre-order and ensure you're able to experience Grand Theft Auto 6 when it launches on November 19th. On Xbox, it begins globally on Tuesday, November 10th at 12 a.m. GMT. Now this is new. Originally the preload date was on the",
+      "reason": "8 palavras-chave; 218 palavras; 60s"
+    },
+    {
+      "start": 59.62,
+      "end": 119.46,
+      "score": 9,
+      "text": "210. So now they're saying 212 depending on your device. So make sure you've got ample space to begin preloading it as soon as possible. So that's the main announcement. But there is a nice little tidbit here at the end. On November 19th, we'll be adding an official printable Grand Theft Auto 6 cover art poster and map of Leonita as a free digital download to the official site. That's amazing. It's free. A double-sided physical version of this poster will also be made available shortly after launch from the Rockstar store for 99 cents on its own or as a free gift with any purchase from the Rockstar store, which I honestly think is incredible. This is one of the things a lot of people were sa",
+      "reason": "3 palavras-chave; 240 palavras; 60s"
+    },
+    {
+      "start": 119.46,
+      "end": 165.64,
+      "score": 15,
+      "text": "map to figure out where you want to go and places you want to uncover first, which is kind of cool. Now, that's not the only thing that was updated on their website. They also have a new article here in their support section. Grand Theft Auto 6 Regional Preload and Release Times on PS5 and Xbox Series X and S. Grand Theft Auto 6 will release midnight local time on November 19th, 2026 in all regions for PS5 and Xbox Series X and S. So this is a confirmation we expected this, but it had not been confirmed yet. So midnight, wherever you are is when the game is going to unlock. Unless, of course, you book your ticket to New Zealand. Last but not least, we got a brand new screenshot of downtown V",
+      "reason": "5 palavras-chave; 183 palavras; 46s"
+    }
+  ],
+  "experiment": [
+    {
+      "start": 0.0,
+      "end": 59.62,
+      "score": 19,
+      "text": "What's up guys? We are just two weeks away from the release of Grand Theft Auto 6 and Rockstar just made a brand new announcement and gave us this beautiful new screenshot. So the main bit is going to be this newswire article which details new information about the preload and there's actually been a pretty big update here. So they say the arrival of Grand Theft Auto 6 on PlayStation 5 and Xbox Series X and S consoles is now only a few weeks away. There's still time to pre-order and ensure you're able to experience Grand Theft Auto 6 when it launches on November 19th. On Xbox, it begins globally on Tuesday, November 10th at 12 a.m. GMT. Now this is new. Originally the preload date was on the",
+      "reason": "8 palavras-chave; 218 palavras; 60s",
+      "experimental": true,
+      "baseline_window": {
+        "start": 0.0,
+        "end": 59.62
+      }
+    },
+    {
+      "start": 60.317,
+      "end": 119.46,
+      "score": 9,
+      "text": "210. So now they're saying 212 depending on your device. So make sure you've got ample space to begin preloading it as soon as possible. So that's the main announcement. But there is a nice little tidbit here at the end. On November 19th, we'll be adding an official printable Grand Theft Auto 6 cover art poster and map of Leonita as a free digital download to the official site. That's amazing. It's free. A double-sided physical version of this poster will also be made available shortly after launch from the Rockstar store for 99 cents on its own or as a free gift with any purchase from the Rockstar store, which I honestly think is incredible. This is one of the things a lot of people were sa",
+      "reason": "3 palavras-chave; 240 palavras; 60s",
+      "experimental": true,
+      "baseline_window": {
+        "start": 59.62,
+        "end": 119.46
+      }
+    },
+    {
+      "start": 119.46,
+      "end": 165.64,
+      "score": 15,
+      "text": "map to figure out where you want to go and places you want to uncover first, which is kind of cool. Now, that's not the only thing that was updated on their website. They also have a new article here in their support section. Grand Theft Auto 6 Regional Preload and Release Times on PS5 and Xbox Series X and S. Grand Theft Auto 6 will release midnight local time on November 19th, 2026 in all regions for PS5 and Xbox Series X and S. So this is a confirmation we expected this, but it had not been confirmed yet. So midnight, wherever you are is when the game is going to unlock. Unless, of course, you book your ticket to New Zealand. Last but not least, we got a brand new screenshot of downtown V",
+      "reason": "5 palavras-chave; 183 palavras; 46s",
+      "experimental": true,
+      "baseline_window": {
+        "start": 119.46,
+        "end": 165.64
+      }
+    }
+  ],
+  "editorial_verdict": null,
+  "production_selection_changed": false
+}

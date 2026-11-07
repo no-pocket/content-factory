@@ -1,0 +1,300 @@
+{
+  "cohort": "gpu-five-2026-11-06",
+  "model": "qwen2.5:1.5b",
+  "model_filename": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+  "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+  "settings": {
+    "clip_count": 3,
+    "target_seconds": 30,
+    "min_seconds": 18,
+    "max_seconds": 45,
+    "proposal_max_chunks": 2,
+    "shortlist": 5,
+    "ollama_timeout": 300,
+    "whisper_model": "base",
+    "ranker_mode": "ollama",
+    "llm_backend": "kepler_gpu",
+    "llm_model": "qwen2.5:1.5b",
+    "director_mode": "ollama",
+    "render_engine": "remotion",
+    "render_quality": "high"
+  },
+  "transcription_reused": true,
+  "source_parents": [
+    "255f7f42-5d82-45ae-9707-0fa142c2d985",
+    "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+    "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39",
+    "a5f108ff-c572-42db-905a-a73def7c4ba1",
+    "7256c7f7-ab16-464b-8314-ce84e138f0e1"
+  ],
+  "status": "COMPLETED",
+  "jobs": [
+    {
+      "id": "58924b9a-dedf-4f56-ab6d-10b25f1240b5",
+      "parent": "255f7f42-5d82-45ae-9707-0fa142c2d985",
+      "name": "GPU 5 vídeos · GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "language": "pt",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds": 291.695,
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 27.2,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 81
+        },
+        {
+          "start": 39.96,
+          "end": 70.25,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 85
+        },
+        {
+          "start": 121.63,
+          "end": 154.35,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 100
+        }
+      ],
+      "gpu_and_remotion_complete": true
+    },
+    {
+      "id": "ae34ddee-0e98-4bba-9984-0ce95fd48abe",
+      "parent": "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39",
+      "name": "GPU 5 vídeos · RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "language": "pt",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds": 295.96,
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 25.2,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 50
+        },
+        {
+          "start": 138.5,
+          "end": 173.34,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 89
+        },
+        {
+          "start": 181.66,
+          "end": 215.92,
+          "state": "WARNING",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 63
+        }
+      ],
+      "gpu_and_remotion_complete": true
+    },
+    {
+      "id": "4cb53aa0-ad5f-4762-8c44-5fbface0f77f",
+      "parent": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "name": "GPU 5 vídeos · GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "language": "en",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds": 349.818,
+      "candidates": [
+        {
+          "start": 209.34,
+          "end": 245.96,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 153
+        },
+        {
+          "start": 265.58,
+          "end": 300.44,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 130
+        },
+        {
+          "start": 344.4,
+          "end": 375.66,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 116
+        }
+      ],
+      "gpu_and_remotion_complete": true
+    },
+    {
+      "id": "b82453d3-e032-482c-80cc-f5e782622cdb",
+      "parent": "7256c7f7-ab16-464b-8314-ce84e138f0e1",
+      "name": "GPU 5 vídeos · Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "language": "en",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds": 335.695,
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 29.92,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 108
+        },
+        {
+          "start": 89.54,
+          "end": 129.52,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 174
+        },
+        {
+          "start": 146.04,
+          "end": 189.64,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 177
+        }
+      ],
+      "gpu_and_remotion_complete": true
+    },
+    {
+      "id": "f6b1c5c5-fb6b-429a-8b79-819fb86097bc",
+      "parent": "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+      "name": "GPU 5 vídeos · retentativa GPU · JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "language": "pt",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds": 369.497,
+      "candidates": [
+        {
+          "start": 14.9,
+          "end": 50.68,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 111
+        },
+        {
+          "start": 76.86,
+          "end": 120.76,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 123
+        },
+        {
+          "start": 314.5,
+          "end": 347.0,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 99
+        }
+      ],
+      "gpu_and_remotion_complete": true,
+      "settings": {
+        "clip_count": 3,
+        "target_seconds": 30,
+        "min_seconds": 18,
+        "max_seconds": 45,
+        "proposal_max_chunks": 2,
+        "shortlist": 3,
+        "ollama_timeout": 300,
+        "whisper_model": "base",
+        "whisper_beam_size": 5,
+        "ranker_mode": "ollama",
+        "llm_backend": "kepler_gpu",
+        "llm_model": "qwen2.5:1.5b",
+        "director_mode": "ollama",
+        "render_engine": "remotion",
+        "render_quality": "high"
+      }
+    }
+  ],
+  "editorial_verdict": null,
+  "bounded_retry": true,
+  "diagnostic_previous_tests": [
+    {
+      "id": "8b572e41-35b5-4007-a456-1a3d9f20ee8a",
+      "parent": "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+      "name": "GPU 5 vídeos · JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "language": "pt",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "heuristic_fallback",
+      "seconds": 424.41,
+      "candidates": [
+        {
+          "start": 14.9,
+          "end": 50.68,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 111
+        },
+        {
+          "start": 76.86,
+          "end": 120.76,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 123
+        },
+        {
+          "start": 120.76,
+          "end": 165.74,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 99
+        }
+      ],
+      "gpu_and_remotion_complete": false
+    }
+  ],
+  "gpu_engine": "cf-five-engine-aef9313a",
+  "gpu_memory_loaded": "2274 MiB, 4096 MiB",
+  "parents_unchanged": true,
+  "approved_records_unchanged": true,
+  "production_services_running": true,
+  "post_run_checks": {
+    "at": "2026-11-06T23:21:35.131503+00:00",
+    "services_running": {
+      "content-factory-worker-1": true,
+      "content-factory-kepler-engine-1": true,
+      "content-factory-ui-1": true,
+      "content-factory-api-1": true
+    },
+    "gpu_health": {
+      "status": "ok",
+      "backend": "cuda10.2"
+    },
+    "queues": {
+      "clips:queue": 0,
+      "clips:processing": 0
+    },
+    "tests_passed": 140,
+    "test_seconds": 37.07,
+    "browser_previews_ended": 15,
+    "browser_errors": 0,
+    "tailnet_health": {
+      "100.78.0.122": 200,
+      "workstation.taild835d6.ts.net": 200
+    }
+  }
+}

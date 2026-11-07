@@ -2,26 +2,187 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Content Factory Timeline v2.0",
   "type": "object",
-  "required": ["schema_version", "width", "height", "fps", "duration", "source_range", "layers", "caption_style"],
+  "required": [
+    "schema_version",
+    "width",
+    "height",
+    "fps",
+    "duration",
+    "source_range",
+    "layers",
+    "caption_style"
+  ],
   "properties": {
-    "schema_version": {"const": "2.0"},
-    "width": {"const": 720},
-    "height": {"const": 1280},
-    "fps": {"const": 30},
-    "duration": {"type": "number", "exclusiveMinimum": 0, "maximum": 60},
-    "source_range": {"type": "object", "required": ["start", "end"], "properties": {"start": {"type": "number", "minimum": 0}, "end": {"type": "number", "exclusiveMinimum": 0}}},
-    "caption_style": {"const": "bold_karaoke_v1"},
+    "schema_version": {
+      "const": "2.0"
+    },
+    "width": {
+      "const": 720
+    },
+    "height": {
+      "const": 1280
+    },
+    "fps": {
+      "const": 30
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 60
+    },
+    "source_range": {
+      "type": "object",
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "caption_style": {
+      "const": "bold_karaoke_v1"
+    },
     "layers": {
       "type": "object",
-      "required": ["video", "audio", "captions", "text", "effects", "broll"],
+      "required": [
+        "video",
+        "audio",
+        "captions",
+        "text",
+        "effects",
+        "broll"
+      ],
       "properties": {
-        "video": {"type": "object", "required": ["path"], "properties": {"path": {"const": "base.mp4"}}},
-        "audio": {"type": "object", "required": ["from"], "properties": {"from": {"const": "base.mp4"}}},
-        "captions": {"type": "array", "items": {"type": "object", "required": ["text", "start", "end"], "properties": {"text": {"type": "string", "maxLength": 64}, "start": {"type": "number", "minimum": 0}, "end": {"type": "number", "exclusiveMinimum": 0}}}},
-        "text": {"type": "array", "items": {"type": "object", "required": ["text", "at", "duration", "animation"]}},
-        "effects": {"type": "array", "maxItems": 3, "items": {"type": "object", "required": ["type", "at", "duration"], "properties": {"type": {"const": "punch_zoom"}}}},
-        "broll": {"type": "array", "maxItems": 2, "items": {"type": "object", "required": ["asset_id", "at", "duration", "source_start", "path"], "properties": {"asset_id": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,50}$"}, "path": {"type": "string", "pattern": "^broll_[0-9]+\\.mp4$"}}}}
+        "video": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "const": "base.mp4"
+            }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "required": [
+            "from"
+          ],
+          "properties": {
+            "from": {
+              "const": "base.mp4"
+            }
+          }
+        },
+        "captions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "start",
+              "end"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "at",
+              "duration",
+              "animation"
+            ]
+          }
+        },
+        "effects": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "at",
+              "duration"
+            ],
+            "properties": {
+              "type": {
+                "const": "punch_zoom"
+              }
+            }
+          }
+        },
+        "broll": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "asset_id",
+              "at",
+              "duration",
+              "source_start",
+              "path"
+            ],
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,50}$"
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^broll_[0-9]+\\.mp4$"
+              }
+            }
+          }
+        }
       }
+    },
+    "finishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tail_seconds",
+        "fade_seconds"
+      ],
+      "properties": {
+        "tail_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.75
+        },
+        "fade_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.75
+        }
+      },
+      "description": "Optional post-speech tail; fade_seconds must not exceed tail_seconds. Output duration = duration + tail_seconds."
     }
   }
 }

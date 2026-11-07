@@ -24,11 +24,16 @@ Para cada corte, `app/director.py` pode pedir título, zooms e B-roll ao Qwen. `
 
 ## 5. Render e prévia
 
-FFmpeg normaliza a fonte e o B-roll autorizado. Remotion compõe a versão animada. Se configurado, uma falha do Remotion usa FFmpeg com legendas simplificadas; o campo `renderer_used` informa qual caminho produziu o corte. O MP4 fica em `data/output/<id>/candidate_N.mp4`.
+FFmpeg normaliza a fonte e o B-roll autorizado. Remotion compõe a versão animada. No perfil standard, se configurado, uma falha do Remotion usa FFmpeg com legendas simplificadas; high falha explicitamente para preservar o estilo. O campo `renderer_used` informa qual caminho produziu o corte. Novas timelines usam título compacto independente das legendas e cauda suave após a fala; as antigas preservam sua composição. O MP4 fica em `data/output/<id>/candidate_N.mp4`.
 
 Depois do MP4, `app/edit_render.py` cria `candidate_N.preview.webm` com VP8/Opus, decodifica a prévia inteira e só então a publica para o navegador. A UI usa WebM para assistir e oferece MP4 separadamente para download. O JSON da timeline fica ao lado dos vídeos; a decisão de aprovação registra os índices aceitos, sem alterar os arquivos mestres.
 
 ## 6. Revisão humana e limites
+
+Jobs novos passam pelo [QC completo](CONTROLE_QUALIDADE.md) de MP4 e WebM. Falha parcial
+fica `PARTIAL_FAILED`, com revisão apenas dos bons; retry limitado é por candidato.
+As avaliações agora preservam histórico, notas, motivo e retrabalho; siga o
+[protocolo editorial](PROTOCOLO_EDITORIAL.md). UI, CLI e [API](API.md) usam o mesmo serviço.
 
 `NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. `APPROVED`/`REJECTED` são estados locais. Não há postagem automática nem edição manual de timeline pela UI atual.
 

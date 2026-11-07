@@ -6,6 +6,7 @@ commands are permitted to reach FFmpeg/Remotion. Times are relative to the clip.
 from __future__ import annotations
 
 import json
+import math
 import re
 import unicodedata
 from pathlib import Path
@@ -43,13 +44,8 @@ def normalized_words(segments: list[dict], start: float, end: float) -> list[dic
     return sorted(output, key=lambda w: (w["start"], w["end"]))
 
 
-def fallback_hook(text: str) -> str:
-    # Only text already spoken; avoid creating misleading facts or empty clickbait.
-    clean = re.sub(r"\s+", " ", text).strip()
-    return " ".join(clean.split()[:7])[:62]
-
-
-def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None, assets: dict | None = None) -> dict:
+def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None, assets: dict | None = None,
+                   editorial_title: str | None = None) -> dict:
     """Build validated timeline from ASR + constrained director hints."""
     start = as_float(clip["start"])
     end = as_float(clip["end"])
@@ -62,15 +58,23 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
     text = str(clip.get("text", ""))
     hook = str(edit.get("hook", "")).strip()[:62]
     # Do not allow completely invented hooks: compare meaningful words with ASR.
-    def tokens(value):
+    def token_list(value):
         normalized = unicodedata.normalize("NFKD", value.casefold())
         normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
-        return set(re.findall(r"\w+", normalized))
+        return re.findall(r"\w+", normalized)
     # A title can reorder spoken words, but cannot inject an unsupported fact.
-    available = tokens(text)
-    hook_terms = [w for w in tokens(hook) if len(w) > 3]
-    if not hook or any(w not in available for w in hook_terms):
-        hook = fallback_hook(text)
+    available = set(token_list(text))
+    hook_terms = [w for w in token_list(hook) if len(w) > 3]
+    opening = token_list(text)
+    title_words = token_list(hook)
+    repeats_opening = bool(title_words) and title_words == opening[:len(title_words)]
+    if not hook or any(w not in available for w in hook_terms) or repeats_opening or len(hook.split()) > 10:
+        hook = ''
+    if editorial_title is not None:
+        if (not isinstance(editorial_title, str) or not 1 <= len(editorial_title.strip()) <= 80
+                or len(editorial_title.split()) > 12 or any(ord(c) < 32 for c in editorial_title)):
+            raise ValueError('Editorial title must contain 1..80 characters and at most 12 words')
+        hook = editorial_title.strip()
 
     fx = []
     for effect in edit.get("effects", []) if isinstance(edit.get("effects"), list) else []:
@@ -108,13 +112,24 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
             "video": {"path": "base.mp4", "start": 0, "duration": duration},
             "audio": {"from": "base.mp4", "start": 0, "duration": duration},
             "captions": words,
-            "text": [{"text": hook, "at": 0.5, "duration": min(2.5, max(0.6, duration - 0.6)), "animation": "pop"}] if hook else [],
+            "text": [{"text": hook, "at": 0.5, "duration": min(2.5, max(0.6, duration - 0.6)), "animation": "pop",
+                      "style": "compact_editorial_v1", "origin": "human" if editorial_title is not None else "model"}] if hook else [],
             "effects": fx, "broll": broll,
         },
-        "caption_style": "bold_karaoke_v1"
+        "caption_style": "bold_karaoke_v1",
+        "finishing": {"tail_seconds": 0.35, "fade_seconds": 0.25},
     }
     validate_timeline(timeline)
     return timeline
+
+
+def output_duration(timeline: dict) -> float:
+    """Legacy timelines have no tail; source range and caption timings remain unchanged."""
+    return round(timeline['duration'] + timeline.get('finishing', {}).get('tail_seconds', 0), 3)
+
+
+def candidate_duration(clip: dict) -> float:
+    return output_duration({'duration': clip['end'] - clip['start'], **(clip.get('timeline') or {})})
 
 
 def validate_timeline(timeline: dict) -> None:
@@ -123,6 +138,14 @@ def validate_timeline(timeline: dict) -> None:
     duration = as_float(timeline.get("duration"))
     if not 0 < duration <= MAX_CLIP_SECONDS:
         raise ValueError("Invalid timeline duration")
+    if 'finishing' in timeline:
+        finishing = timeline['finishing']
+        if not isinstance(finishing, dict) or set(finishing) != {'tail_seconds', 'fade_seconds'}:
+            raise ValueError('Invalid finishing settings')
+        tail, fade = finishing['tail_seconds'], finishing['fade_seconds']
+        if (any(type(v) not in (int, float) or not math.isfinite(v) for v in (tail, fade))
+                or not 0 < fade <= tail <= 0.75):
+            raise ValueError('Invalid finishing duration')
     layers = timeline.get("layers")
     if not isinstance(layers, dict) or layers.get("video", {}).get("path") != "base.mp4":
         raise ValueError("Timeline can only reference staged base.mp4")

@@ -12,8 +12,10 @@ DEFAULTS = {
     'whisper_beam_size': 5,
     'ranker_mode': 'ollama',
     'llm_backend': 'ollama',
+    'llm_model': 'qwen2.5:3b',
     'director_mode': 'ollama',
     'render_engine': 'remotion',
+    'render_quality': 'high',
 }
 
 RANGES = {
@@ -46,9 +48,11 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if settings['whisper_model'] not in WHISPER_MODELS:
         raise ValueError('Unsupported whisper_model')
     for key, allowed in {'ranker_mode': {'heuristic', 'ollama'},
+                         'llm_model': {'qwen2.5:1.5b', 'qwen2.5:3b'},
                          'llm_backend': {'ollama', 'kepler_gpu'},
                          'director_mode': {'heuristic', 'ollama'},
-                         'render_engine': {'ffmpeg', 'remotion'}}.items():
+                         'render_engine': {'ffmpeg', 'remotion'},
+                         'render_quality': {'standard', 'high'}}.items():
         if settings[key] not in allowed:
             raise ValueError(f'Unsupported {key}')
     if not settings['min_seconds'] <= settings['target_seconds'] <= settings['max_seconds']:

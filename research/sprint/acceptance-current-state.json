@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-06T11:28:12.500084+00:00",
+  "reference_hash_checks": {
+    "/data/work/7cb2fb21-353c-4805-9fbb-b3c10603be44.json": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_1.mp4": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_2.mp4": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_3.mp4": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_1.preview.webm": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_2.preview.webm": true,
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_3.preview.webm": true
+  },
+  "all_reference_hashes_match": true,
+  "status_counts": {
+    "APPROVED": 2,
+    "NEEDS_REVIEW": 2,
+    "REJECTED": 18
+  },
+  "pending_jobs": [
+    "77b79d5e-c999-45bf-86ee-a4ddfacaaf6e",
+    "90dda26b-ae0d-4ee1-8b3f-643c554eb078"
+  ],
+  "technical_suite": {
+    "passed": 136,
+    "seconds": 16.33
+  },
+  "latest_focused_http": {
+    "passed": 1,
+    "seconds": 1.06
+  },
+  "editorial_validation_complete": false,
+  "pending": "No review blocker for title/ending adjustment: human approved 700982a4. Broader corpus editorial generalization is not established.",
+  "title_ending_human_approved": true
+}

@@ -1,0 +1,722 @@
+{
+  "job": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+  "language": "en",
+  "benchmark_version": 2,
+  "segment_count": 12,
+  "baseline": [
+    {
+      "start": 27.34,
+      "end": 87.3,
+      "score": 11,
+      "text": "This information is coming from PlayStation game size. It tweeted this right here, and they have a long standing track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105GB. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5 was around 90 gigs at launch. And then eventually, I think it got up to like 125 or 130 or something like that. Now GTA 5 and online were together. So that's another thing when GTA VI online comes out. Are t",
+      "reason": "4 palavras-chave; 217 palavras; 60s"
+    }
+  ],
+  "rerank_candidates": [
+    {
+      "start": 27.34,
+      "end": 87.3,
+      "score": 11,
+      "text": "This information is coming from PlayStation game size. It tweeted this right here, and they have a long standing track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105GB. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5 was around 90 gigs at launch. And then eventually, I think it got up to like 125 or 130 or something like that. Now GTA 5 and online were together. So that's another thing when GTA VI online comes out. Are t",
+      "reason": "4 palavras-chave; 217 palavras; 60s"
+    },
+    {
+      "start": 202.92,
+      "end": 245.96,
+      "score": 13,
+      "text": "Now the good news is obviously we know the game is going to be coming out in November 19. However, if you pre-ordered, you could start pre-loading on November 12. So you have an entire week to be able to download this. I certainly hope that's enough time for all of us to be able to get that done. I just can't believe this is happening, man. We are just a little bit over three weeks away and we are actually going to be playing this game. Now I will say usually shortly after stuff like this starts popping up. If it shows up on the back end, there are also going to be things like the trophy lists and the achievements and things like that. So just be a little bit careful about that. Obviously, y",
+      "reason": "4 palavras-chave; 184 palavras; 43s"
+    },
+    {
+      "start": 265.58,
+      "end": 310.22,
+      "score": 23,
+      "text": "We actually have a little preview of this. So Xbox tweeted this how our fall will be looking and look at this image. This might be the first time we have ever seen GTA 6, the actual downloaded playable version of it out in the wild. So you can see here. This is not a pre-order. You have the little Rockstar logo and stuff down here in the bottom. This is an actual launchable game as far as I'm concerned. So whoever took this photo, congrats to you. You are currently playing GTA 6, which is just a wild thing to think about. I mean, there are actually GTA copies out in the wild being played right now. It doesn't feel like we should have gotten to this point. And it's honestly like I wasn't sure",
+      "reason": "9 palavras-chave; 172 palavras; 45s"
+    },
+    {
+      "start": 333.3,
+      "end": 375.66,
+      "score": 19,
+      "text": "Just, I mean, you know, you know, right as soon as midnight hits on November 19th, they're going to be a couple YouTube channels out there with Jason dying to see a dying third ending everything else. So just if you want to experience it for yourself, I would recommend being careful from this point forward on some really exciting news. We are going to get some more info later this week on Thursday. So games right our tweet at this grant. That is six is the cover star of edge number 430, which is their magazine inside. That is a 16 page report featuring exclusive rockstar games, interviews and screenshots from the most ambitious game and the studio's history. Special print issue features a do",
+      "reason": "7 palavras-chave; 155 palavras; 42s"
+    },
+    {
+      "start": 370.88,
+      "end": 414.1,
+      "score": 11,
+      "text": "And we actually, we have like a little preview. They have like a really blurry video here. So if I bring this full screen, it's going to briefly flip through the magazine here. And it's, you know, there are only a couple of pixels available here. So you can't see much. But I did spot one thing. This one right here. Look at this thing right here. We've got Jason kind of wiping the sweat from his mouth or whatever, but this really looks like the max pain three cover, which that is an absolutely fantastic game. If you guys haven't played it from rockstar back in the day, I think we should have a series on the channel. But yeah, very excited for this. Hopefully it's really good. Our game and for",
+      "reason": "3 palavras-chave; 186 palavras; 43s"
+    },
+    {
+      "start": 414.1,
+      "end": 459.08,
+      "score": 13,
+      "text": "But here we're going to get a ton of new screenshots and I mean 16 pages. There's got to be some gyms in here. So very excited to check this out. We will be breaking this down on Thursday and last but not least around this thing out. And just got to turn it into a little update video is wanting to make one of these anyway. Miami is still absolutely popping off. You guys haven't seen. I've actually been uploading short form on the channel as well as IG and TikTok. You guys can feel free to check that out. But the city is continuing to transform. It started with the Kaseya center and the blimp and the beach chairs and umbrellas and things and all that kind of stuff. Now we've got an actual bur",
+      "reason": "4 palavras-chave; 198 palavras; 45s"
+    }
+  ],
+  "available": [
+    {
+      "name": "qwen2.5:1.5b",
+      "model": "qwen2.5:1.5b",
+      "modified_at": "2026-11-05T01:48:17.924319628Z",
+      "size": 986061892,
+      "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 1536,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    },
+    {
+      "name": "qwen2.5:3b",
+      "model": "qwen2.5:3b",
+      "modified_at": "2026-11-03T22:35:26.510977743Z",
+      "size": 1929912432,
+      "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "3.1B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 2048,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 0,
+      "proposals": [],
+      "accepted_proposals": 0,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 202.92,
+          "end": 245.96,
+          "score": 13,
+          "text": "Now the good news is obviously we know the game is going to be coming out in November 19. However, if you pre-ordered, you could start pre-loading on November 12. So you have an entire week to be able to download this. I certainly hope that's enough time for all of us to be able to get that done. I just can't believe this is happening, man. We are just a little bit over three weeks away and we are actually going to be playing this game. Now I will say usually shortly after stuff like this starts popping up. If it shows up on the back end, there are also going to be things like the trophy lists and the achievements and things like that. So just be a little bit careful about that. Obviously, y",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 184 palavras; 43s",
+          "ai_reason": "The candidate provides a detailed explanation of the upcoming GTA 6 news, including the pre-order information and the upcoming release date."
+        },
+        {
+          "start": 265.58,
+          "end": 310.22,
+          "score": 23,
+          "text": "We actually have a little preview of this. So Xbox tweeted this how our fall will be looking and look at this image. This might be the first time we have ever seen GTA 6, the actual downloaded playable version of it out in the wild. So you can see here. This is not a pre-order. You have the little Rockstar logo and stuff down here in the bottom. This is an actual launchable game as far as I'm concerned. So whoever took this photo, congrats to you. You are currently playing GTA 6, which is just a wild thing to think about. I mean, there are actually GTA copies out in the wild being played right now. It doesn't feel like we should have gotten to this point. And it's honestly like I wasn't sure",
+          "reason": "Classificado por modelo local; 9 palavras-chave; 172 palavras; 45s",
+          "ai_reason": "The candidate provides a clear and concise explanation of the GTA 6 preview, focusing on the first time GTA 6 has been available for download and the excitement it has generated."
+        },
+        {
+          "start": 333.3,
+          "end": 375.66,
+          "score": 19,
+          "text": "Just, I mean, you know, you know, right as soon as midnight hits on November 19th, they're going to be a couple YouTube channels out there with Jason dying to see a dying third ending everything else. So just if you want to experience it for yourself, I would recommend being careful from this point forward on some really exciting news. We are going to get some more info later this week on Thursday. So games right our tweet at this grant. That is six is the cover star of edge number 430, which is their magazine inside. That is a 16 page report featuring exclusive rockstar games, interviews and screenshots from the most ambitious game and the studio's history. Special print issue features a do",
+          "reason": "Classificado por modelo local; 7 palavras-chave; 155 palavras; 42s",
+          "ai_reason": "The candidate provides a detailed explanation of the upcoming GTA 6 news, including the pre-order information and the upcoming release date."
+        }
+      ],
+      "director_hints": {
+        "hook": "GTA VI é 2x maior que Red Dead Redemption 2 na primeira lançada",
+        "effects": [],
+        "broll": []
+      },
+      "validated_text_layers": [
+        {
+          "text": "This information is coming from PlayStation game",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 24.889,
+          "prompt_sha256": "668fefe606fb55805742358568588bcae0f381d1baa15227f210f359bffecc5c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1244,
+          "eval_count": 176,
+          "prompt_eval_duration": 12838134000,
+          "eval_duration": 6697470000,
+          "load_duration": 5337721006
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 23.717,
+          "prompt_sha256": "27ce8257340011a5f97ce5f38fe6d1b7526cfef9b6134266640d9bdd1a5dfc16",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1368,
+          "eval_count": 267,
+          "prompt_eval_duration": 13320619000,
+          "eval_duration": 10356658000,
+          "load_duration": 893875
+        },
+        {
+          "task": "director",
+          "wall_seconds": 6.084,
+          "prompt_sha256": "0c0ebfcee9e7871275274ef9f28819ceedc660f257f048a162986337ff4537b7",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 371,
+          "eval_count": 38,
+          "prompt_eval_duration": 3266836000,
+          "eval_duration": 1237710000,
+          "load_duration": 1569952480
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:1.5b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:1.5b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:16:40.731688658Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 1,
+      "proposals": [],
+      "accepted_proposals": 0,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 202.92,
+          "end": 245.96,
+          "score": 13,
+          "text": "Now the good news is obviously we know the game is going to be coming out in November 19. However, if you pre-ordered, you could start pre-loading on November 12. So you have an entire week to be able to download this. I certainly hope that's enough time for all of us to be able to get that done. I just can't believe this is happening, man. We are just a little bit over three weeks away and we are actually going to be playing this game. Now I will say usually shortly after stuff like this starts popping up. If it shows up on the back end, there are also going to be things like the trophy lists and the achievements and things like that. So just be a little bit careful about that. Obviously, y",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 184 palavras; 43s",
+          "ai_reason": "The candidate provides a detailed explanation of the upcoming GTA 6 news, including the pre-order information and the upcoming release date."
+        },
+        {
+          "start": 265.58,
+          "end": 310.22,
+          "score": 23,
+          "text": "We actually have a little preview of this. So Xbox tweeted this how our fall will be looking and look at this image. This might be the first time we have ever seen GTA 6, the actual downloaded playable version of it out in the wild. So you can see here. This is not a pre-order. You have the little Rockstar logo and stuff down here in the bottom. This is an actual launchable game as far as I'm concerned. So whoever took this photo, congrats to you. You are currently playing GTA 6, which is just a wild thing to think about. I mean, there are actually GTA copies out in the wild being played right now. It doesn't feel like we should have gotten to this point. And it's honestly like I wasn't sure",
+          "reason": "Classificado por modelo local; 9 palavras-chave; 172 palavras; 45s",
+          "ai_reason": "The candidate provides a clear and concise explanation of the GTA 6 preview, focusing on the first time GTA 6 has been available for download and the excitement it has generated."
+        },
+        {
+          "start": 333.3,
+          "end": 375.66,
+          "score": 19,
+          "text": "Just, I mean, you know, you know, right as soon as midnight hits on November 19th, they're going to be a couple YouTube channels out there with Jason dying to see a dying third ending everything else. So just if you want to experience it for yourself, I would recommend being careful from this point forward on some really exciting news. We are going to get some more info later this week on Thursday. So games right our tweet at this grant. That is six is the cover star of edge number 430, which is their magazine inside. That is a 16 page report featuring exclusive rockstar games, interviews and screenshots from the most ambitious game and the studio's history. Special print issue features a do",
+          "reason": "Classificado por modelo local; 7 palavras-chave; 155 palavras; 42s",
+          "ai_reason": "The candidate provides a detailed explanation of the upcoming GTA 6 news, including the pre-order information and the upcoming release date."
+        }
+      ],
+      "director_hints": {
+        "hook": "GTA VI é 2x maior que Red Dead Redemption 2 na primeira lançada",
+        "effects": [],
+        "broll": []
+      },
+      "validated_text_layers": [
+        {
+          "text": "This information is coming from PlayStation game",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 20.09,
+          "prompt_sha256": "668fefe606fb55805742358568588bcae0f381d1baa15227f210f359bffecc5c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1244,
+          "eval_count": 176,
+          "prompt_eval_duration": 11824593000,
+          "eval_duration": 6686551000,
+          "load_duration": 1563681068
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 23.369,
+          "prompt_sha256": "27ce8257340011a5f97ce5f38fe6d1b7526cfef9b6134266640d9bdd1a5dfc16",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1368,
+          "eval_count": 267,
+          "prompt_eval_duration": 13027739000,
+          "eval_duration": 10302416000,
+          "load_duration": 848072
+        },
+        {
+          "task": "director",
+          "wall_seconds": 6.179,
+          "prompt_sha256": "0c0ebfcee9e7871275274ef9f28819ceedc660f257f048a162986337ff4537b7",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 371,
+          "eval_count": 38,
+          "prompt_eval_duration": 3365515000,
+          "eval_duration": 1240354000,
+          "load_duration": 1564273582
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:1.5b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:1.5b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:17:30.370692102Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 0,
+      "proposals": [],
+      "accepted_proposals": 0,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 27.34,
+          "end": 87.3,
+          "score": 11,
+          "text": "This information is coming from PlayStation game size. It tweeted this right here, and they have a long standing track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105GB. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5 was around 90 gigs at launch. And then eventually, I think it got up to like 125 or 130 or something like that. Now GTA 5 and online were together. So that's another thing when GTA VI online comes out. Are t",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 217 palavras; 60s",
+          "ai_reason": "Transmite informações confiáveis sobre o tamanho do jogo GTA VI em comparação com GTA 5 e Red Dead Redemption 2, fornecendo um contexto útil para os espectadores."
+        },
+        {
+          "start": 202.92,
+          "end": 245.96,
+          "score": 13,
+          "text": "Now the good news is obviously we know the game is going to be coming out in November 19. However, if you pre-ordered, you could start pre-loading on November 12. So you have an entire week to be able to download this. I certainly hope that's enough time for all of us to be able to get that done. I just can't believe this is happening, man. We are just a little bit over three weeks away and we are actually going to be playing this game. Now I will say usually shortly after stuff like this starts popping up. If it shows up on the back end, there are also going to be things like the trophy lists and the achievements and things like that. So just be a little bit careful about that. Obviously, y",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 184 palavras; 43s",
+          "ai_reason": "Informa aos espectadores sobre a possibilidade de pré-carregamento do jogo, aumentando a expectativa e a interatividade do espectador."
+        },
+        {
+          "start": 414.1,
+          "end": 459.08,
+          "score": 13,
+          "text": "But here we're going to get a ton of new screenshots and I mean 16 pages. There's got to be some gyms in here. So very excited to check this out. We will be breaking this down on Thursday and last but not least around this thing out. And just got to turn it into a little update video is wanting to make one of these anyway. Miami is still absolutely popping off. You guys haven't seen. I've actually been uploading short form on the channel as well as IG and TikTok. You guys can feel free to check that out. But the city is continuing to transform. It started with the Kaseya center and the blimp and the beach chairs and umbrellas and things and all that kind of stuff. Now we've got an actual bur",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 198 palavras; 45s",
+          "ai_reason": "Descreve novidades interessantes relacionadas ao jogo GTA VI, incluindo novas screenshots e a capa da revista Edge, mantendo o espectador envolvido e curioso."
+        }
+      ],
+      "director_hints": {
+        "hook": "I believe they scraped the back end",
+        "effects": [
+          {
+            "type": "zoom_in",
+            "at": 10
+          },
+          {
+            "type": "zoom_in",
+            "at": 20
+          }
+        ],
+        "broll": [
+          {
+            "asset_id": "profile_12345",
+            "at": 30,
+            "duration": 2.5,
+            "source_start": 30
+          }
+        ]
+      },
+      "validated_text_layers": [
+        {
+          "text": "I believe they scraped the back end",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 45.992,
+          "prompt_sha256": "668fefe606fb55805742358568588bcae0f381d1baa15227f210f359bffecc5c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1244,
+          "eval_count": 181,
+          "prompt_eval_duration": 25027300000,
+          "eval_duration": 12584176000,
+          "load_duration": 8363260798
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 42.844,
+          "prompt_sha256": "27ce8257340011a5f97ce5f38fe6d1b7526cfef9b6134266640d9bdd1a5dfc16",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1368,
+          "eval_count": 223,
+          "prompt_eval_duration": 27000368000,
+          "eval_duration": 15803477000,
+          "load_duration": 1011185
+        },
+        {
+          "task": "director",
+          "wall_seconds": 17.162,
+          "prompt_sha256": "0c0ebfcee9e7871275274ef9f28819ceedc660f257f048a162986337ff4537b7",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 371,
+          "eval_count": 116,
+          "prompt_eval_duration": 7156418000,
+          "eval_duration": 7422387000,
+          "load_duration": 2573837511
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:3b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:3b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:19:16.365499937Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:17:30.370692102Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 1,
+      "proposals": [],
+      "accepted_proposals": 0,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 27.34,
+          "end": 87.3,
+          "score": 11,
+          "text": "This information is coming from PlayStation game size. It tweeted this right here, and they have a long standing track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105GB. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5 was around 90 gigs at launch. And then eventually, I think it got up to like 125 or 130 or something like that. Now GTA 5 and online were together. So that's another thing when GTA VI online comes out. Are t",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 217 palavras; 60s",
+          "ai_reason": "Transmite informações confiáveis sobre o tamanho do jogo GTA VI em comparação com GTA 5 e Red Dead Redemption 2, fornecendo um contexto útil para os espectadores."
+        },
+        {
+          "start": 202.92,
+          "end": 245.96,
+          "score": 13,
+          "text": "Now the good news is obviously we know the game is going to be coming out in November 19. However, if you pre-ordered, you could start pre-loading on November 12. So you have an entire week to be able to download this. I certainly hope that's enough time for all of us to be able to get that done. I just can't believe this is happening, man. We are just a little bit over three weeks away and we are actually going to be playing this game. Now I will say usually shortly after stuff like this starts popping up. If it shows up on the back end, there are also going to be things like the trophy lists and the achievements and things like that. So just be a little bit careful about that. Obviously, y",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 184 palavras; 43s",
+          "ai_reason": "Informa aos espectadores sobre a possibilidade de pré-carregamento do jogo, aumentando a expectativa e a interatividade do espectador."
+        },
+        {
+          "start": 414.1,
+          "end": 459.08,
+          "score": 13,
+          "text": "But here we're going to get a ton of new screenshots and I mean 16 pages. There's got to be some gyms in here. So very excited to check this out. We will be breaking this down on Thursday and last but not least around this thing out. And just got to turn it into a little update video is wanting to make one of these anyway. Miami is still absolutely popping off. You guys haven't seen. I've actually been uploading short form on the channel as well as IG and TikTok. You guys can feel free to check that out. But the city is continuing to transform. It started with the Kaseya center and the blimp and the beach chairs and umbrellas and things and all that kind of stuff. Now we've got an actual bur",
+          "reason": "Classificado por modelo local; 4 palavras-chave; 198 palavras; 45s",
+          "ai_reason": "Descreve novidades interessantes relacionadas ao jogo GTA VI, incluindo novas screenshots e a capa da revista Edge, mantendo o espectador envolvido e curioso."
+        }
+      ],
+      "director_hints": {
+        "hook": "I believe they scraped the back end",
+        "effects": [
+          {
+            "type": "zoom_in",
+            "at": 10
+          },
+          {
+            "type": "zoom_in",
+            "at": 20
+          }
+        ],
+        "broll": [
+          {
+            "asset_id": "profile_12345",
+            "at": 30,
+            "duration": 2.5,
+            "source_start": 30
+          }
+        ]
+      },
+      "validated_text_layers": [
+        {
+          "text": "I believe they scraped the back end",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 39.662,
+          "prompt_sha256": "668fefe606fb55805742358568588bcae0f381d1baa15227f210f359bffecc5c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1244,
+          "eval_count": 181,
+          "prompt_eval_duration": 24667737000,
+          "eval_duration": 12657582000,
+          "load_duration": 2322736097
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 44.196,
+          "prompt_sha256": "27ce8257340011a5f97ce5f38fe6d1b7526cfef9b6134266640d9bdd1a5dfc16",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1368,
+          "eval_count": 223,
+          "prompt_eval_duration": 27453627000,
+          "eval_duration": 16700777999,
+          "load_duration": 871373
+        },
+        {
+          "task": "director",
+          "wall_seconds": 17.379,
+          "prompt_sha256": "0c0ebfcee9e7871275274ef9f28819ceedc660f257f048a162986337ff4537b7",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 371,
+          "eval_count": 116,
+          "prompt_eval_duration": 7304805000,
+          "eval_duration": 7492210000,
+          "load_duration": 2572753594
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:3b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:3b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:20:57.600584023Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:17:30.370692102Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    }
+  ],
+  "editorial_verdict": null,
+  "default_changed": false,
+  "limits": "One video, two repeats, production prompts/validators. No human editorial ratings."
+}

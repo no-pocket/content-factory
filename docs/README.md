@@ -22,4 +22,15 @@ Versão de referência: **4.1.0**. Esta página é o ponto de entrada para opera
 
 ## Medições e histórico
 
+Sprint de qualidade e API: [plano e dependências](SPRINT_QUALIDADE_PLANO.md),
+[QC por candidato](CONTROLE_QUALIDADE.md), [protocolo editorial](PROTOCOLO_EDITORIAL.md),
+[API v1](API.md) e [evidências e pendências](../research/SPRINT_QUALIDADE_RESULTADOS.md).
+
+Revisão mais recente: [correções solicitadas pelo usuário e ensaio GPU](../research/CORRECOES_REVISAO_USUARIO.md).
+
+Continuação: [plano das próximas sprints e pontos em aberto](PROXIMAS_SPRINTS.md).
+Plano executável e handoff atual: [Content Factory — revisão editorial e aprendizado](planning/content-factory-next/README.md), com branches de produto e aprendizado separadas.
+Para revisão no celular: [acesso privado via Tailscale](OPERACAO.md#acessar-pelo-celular-via-tailscale).
+Rodada atual para avaliação: [cinco vídeos, quinze candidatos GPU/Qwen 2.5](../research/TESTES_GPU_5_VIDEOS_2026-11-06.md).
+
 Os relatórios em [`research/`](../research/) registram experimentos, resultados e limitações. O [relatório REA da K4200](../research/AUDITORIA_REA_K4200_2026-11-05.md) contém o benchmark CPU/GPU e o manifesto do ambiente. A [auditoria de produto](AUDITORIA_E_OPCOES_2026-11-04.md) é um retrato histórico; consulte os guias acima para o comportamento atual.

@@ -1,0 +1,408 @@
+{
+  "job": "530ade0e-7027-46ff-8173-5da8e5166ef4",
+  "segment_count": 12,
+  "baseline": [
+    {
+      "start": 0.59,
+      "end": 41.81,
+      "score": 8.86,
+      "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada. E assim, como é que dá ansiedade aí pra vocês? Como é que dá a ansiedade? Eu confesso que agora está pegando pra mim a ansiedade, tá? Eu já falei pra vocês como é que eu faço pra controlar pico de ansiedade, eu fico sempre",
+      "reason": "2 palavras-chave; 118 palavras; 41s"
+    }
+  ],
+  "available": [
+    {
+      "name": "qwen2.5:1.5b",
+      "model": "qwen2.5:1.5b",
+      "modified_at": "2026-11-05T01:48:17.924319628Z",
+      "size": 986061892,
+      "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 1536,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    },
+    {
+      "name": "qwen2.5:3b",
+      "model": "qwen2.5:3b",
+      "modified_at": "2026-11-03T22:35:26.510977743Z",
+      "size": 1929912432,
+      "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "3.1B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 2048,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 0,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "validated_hook": null,
+      "calls": [
+        {
+          "wall_seconds": 22.717,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 170,
+          "prompt_eval_duration": 9411667000,
+          "eval_duration": 10936903000,
+          "load_duration": 2344724744
+        },
+        {
+          "wall_seconds": 7.789,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 29,
+          "prompt_eval_duration": 4681531000,
+          "eval_duration": 1259500000,
+          "load_duration": 1836634965
+        }
+      ],
+      "events": [],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:52:06.431082435Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 1,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "validated_hook": null,
+      "calls": [
+        {
+          "wall_seconds": 17.157,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 170,
+          "prompt_eval_duration": 8084379000,
+          "eval_duration": 7231907000,
+          "load_duration": 1830461138
+        },
+        {
+          "wall_seconds": 7.798,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 29,
+          "prompt_eval_duration": 4583755000,
+          "eval_duration": 1640065000,
+          "load_duration": 1565285311
+        }
+      ],
+      "events": [],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:52:31.388880906Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 0,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Iniciação da transcrição, menciona GTA VI e a data de início da gravação.",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "validated_hook": null,
+      "calls": [
+        {
+          "wall_seconds": 36.241,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 156,
+          "prompt_eval_duration": 16520307000,
+          "eval_duration": 15101955000,
+          "load_duration": 4605844074
+        },
+        {
+          "wall_seconds": 19.726,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 93,
+          "prompt_eval_duration": 8825999000,
+          "eval_duration": 7032728000,
+          "load_duration": 3857383770
+        }
+      ],
+      "events": [],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:53:27.355270722Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:52:31.388880906Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 1,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Iniciação da transcrição, menciona GTA VI e a data de início da gravação.",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "validated_hook": null,
+      "calls": [
+        {
+          "wall_seconds": 34.443,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 156,
+          "prompt_eval_duration": 19437658000,
+          "eval_duration": 12167110000,
+          "load_duration": 2826510330
+        },
+        {
+          "wall_seconds": 19.707,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 93,
+          "prompt_eval_duration": 9577432000,
+          "eval_duration": 7293062000,
+          "load_duration": 2825080658
+        }
+      ],
+      "events": [],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:54:21.504341806Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T00:52:31.388880906Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    }
+  ],
+  "editorial_verdict": null,
+  "default_changed": false,
+  "limits": "One video, two repeats, production prompts/validators. No human editorial ratings."
+}

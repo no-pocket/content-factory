@@ -10,7 +10,7 @@ import logging
 import uuid
 from pathlib import Path
 
-from .core import render
+from .core import render, get_duration
 from .timeline import ASSET_ID, validate_timeline, write_timeline
 
 log = logging.getLogger(__name__)
@@ -53,16 +53,16 @@ def browser_preview(source: Path) -> tuple[Path, str]:
     return (preview, 'video/webm') if preview.is_file() else (source, 'video/mp4')
 
 
-def make_web_preview(source: Path) -> Path:
+def make_web_preview(source: Path, *, quality: str = 'standard') -> Path:
     """Write a VP8/Opus preview only after the complete file decodes successfully."""
     preview = source.with_suffix('.preview.webm')
     pending = source.with_name(f'{source.stem}.preview.{uuid.uuid4().hex}.webm')
     try:
         subprocess.run([
             'ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-i', str(source),
-            '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'scale=540:-2',
+            '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'scale=720:-2' if quality == 'high' else 'scale=540:-2',
             '-c:v', 'libvpx', '-deadline', 'realtime', '-cpu-used', '8',
-            '-b:v', '1500k', '-threads', '4', '-pix_fmt', 'yuv420p',
+            '-b:v', '4000k' if quality == 'high' else '1500k', '-crf', '10' if quality == 'high' else '24', '-threads', '4', '-pix_fmt', 'yuv420p',
             '-c:a', 'libopus', '-b:a', '96k', str(pending),
         ], check=True, capture_output=True, text=True)
         subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-xerror',
@@ -74,13 +74,35 @@ def make_web_preview(source: Path) -> Path:
         pending.unlink(missing_ok=True)
 
 
-def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None) -> str:
+def apply_finishing(target: Path, timeline: dict, *, quality: str = 'standard') -> None:
+    """Add an outro after all speech; legacy timelines keep their original bytes."""
+    ending = timeline.get('finishing')
+    if not ending:
+        return
+    # Called after timeline validation; times are bounded numeric values, not expressions.
+    tail, fade = ending['tail_seconds'], ending['fade_seconds']
+    duration = get_duration(target)
+    pending = target.with_name(f'{target.stem}.ending.{uuid.uuid4().hex}.mp4')
+    try:
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(target),
+                        '-map', '0:v:0', '-map', '0:a:0?',
+                        '-vf', f'tpad=stop_mode=clone:stop_duration={tail},fade=t=out:st={duration+tail-fade}:d={fade}',
+                        '-af', f'apad=pad_dur={tail}', '-t', str(duration+tail),
+                        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18' if quality == 'high' else '24',
+                        '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', str(pending)],
+                       check=True, capture_output=True, text=True)
+        os.replace(pending, target)
+    finally:
+        pending.unlink(missing_ok=True)
+
+
+def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard') -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
     output_dir = PUBLIC / job_id / str(ordinal)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Existing renderer is reliable and handles source media variations.
-    render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False)
+    render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24)
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
         asset = assets.get(piece["asset_id"])
@@ -108,8 +130,9 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     target.parent.mkdir(parents=True, exist_ok=True)
     engine = (engine if engine is not None else os.getenv("RENDER_ENGINE", "remotion")).lower()
     if engine == "ffmpeg":
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True)
-        make_web_preview(target)
+        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24)
+        apply_finishing(target, timeline, quality=quality)
+        make_web_preview(target, quality=quality)
         return "ffmpeg_subtitled"
     props = {"jobId": job_id, "clipNo": str(ordinal), "timeline": timeline}
     props_path = output_dir / "props.json"
@@ -117,13 +140,14 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     # The CLI uses absolute paths for props/output; only internally generated paths.
     try:
         subprocess.run(["./node_modules/.bin/remotion", "render", "src/index.tsx", "VerticalClip", str(target.resolve()),
-                        "--props=" + str(props_path.resolve()), "--codec=h264", "--log=error"], cwd=RENDERER,
+                        "--props=" + str(props_path.resolve()), "--codec=h264", "--log=error", *(["--crf=18"] if quality == "high" else [])], cwd=RENDERER,
                        check=True, capture_output=True, text=True, timeout=int(os.getenv("RENDER_TIMEOUT", "900")))
         renderer_used = "remotion"
     except (subprocess.SubprocessError, OSError) as exc:
-        if os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
+        if quality == "high" or os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
             raise
-        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True)
+        render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24)
         renderer_used = f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
-    make_web_preview(target)
+    apply_finishing(target, timeline, quality=quality)
+    make_web_preview(target, quality=quality)
     return renderer_used

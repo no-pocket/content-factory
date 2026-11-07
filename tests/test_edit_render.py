@@ -58,3 +58,38 @@ def test_browser_preview_uses_vp8_opus_and_decodes(tmp_path):
     assert edit_render.browser_preview(source) == (preview, 'video/webm')
     preview.unlink()
     assert edit_render.browser_preview(source) == (source, 'video/mp4')
+
+
+def test_high_fidelity_preview_keeps_master_resolution(tmp_path):
+    if not shutil.which('ffmpeg'):
+        return
+    source=tmp_path/'portrait.mp4'
+    subprocess.run(['ffmpeg','-v','error','-y','-f','lavfi','-i','testsrc2=size=720x1280:rate=10',
+                    '-f','lavfi','-i','sine=frequency=440','-t','1','-c:v','libx264','-c:a','aac',str(source)],check=True)
+    preview=edit_render.make_web_preview(source,quality='high')
+    streams=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-of','json',str(preview)]))['streams']
+    assert (streams[0]['width'],streams[0]['height'])==(720,1280)
+
+
+def test_finishing_preserves_spoken_audio_then_adds_fading_tail(tmp_path):
+    from app.core import get_duration
+    from app.edit_render import apply_finishing
+    if not shutil.which('ffmpeg'):
+        return
+    source = tmp_path/'ending.mp4'
+    subprocess.run(['ffmpeg','-v','error','-y','-f','lavfi','-i','color=white:size=90x160:rate=30',
+                    '-f','lavfi','-i','sine=frequency=440:sample_rate=48000','-t','1',
+                    '-c:v','libx264','-c:a','aac',str(source)],check=True)
+    apply_finishing(source, {'duration':1,'finishing':{'tail_seconds':.35,'fade_seconds':.25}}, quality='high')
+    assert 1.33 < get_duration(source) < 1.40
+    # The source's last spoken interval remains audible; the appended tail is silent.
+    import array
+    def rms(start):
+        raw=subprocess.check_output(['ffmpeg','-v','error','-ss',str(start),'-i',str(source),'-t','0.06',
+                                     '-vn','-ac','1','-f','s16le','-'])
+        samples=array.array('h',raw)
+        return (sum(v*v for v in samples)/len(samples))**.5
+    assert rms(.92) > 500 and rms(1.18) < 40
+    raw=subprocess.check_output(['ffmpeg','-v','error','-ss','1.30','-i',str(source),'-frames:v','1',
+                                 '-vf','scale=1:1','-f','rawvideo','-pix_fmt','rgb24','-'])
+    assert max(raw) < 70

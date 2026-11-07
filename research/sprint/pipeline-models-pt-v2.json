@@ -1,0 +1,754 @@
+{
+  "job": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+  "language": "pt",
+  "benchmark_version": 2,
+  "segment_count": 12,
+  "baseline": [
+    {
+      "start": 0.59,
+      "end": 41.81,
+      "score": 8.86,
+      "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês nós jogaremos GTA VI, e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa jornada. E assim, como é que dá ansiedade aí pra vocês? Como é que dá a ansiedade? Eu confesso que agora está pegando pra mim a ansiedade, tá? Eu já falei pra vocês como é que eu faço pra controlar pico de ansiedade, eu fico sempre",
+      "reason": "2 palavras-chave; 118 palavras; 41s"
+    }
+  ],
+  "rerank_candidates": [
+    {
+      "start": 54.99,
+      "end": 95.13,
+      "score": 17,
+      "text": "Se estão vendo aí o Bruno Mikali doido todo dia, postando o vídeo de falta no seco de GTA, a galera está assim, a galera está assim, ansiedade está insana, e no meu caso né gente, e a gente que trabalha com isso, ansiedade é muito maior, porque não é a sua ansiedade de jogar um jogo incrível, um jogo que vai marcar muito, o jogo vai mudar tudo, um jogo que é importante pra nós assim, vocês sabem o impacto e as mudanças que o GTA V causou na minha vida, o efeito morboleta que o GTA V fez na minha vida foi algo que... absurdo, tudo que eu tenho hoje e que eu entendo de como a minha vida meu dia a dia vem de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em",
+      "reason": "6 palavras-chave; 143 palavras; 40s"
+    },
+    {
+      "start": 90.95,
+      "end": 133.55,
+      "score": 21,
+      "text": "de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em São Paulo, eu sou casado, tenho filho, tudo isso, vem do efeito morboleta que o GTA assim causou tá, desencadiaram eventos na minha vida que me fizeram estar aqui com vocês hoje, então assim é muito doido, então esse jogo obviamente também é muito importante da minha vida, e o GTA VI vai ter também, já está tendo na verdade, né, porque desde que o GTA VI foi anunciado em questão de conteúdo, tudo que aconteceu, eu fui lá na rockstar né galera, eu fui lá, eu vi o jogo na minha frente, eu conheci as pessoas da rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né,",
+      "reason": "8 palavras-chave; 135 palavras; 43s"
+    },
+    {
+      "start": 128.05,
+      "end": 168.43,
+      "score": 13,
+      "text": "rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né, eu criou o canal novo só de GTA VI, o link tá aqui embaixo pra quem não conhece o canal novo, entre no canal novo se inscrevam, eu posso garantir a vida financeira da minha família, ele é pra sempre o que o GTA VI, vocês entendem? É muito doido, é muito doido que tá acontecendo, então pra mim é diferente, e claro que compartilhar isso com vocês vai ser uma experiência inacreditável, de novo, 13 anos depois, mais uma década depois a gente tá aqui, mais uma década depois estamos aqui, ainda com vocês comigo, e cara se tá mais dano em",
+      "reason": "4 palavras-chave; 123 palavras; 40s"
+    },
+    {
+      "start": 340.41,
+      "end": 384.93,
+      "score": 15,
+      "text": "fazer um negócio incrível pra vocês, tá, e eu tenho aqui as melhores ferramentas pra poder fazer esse trabalho de trazer o máximo de vídeos possível que eu vou trazer de GTA6 pra você, por isso que eu falo, escreva-se no canal novo de GTA6, o link tá aqui embaixo na descrição, tá tendo vídeo praticamente todo dia lá, mas vai ter muito mais, vai ter bem mais quando sair o jogo de fato, porque não vai caber tudo de conteúdo aqui, aqui vai ter live, vai ter gameplays longues, vai ter de tudo, mas lá no canal de GTA vai ser uma coisa frenética, produção de conteúdo, porque muita coisa que eu vou fazer durante as lives, eu não vou conseguir converter vídeos tão rabalá, vai ter e vai toma, toma, t",
+      "reason": "5 palavras-chave; 161 palavras; 45s"
+    },
+    {
+      "start": 426.15,
+      "end": 470.51,
+      "score": 13,
+      "text": "azei, 15 milhões de views e o canal de GTA 10 milhões de views, então assim, é mais de quase 80 milhões quase 80 milhões de views, e tudo isso, e assim, isso não é só de GTA, tá gente, dá uma olhada no meu óbvio que tem muito GTA claro, mas é de notícia, é gameplay, e tá assim, eu só tenho que agradecer você por tudo isso, porque é, a gente imagina, galera, que a gente fica a chegar a um certo tempo aqui de trabalho e que dificilmente a gente consegue aumentar muita visualizações que a gente já faz, certo? Porque o canal já tá maduro, o canal já tem um público fiel e tal, só que aí existem eventos, como é o caso do GTA 6 que é o evento único, que faz a gente ter a oportunidade de produzir ma",
+      "reason": "4 palavras-chave; 146 palavras; 44s"
+    },
+    {
+      "start": 487.81,
+      "end": 531.75,
+      "score": 13,
+      "text": "mudou muito, e fazer as pessoas seguirem, você, novos, tipo, eu preciso de um milhão e meio, os novos seguidores pra isso, trazer mais um milhão e meio de pessoas pra cá, eu acho bem difícil, claro que seriam a honra, chegar a esse número, mas eu acho bem difícil, vou fazer de tudo pra isso, com o GTA6 não vai faltar conteúdo, vai ser uma loucura, mas eu não sei se eu chego nesse número, não, tá bom? Bom, esse vídeo foi só pra gente dar aí uma mais uma lembrada, não vou fazer que nem eu me calho, postar vídeo todo o santo dia falando, faltam você quantos dias pro GTA, mais óbvio, se eu rolar qualquer novidade de GTA6, sabe que tem os rumores aí do Tennis, da Nike, foda, mas assim que saí iss",
+      "reason": "4 palavras-chave; 154 palavras; 44s"
+    }
+  ],
+  "available": [
+    {
+      "name": "qwen2.5:1.5b",
+      "model": "qwen2.5:1.5b",
+      "modified_at": "2026-11-05T01:48:17.924319628Z",
+      "size": 986061892,
+      "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 1536,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    },
+    {
+      "name": "qwen2.5:3b",
+      "model": "qwen2.5:3b",
+      "modified_at": "2026-11-03T22:35:26.510977743Z",
+      "size": 1929912432,
+      "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "3.1B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 2048,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 0,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 54.99,
+          "end": 95.13,
+          "score": 17,
+          "text": "Se estão vendo aí o Bruno Mikali doido todo dia, postando o vídeo de falta no seco de GTA, a galera está assim, a galera está assim, ansiedade está insana, e no meu caso né gente, e a gente que trabalha com isso, ansiedade é muito maior, porque não é a sua ansiedade de jogar um jogo incrível, um jogo que vai marcar muito, o jogo vai mudar tudo, um jogo que é importante pra nós assim, vocês sabem o impacto e as mudanças que o GTA V causou na minha vida, o efeito morboleta que o GTA V fez na minha vida foi algo que... absurdo, tudo que eu tenho hoje e que eu entendo de como a minha vida meu dia a dia vem de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em",
+          "reason": "Classificado por modelo local; 6 palavras-chave; 143 palavras; 40s",
+          "ai_reason": "O candidato 1 começa a falar sobre a ansiedade do entrevistado em relação ao GTA VI, destacando a ansiedade que ele sente ao ver o jogo na frente e a ansiedade que ele tem ao trabalhar com o jogo. Isso é uma maneira interessante de começar uma conver"
+        },
+        {
+          "start": 90.95,
+          "end": 133.55,
+          "score": 21,
+          "text": "de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em São Paulo, eu sou casado, tenho filho, tudo isso, vem do efeito morboleta que o GTA assim causou tá, desencadiaram eventos na minha vida que me fizeram estar aqui com vocês hoje, então assim é muito doido, então esse jogo obviamente também é muito importante da minha vida, e o GTA VI vai ter também, já está tendo na verdade, né, porque desde que o GTA VI foi anunciado em questão de conteúdo, tudo que aconteceu, eu fui lá na rockstar né galera, eu fui lá, eu vi o jogo na minha frente, eu conheci as pessoas da rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né,",
+          "reason": "Classificado por modelo local; 8 palavras-chave; 135 palavras; 43s",
+          "ai_reason": "O candidato 0 começa a falar sobre o GTA V e GTA VI, destacando o impacto positivo na vida do entrevistado e da sua família, que é uma maneira interessante de começar uma conversa sobre os jogos."
+        },
+        {
+          "start": 340.41,
+          "end": 384.93,
+          "score": 15,
+          "text": "fazer um negócio incrível pra vocês, tá, e eu tenho aqui as melhores ferramentas pra poder fazer esse trabalho de trazer o máximo de vídeos possível que eu vou trazer de GTA6 pra você, por isso que eu falo, escreva-se no canal novo de GTA6, o link tá aqui embaixo na descrição, tá tendo vídeo praticamente todo dia lá, mas vai ter muito mais, vai ter bem mais quando sair o jogo de fato, porque não vai caber tudo de conteúdo aqui, aqui vai ter live, vai ter gameplays longues, vai ter de tudo, mas lá no canal de GTA vai ser uma coisa frenética, produção de conteúdo, porque muita coisa que eu vou fazer durante as lives, eu não vou conseguir converter vídeos tão rabalá, vai ter e vai toma, toma, t",
+          "reason": "Classificado por modelo local; 5 palavras-chave; 161 palavras; 45s",
+          "ai_reason": "O candidato 2 começa a falar sobre a ansiedade do entrevistado em relação ao GTA VI, destacando a ansiedade que ele sente ao ver o jogo na frente e a ansiedade que ele tem ao trabalhar com o jogo. Isso é uma maneira interessante de começar uma conver"
+        }
+      ],
+      "director_hints": {
+        "hook": "GTA VI - Mês de Novembro",
+        "effects": [],
+        "broll": []
+      },
+      "validated_text_layers": [
+        {
+          "text": "GTA VI - Mês de Novembro",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 15.343,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 170,
+          "prompt_eval_duration": 7241203000,
+          "eval_duration": 6023893000,
+          "load_duration": 2067038471
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 35.342,
+          "prompt_sha256": "f3cc2a8246c69a743f31685f2cda8b7fdda94cf2deb938c7b08dd56a298a3f7c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1565,
+          "eval_count": 480,
+          "prompt_eval_duration": 15699061000,
+          "eval_duration": 19612772000,
+          "load_duration": 827584
+        },
+        {
+          "task": "director",
+          "wall_seconds": 6.038,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 29,
+          "prompt_eval_duration": 3509195000,
+          "eval_duration": 956116000,
+          "load_duration": 1563257405
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:1.5b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:1.5b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:01:03.315040365Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 1,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 54.99,
+          "end": 95.13,
+          "score": 17,
+          "text": "Se estão vendo aí o Bruno Mikali doido todo dia, postando o vídeo de falta no seco de GTA, a galera está assim, a galera está assim, ansiedade está insana, e no meu caso né gente, e a gente que trabalha com isso, ansiedade é muito maior, porque não é a sua ansiedade de jogar um jogo incrível, um jogo que vai marcar muito, o jogo vai mudar tudo, um jogo que é importante pra nós assim, vocês sabem o impacto e as mudanças que o GTA V causou na minha vida, o efeito morboleta que o GTA V fez na minha vida foi algo que... absurdo, tudo que eu tenho hoje e que eu entendo de como a minha vida meu dia a dia vem de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em",
+          "reason": "Classificado por modelo local; 6 palavras-chave; 143 palavras; 40s",
+          "ai_reason": "O candidato 1 começa a falar sobre a ansiedade do entrevistado em relação ao GTA VI, destacando a ansiedade que ele sente ao ver o jogo na frente e a ansiedade que ele tem ao trabalhar com o jogo. Isso é uma maneira interessante de começar uma conver"
+        },
+        {
+          "start": 90.95,
+          "end": 133.55,
+          "score": 21,
+          "text": "de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em São Paulo, eu sou casado, tenho filho, tudo isso, vem do efeito morboleta que o GTA assim causou tá, desencadiaram eventos na minha vida que me fizeram estar aqui com vocês hoje, então assim é muito doido, então esse jogo obviamente também é muito importante da minha vida, e o GTA VI vai ter também, já está tendo na verdade, né, porque desde que o GTA VI foi anunciado em questão de conteúdo, tudo que aconteceu, eu fui lá na rockstar né galera, eu fui lá, eu vi o jogo na minha frente, eu conheci as pessoas da rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né,",
+          "reason": "Classificado por modelo local; 8 palavras-chave; 135 palavras; 43s",
+          "ai_reason": "O candidato 0 começa a falar sobre o GTA V e GTA VI, destacando o impacto positivo na vida do entrevistado e da sua família, que é uma maneira interessante de começar uma conversa sobre os jogos."
+        },
+        {
+          "start": 340.41,
+          "end": 384.93,
+          "score": 15,
+          "text": "fazer um negócio incrível pra vocês, tá, e eu tenho aqui as melhores ferramentas pra poder fazer esse trabalho de trazer o máximo de vídeos possível que eu vou trazer de GTA6 pra você, por isso que eu falo, escreva-se no canal novo de GTA6, o link tá aqui embaixo na descrição, tá tendo vídeo praticamente todo dia lá, mas vai ter muito mais, vai ter bem mais quando sair o jogo de fato, porque não vai caber tudo de conteúdo aqui, aqui vai ter live, vai ter gameplays longues, vai ter de tudo, mas lá no canal de GTA vai ser uma coisa frenética, produção de conteúdo, porque muita coisa que eu vou fazer durante as lives, eu não vou conseguir converter vídeos tão rabalá, vai ter e vai toma, toma, t",
+          "reason": "Classificado por modelo local; 5 palavras-chave; 161 palavras; 45s",
+          "ai_reason": "O candidato 2 começa a falar sobre a ansiedade do entrevistado em relação ao GTA VI, destacando a ansiedade que ele sente ao ver o jogo na frente e a ansiedade que ele tem ao trabalhar com o jogo. Isso é uma maneira interessante de começar uma conver"
+        }
+      ],
+      "director_hints": {
+        "hook": "GTA VI - Mês de Novembro",
+        "effects": [],
+        "broll": []
+      },
+      "validated_text_layers": [
+        {
+          "text": "GTA VI - Mês de Novembro",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 14.97,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 170,
+          "prompt_eval_duration": 7349272000,
+          "eval_duration": 6045706000,
+          "load_duration": 1564473320
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 35.151,
+          "prompt_sha256": "f3cc2a8246c69a743f31685f2cda8b7fdda94cf2deb938c7b08dd56a298a3f7c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1565,
+          "eval_count": 480,
+          "prompt_eval_duration": 15384888000,
+          "eval_duration": 19736710000,
+          "load_duration": 906595
+        },
+        {
+          "task": "director",
+          "wall_seconds": 5.778,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 29,
+          "prompt_eval_duration": 3535468000,
+          "eval_duration": 921893000,
+          "load_duration": 1311541702
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:1.5b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:1.5b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:01:59.212279224Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 0,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Iniciação da transcrição, menciona GTA VI e a data de início da gravação.",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 54.99,
+          "end": 95.13,
+          "score": 17,
+          "text": "Se estão vendo aí o Bruno Mikali doido todo dia, postando o vídeo de falta no seco de GTA, a galera está assim, a galera está assim, ansiedade está insana, e no meu caso né gente, e a gente que trabalha com isso, ansiedade é muito maior, porque não é a sua ansiedade de jogar um jogo incrível, um jogo que vai marcar muito, o jogo vai mudar tudo, um jogo que é importante pra nós assim, vocês sabem o impacto e as mudanças que o GTA V causou na minha vida, o efeito morboleta que o GTA V fez na minha vida foi algo que... absurdo, tudo que eu tenho hoje e que eu entendo de como a minha vida meu dia a dia vem de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em",
+          "reason": "Classificado por modelo local; 6 palavras-chave; 143 palavras; 40s",
+          "ai_reason": "Continua a falar sobre o impacto do GTA V na vida do apresentador, seguido por uma introdução ao novo canal, mantendo a ideia completa e o gancho imediato."
+        },
+        {
+          "start": 90.95,
+          "end": 133.55,
+          "score": 21,
+          "text": "de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em São Paulo, eu sou casado, tenho filho, tudo isso, vem do efeito morboleta que o GTA assim causou tá, desencadiaram eventos na minha vida que me fizeram estar aqui com vocês hoje, então assim é muito doido, então esse jogo obviamente também é muito importante da minha vida, e o GTA VI vai ter também, já está tendo na verdade, né, porque desde que o GTA VI foi anunciado em questão de conteúdo, tudo que aconteceu, eu fui lá na rockstar né galera, eu fui lá, eu vi o jogo na minha frente, eu conheci as pessoas da rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né,",
+          "reason": "Classificado por modelo local; 8 palavras-chave; 135 palavras; 43s",
+          "ai_reason": "Inicia com uma declaração forte sobre o impacto do GTA V na vida do apresentador, seguida por uma introdução ao novo canal dedicado ao GTA VI, criando um gancho imediato e uma ideia completa."
+        },
+        {
+          "start": 340.41,
+          "end": 384.93,
+          "score": 15,
+          "text": "fazer um negócio incrível pra vocês, tá, e eu tenho aqui as melhores ferramentas pra poder fazer esse trabalho de trazer o máximo de vídeos possível que eu vou trazer de GTA6 pra você, por isso que eu falo, escreva-se no canal novo de GTA6, o link tá aqui embaixo na descrição, tá tendo vídeo praticamente todo dia lá, mas vai ter muito mais, vai ter bem mais quando sair o jogo de fato, porque não vai caber tudo de conteúdo aqui, aqui vai ter live, vai ter gameplays longues, vai ter de tudo, mas lá no canal de GTA vai ser uma coisa frenética, produção de conteúdo, porque muita coisa que eu vou fazer durante as lives, eu não vou conseguir converter vídeos tão rabalá, vai ter e vai toma, toma, t",
+          "reason": "Classificado por modelo local; 5 palavras-chave; 161 palavras; 45s",
+          "ai_reason": "Introduz o novo canal dedicado ao GTA VI, fornecendo uma explicação clara e um gancho imediato para o conteúdo futuro."
+        }
+      ],
+      "director_hints": {
+        "hook": "0s",
+        "effects": [
+          {
+            "type": "zoom_in",
+            "at": 10.5
+          }
+        ],
+        "broll": [
+          {
+            "asset_id": "12345",
+            "at": 20.0,
+            "duration": 2.0,
+            "source_start": 0.0
+          }
+        ]
+      },
+      "validated_text_layers": [
+        {
+          "text": "0s",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 30.345,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 156,
+          "prompt_eval_duration": 15433901000,
+          "eval_duration": 11575531000,
+          "load_duration": 3323885617
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 59.068,
+          "prompt_sha256": "f3cc2a8246c69a743f31685f2cda8b7fdda94cf2deb938c7b08dd56a298a3f7c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1565,
+          "eval_count": 352,
+          "prompt_eval_duration": 32706462000,
+          "eval_duration": 26317950000,
+          "load_duration": 993403
+        },
+        {
+          "task": "director",
+          "wall_seconds": 15.629,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 93,
+          "prompt_eval_duration": 7354528000,
+          "eval_duration": 5945242000,
+          "load_duration": 2319697373
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:3b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:3b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:03:44.249687411Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:01:59.212279224Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 1,
+      "proposals": [
+        {
+          "start": 0.59,
+          "end": 19.63,
+          "score": 5.0,
+          "text": "Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado, mas estão aí. E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "reason": "Proposto pelo modelo local",
+          "ai_reason": "Iniciação da transcrição, menciona GTA VI e a data de início da gravação.",
+          "proposal_source": "transcript"
+        }
+      ],
+      "accepted_proposals": 1,
+      "director_engine": "ollama",
+      "reranked": [
+        {
+          "start": 54.99,
+          "end": 95.13,
+          "score": 17,
+          "text": "Se estão vendo aí o Bruno Mikali doido todo dia, postando o vídeo de falta no seco de GTA, a galera está assim, a galera está assim, ansiedade está insana, e no meu caso né gente, e a gente que trabalha com isso, ansiedade é muito maior, porque não é a sua ansiedade de jogar um jogo incrível, um jogo que vai marcar muito, o jogo vai mudar tudo, um jogo que é importante pra nós assim, vocês sabem o impacto e as mudanças que o GTA V causou na minha vida, o efeito morboleta que o GTA V fez na minha vida foi algo que... absurdo, tudo que eu tenho hoje e que eu entendo de como a minha vida meu dia a dia vem de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em",
+          "reason": "Classificado por modelo local; 6 palavras-chave; 143 palavras; 40s",
+          "ai_reason": "Continua a falar sobre o impacto do GTA V na vida do apresentador, seguido por uma introdução ao novo canal, mantendo a ideia completa e o gancho imediato."
+        },
+        {
+          "start": 90.95,
+          "end": 133.55,
+          "score": 21,
+          "text": "de alguma maneira por causa de GTA V, é impressionante, tudo que mudou, hoje eu moro em São Paulo, eu sou casado, tenho filho, tudo isso, vem do efeito morboleta que o GTA assim causou tá, desencadiaram eventos na minha vida que me fizeram estar aqui com vocês hoje, então assim é muito doido, então esse jogo obviamente também é muito importante da minha vida, e o GTA VI vai ter também, já está tendo na verdade, né, porque desde que o GTA VI foi anunciado em questão de conteúdo, tudo que aconteceu, eu fui lá na rockstar né galera, eu fui lá, eu vi o jogo na minha frente, eu conheci as pessoas da rockstar em 3 onde os caras fazem um jogo, então assim, o GTA VI já dá muito fruto aqui né,",
+          "reason": "Classificado por modelo local; 8 palavras-chave; 135 palavras; 43s",
+          "ai_reason": "Inicia com uma declaração forte sobre o impacto do GTA V na vida do apresentador, seguida por uma introdução ao novo canal dedicado ao GTA VI, criando um gancho imediato e uma ideia completa."
+        },
+        {
+          "start": 340.41,
+          "end": 384.93,
+          "score": 15,
+          "text": "fazer um negócio incrível pra vocês, tá, e eu tenho aqui as melhores ferramentas pra poder fazer esse trabalho de trazer o máximo de vídeos possível que eu vou trazer de GTA6 pra você, por isso que eu falo, escreva-se no canal novo de GTA6, o link tá aqui embaixo na descrição, tá tendo vídeo praticamente todo dia lá, mas vai ter muito mais, vai ter bem mais quando sair o jogo de fato, porque não vai caber tudo de conteúdo aqui, aqui vai ter live, vai ter gameplays longues, vai ter de tudo, mas lá no canal de GTA vai ser uma coisa frenética, produção de conteúdo, porque muita coisa que eu vou fazer durante as lives, eu não vou conseguir converter vídeos tão rabalá, vai ter e vai toma, toma, t",
+          "reason": "Classificado por modelo local; 5 palavras-chave; 161 palavras; 45s",
+          "ai_reason": "Introduz o novo canal dedicado ao GTA VI, fornecendo uma explicação clara e um gancho imediato para o conteúdo futuro."
+        }
+      ],
+      "director_hints": {
+        "hook": "0s",
+        "effects": [
+          {
+            "type": "zoom_in",
+            "at": 10.5
+          }
+        ],
+        "broll": [
+          {
+            "asset_id": "12345",
+            "at": 20.0,
+            "duration": 2.0,
+            "source_start": 0.0
+          }
+        ]
+      },
+      "validated_text_layers": [
+        {
+          "text": "0s",
+          "at": 0.5,
+          "duration": 2.5,
+          "animation": "pop"
+        }
+      ],
+      "calls": [
+        {
+          "task": "proposal",
+          "wall_seconds": 28.334,
+          "prompt_sha256": "79114c96a7a2e35133c4442fca423a786cb7512fe2b531f2925475d6b88131aa",
+          "options": {
+            "temperature": 0,
+            "num_predict": 350,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 767,
+          "eval_count": 156,
+          "prompt_eval_duration": 15154198000,
+          "eval_duration": 10594623000,
+          "load_duration": 2571212669
+        },
+        {
+          "task": "rerank",
+          "wall_seconds": 58.119,
+          "prompt_sha256": "f3cc2a8246c69a743f31685f2cda8b7fdda94cf2deb938c7b08dd56a298a3f7c",
+          "options": {
+            "temperature": 0,
+            "num_predict": 700,
+            "num_ctx": 8192
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 1565,
+          "eval_count": 352,
+          "prompt_eval_duration": 32035130000,
+          "eval_duration": 26049218000,
+          "load_duration": 907793
+        },
+        {
+          "task": "director",
+          "wall_seconds": 16.182,
+          "prompt_sha256": "4c2440746f845e8b218e64644835f653d313bc49d6feb8103619df12c04233c3",
+          "options": {
+            "temperature": 0,
+            "num_predict": 450,
+            "num_ctx": 4096
+          },
+          "done_reason": "stop",
+          "prompt_eval_count": 379,
+          "eval_count": 93,
+          "prompt_eval_duration": 7409647000,
+          "eval_duration": 6190316000,
+          "load_duration": 2572470971
+        }
+      ],
+      "events": [
+        {
+          "task": "rerank",
+          "event": "analyzing",
+          "total_candidates": 6,
+          "model": "qwen2.5:3b"
+        },
+        {
+          "task": "rerank",
+          "event": "completed",
+          "selected_count": 3,
+          "model": "qwen2.5:3b"
+        }
+      ],
+      "resource_snapshot": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2168360795,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:05:26.875797069Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1173136342,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-11-06T02:01:59.212279224Z",
+            "size_vram": 0,
+            "context_length": 4096,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    }
+  ],
+  "editorial_verdict": null,
+  "default_changed": false,
+  "limits": "One video, two repeats, production prompts/validators. No human editorial ratings."
+}
