@@ -2,6 +2,16 @@
 
 ## Suíte automatizada
 
+Renderer (Node22, dependências de desenvolvimento fixadas no lockfile):
+
+```powershell
+npm --prefix renderer ci --ignore-scripts --no-audit --no-fund
+npm --prefix renderer run typecheck
+```
+
+O CI executa esse check separadamente da suíte Python. A instalação inclui as
+declarações React necessárias ao TypeScript estrito.
+
 Montagem: `tests/test_assembly.py` verifica relógio, fonte, limites, sobreposição,
 reordenação explícita e palavras parciais; `tests/test_multisegment_render.py`
 concatena marcadores de cor/tom e verifica duração dentro de um frame, remapeamento

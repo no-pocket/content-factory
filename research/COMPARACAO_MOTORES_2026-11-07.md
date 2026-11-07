@@ -1,6 +1,7 @@
 # Upgrade e comparação editorial — 07/11/2026
 
 Referência: `main` remota confirmada em `619efee4d799b8da4dcc16476da72374db63d2ef`.
+Consolidação posterior do código: [registro na main](../docs/CONSOLIDACAO_MAIN_2026-11-07.md).
 Revisão dos candidatos na aplicação principal: <http://127.0.0.1:8501>.
 Clique **Atualizar status** e procure **COMPARAÇÃO ESTRITA** no seletor de jobs.
 

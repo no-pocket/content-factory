@@ -1,5 +1,7 @@
 # Documentação do Content Factory
 
+Estado atual do código: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
+
 Versão de referência: **4.1.0**. Esta página é o ponto de entrada para operar, testar e modificar a aplicação nesta workstation.
 
 | Preciso de… | Leia |

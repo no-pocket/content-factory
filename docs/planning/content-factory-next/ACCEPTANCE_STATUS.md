@@ -1,6 +1,8 @@
 # Aceitação da execução editorial — 07/11/2026
 
-Implementação em revisão, sem merge/deploy. Produto: [PR3](https://github.com/no-pocket/content-factory/pull/3).
+Código consolidado na main por autorização explícita do proprietário; registro
+e validações em [consolidação de07/11](../../CONSOLIDACAO_MAIN_2026-11-07.md).
+Produto: [PR3](https://github.com/no-pocket/content-factory/pull/3).
 Aprendizado independente: [PR4](https://github.com/no-pocket/content-factory/pull/4), contra a branch de produto.
 Baseline: [PR2](https://github.com/no-pocket/content-factory/pull/2). Originais, eventos,
 volumes, modelos e serviços de produção foram preservados.
