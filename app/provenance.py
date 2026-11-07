@@ -54,6 +54,6 @@ def component_snapshot(settings: dict) -> dict:
                 'backend_requested': settings['llm_backend'], 'context_window': 4096 if settings['llm_backend'] == 'kepler_gpu' else 8192,
                 'renderer_requested': settings['render_engine'], 'timeline_schema': '3.0' if settings.get('timeline_v3') else '2.0',
                 'ranker_rules': 'full-context-v1',
-                'retrieval': {'mode':settings['retrieval_mode'],'selector':'lexical-v1','dataset_id':settings['retrieval_dataset_id']} if settings.get('retrieval_mode','off')!='off' else None,
+                'retrieval': {'mode':settings['retrieval_mode'],'selector':'lexical-v2','dataset_id':settings['retrieval_dataset_id']} if settings.get('retrieval_mode','off')!='off' else None,
                 'dataset': settings.get('retrieval_dataset_id')}
     return {**snapshot, 'snapshot_id': digest(snapshot)}

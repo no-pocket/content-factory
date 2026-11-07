@@ -96,3 +96,24 @@ validar/fixar todo o ambiente extra e executar integração sintética nele. Nã
 modelo treinado, avaliação de holdout, promoção ou evidência de ganho nesta rodada.
 
 Estudo C/fine-tuning: [decisão NO-GO, fontes, hardware e orçamento](editorial_finetuning_feasibility.md).
+
+## Revisão final e compatibilidade de derivados
+
+A revisão independente detectou dois riscos e ambos tiveram regressão RED→GREEN:
+ancestral ausente do export ainda precisa excluir seus descendentes da recuperação;
+e uma preferência não pode contar para o render novo de uma alternativa antiga.
+
+O seletor `lexical-v2` usa o mapa de proveniência com IDs dos nós em hash, inclusive
+ancestrais/aliases sem linha própria. Proveniência declarada e não resolvida usa
+baseline. Snapshots experimentais `lexical-v1` não são reinterpretados; novo job é
+necessário. Exports antigos sem mapa precisam de reexport, preservando o anterior.
+Export endurecido observado:
+`a0140bc495a89ac93c864dd7343ca4f53cc542a0d5e9c6c6b808c4f1c55838e2`.
+
+Alternativas de preferência aceitam opcionalmente o par `artifact_id` e
+`render_revision`; ambos são validados juntos. Registros antigos somente com
+`candidate_version` continuam legíveis, mas sua comparação é excluída como
+stale/unverifiable. Nenhum binding é inferido retroativamente. Uma mudança de
+encode pode incrementar render_revision sem mudar candidate_version, e agora
+invalida essa contribuição relativa. Essa exclusão pode reduzir o número de pares
+utilizáveis; evita atribuir uma preferência humana a mídia que não foi avaliada.

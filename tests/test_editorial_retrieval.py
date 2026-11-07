@@ -67,6 +67,10 @@ def test_job_freezes_retrieval_and_refuses_changed_context(monkeypatch):
     job['retrieval_snapshot']=copy.deepcopy(saved)
     assert retrieval.prepare_job_retrieval(job,segments)==saved and len(calls)==1
     with pytest.raises(ValueError,match='context'):retrieval.prepare_job_retrieval(job,[{'text':'changed'}])
+    from app.artifacts import digest
+    job['retrieval_snapshot']['selector_version']='lexical-v1'
+    job['retrieval_snapshot']['snapshot_id']=digest({k:v for k,v in job['retrieval_snapshot'].items() if k!='snapshot_id'})
+    with pytest.raises(ValueError,match='context'):retrieval.prepare_job_retrieval(job,segments)
 
 
 def test_retrieval_settings_are_opt_in_and_snapshotted():
@@ -92,3 +96,22 @@ def test_ranker_and_director_receive_frozen_examples_with_complete_source(monkey
     director.direct_edit({**clip,'retrieval_snapshot':{'examples':examples}}, {},mode='ollama')
     assert len(seen)==2 and all('SYNTHETIC review' in prompt and 'COMPLETE SOURCE END.' in prompt for prompt in seen)
     assert any(event=='retrieval_context' and detail['used_candidate_ids'] for event,detail in events)
+
+
+def test_absent_parent_and_sibling_resolve_to_exported_family():
+    import uuid
+    from app.editorial_dataset import build_dataset
+    from app.editorial_retrieval import select_examples
+    from test_editorial_dataset import job,config
+    parent=str(uuid.uuid5(uuid.NAMESPACE_URL,'absent-parent'))
+    child=job('b');child['source_parent_job']=parent
+    child['feedback_events'][0]['versions'].update(brief_sha256='b'*64,component_snapshot_id='c'*64)
+    for seed in range(10):
+        data=build_dataset([child],config(seed=seed),None)
+        if data['records'][0]['split']=='train':break
+    assert data['records'][0]['split']=='train'
+    for ident in (parent,str(uuid.uuid5(uuid.NAMESPACE_URL,'new-sibling'))):
+        q={'source_group_id':parent,'source_ids':[ident,parent],'source_fingerprint':'c'*64,'text':'Synthetic complete story'}
+        assert select_examples(q,data,policy(),budget())==[]
+    q.update(source_group_id='unresolved-parent',source_ids=['new-sibling','unresolved-parent'],provenance_ids=['unresolved-parent'])
+    assert select_examples(q,data,policy(),budget())==[]

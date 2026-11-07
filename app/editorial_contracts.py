@@ -159,9 +159,13 @@ def validate_feedback_event(event: dict) -> dict:
         if not isinstance(relative['alternatives'], list) or not 1 <= len(relative['alternatives']) <= 6:
             raise ValueError('Relative alternatives required')
         for item in relative['alternatives']:
-            _object(item, ('candidate_id', 'candidate_version'), ('candidate_id', 'candidate_version'))
+            _object(item, ('candidate_id', 'candidate_version','render_revision','artifact_id'), ('candidate_id', 'candidate_version'))
             _uuid(item['candidate_id'])
             _integer(item['candidate_version'], 1)
+            if 'render_revision' in item or 'artifact_id' in item:
+                _integer(item.get('render_revision'),1)
+                if not isinstance(item.get('artifact_id'),str) or not re.fullmatch(r'sha256:[0-9a-f]{64}',item['artifact_id']):
+                    raise ValueError('Invalid frozen relative artifact')
         alternatives = [item['candidate_id'] for item in relative['alternatives']]
         if len(set(alternatives)) != len(alternatives) or relative['preferred_candidate_id'] not in alternatives:
             raise ValueError('Invalid relative pool')

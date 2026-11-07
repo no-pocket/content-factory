@@ -125,3 +125,14 @@ def test_nested_feedback_is_strict(field, value):
     event[field] = value
     with pytest.raises(ValueError):
         validate_feedback_event(event)
+
+
+def test_relative_alternative_optional_render_binding_is_validated():
+    from app.editorial_contracts import validate_feedback_event
+    event=feedback();cid=event['candidate_id']
+    event['relative_assessment']={'comparison_set_id':str(uuid.uuid4()),'preferred_candidate_id':cid,
+        'alternatives':[{'candidate_id':cid,'candidate_version':1,'render_revision':1,'artifact_id':event['artifact_id']}],
+        'all_options_below_bar':True,'comment':'SYNTHETIC pair','confirmed_by':'human'}
+    assert validate_feedback_event(event)['relative_assessment']['alternatives'][0]['artifact_id']==event['artifact_id']
+    broken=copy.deepcopy(event);broken['relative_assessment']['alternatives'][0].pop('render_revision')
+    with pytest.raises(ValueError):validate_feedback_event(broken)

@@ -7,7 +7,7 @@ import unicodedata
 from .artifacts import digest
 from .editorial_context import require_prompt_budget
 
-SELECTOR='lexical-v1'
+SELECTOR='lexical-v2'
 
 
 def _tokens(text):
@@ -25,6 +25,8 @@ def load_dataset(ident: str) -> dict:
         raise ValueError('Dataset identity mismatch')
     if digest({k:v for k,v in manifest.items() if k!='dataset_id'})!=ident or digest(records)!=manifest['records_sha256']:
         raise ValueError('Dataset content changed')
+    if not isinstance(manifest.get('source_membership'),dict):
+        raise ValueError('Dataset lacks canonical source provenance; rebuild the local export')
     return {'manifest':manifest,'records':records}
 
 
@@ -38,6 +40,14 @@ def select_examples(query: dict,dataset: dict,policy: dict,budget: dict) -> list
     available=min(600,values['max_example_tokens'],values['context_window']-values['generation_reserve']-256-values['context_tokens_upper_bound'])
     if available<=0:return []
     rows=dataset['records'];excluded={query['source_group_id']};ids=set(query.get('source_ids',[]))
+    membership=dataset['manifest'].get('source_membership')
+    if ids and not isinstance(membership,dict):return []
+    if membership:
+        for ident in ids | {query['source_group_id']}:
+            group=membership.get(digest({'node_id':ident}))
+            if group:excluded.add(group)
+        for ident in query.get('provenance_ids',[]):
+            if digest({'node_id':ident}) not in membership and ident not in membership.values():return []
     for row in rows:
         if row['job_id'] in ids or (query.get('source_fingerprint') and query['source_fingerprint']==row.get('source_fingerprint')):
             excluded.add(row['source_group_id'])
@@ -103,9 +113,11 @@ def prepare_job_retrieval(job: dict,segments: list[dict]) -> dict | None:
     query={'source_group_id':job.get('source_group_id') or job.get('source_fingerprint') or job['id'],
            'source_fingerprint':job.get('source_fingerprint'),'source_ids':[job['id']]+[job[k] for k in ('source_parent_job','parent_job_id','source_group_id') if job.get(k)],
            'text':' '.join(s.get('text','') for s in segments),'policy_sha256':job.get('editorial_policy',{}).get('brief_sha256','UNKNOWN')}
+    query['provenance_ids']=[job[k] for k in ('source_parent_job','parent_job_id','source_group_id') if job.get(k)]
     existing=job.get('retrieval_snapshot')
     if existing:
         if (digest({k:v for k,v in existing.items() if k!='snapshot_id'})!=existing['snapshot_id']
+                or existing.get('selector_version')!=SELECTOR
                 or existing['query_sha256']!=digest(query) or existing['dataset_id']!=settings['retrieval_dataset_id']):
             raise ValueError('Frozen retrieval context changed; create a new job')
         return existing

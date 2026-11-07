@@ -39,11 +39,11 @@ def test_conditional_and_unknown_decisions_remain_separate():
 def test_dimension_coverage_and_relative_better_does_not_imply_positive():
     from app.editorial_dataset import evaluate_pool
     r=rows([0,0],['REJECTED','REJECTED'])
-    for row in r:row['candidate_version']=1
+    for row in r:row.update(candidate_version=1,render_revision=1)
     r[0]['dimensions']={'closure':2}
     r[0]['reasons']=[{'code':'INCOMPLETE_PAYOFF','confirmed_by':'human'}]
     r[0]['relative_assessment']={'comparison_set_id':'relative-set','confirmed_by':'human','preferred_candidate_id':'0',
-        'alternatives':[{'candidate_id':'0','candidate_version':1},{'candidate_id':'1','candidate_version':1}], 'all_options_below_bar':True}
+        'alternatives':[{'candidate_id':'0','candidate_version':1,'render_revision':1,'artifact_id':'0'},{'candidate_id':'1','candidate_version':1,'render_revision':1,'artifact_id':'1'}], 'all_options_below_bar':True}
     report=evaluate_pool(r,{})
     assert report['problem_dimensions']['closure']['evaluated']==1
     assert report['problem_dimensions']['closure']['problem_count']==1
@@ -57,3 +57,27 @@ def test_administrative_queries_are_audited_separately_from_editorial_coverage()
     report=evaluate_pool(regular+admin,{})
     assert report['queries_generated']==1 and report['excluded_administrative_queries']==1
     assert report['acceptance_at_3_clean']==pytest.approx(1/3)
+
+
+def test_relative_comparison_excludes_replaced_alternative_at_same_candidate_version():
+    from app.editorial_dataset import evaluate_pool
+    records=rows([3,None],['APPROVED',None])
+    for row in records:row.update(candidate_version=1,render_revision=1)
+    records[0]['relative_assessment']={'comparison_set_id':'old-comparison','confirmed_by':'human',
+        'preferred_candidate_id':'1','all_options_below_bar':False,'alternatives':[
+        {'candidate_id':'0','candidate_version':1,'render_revision':1,'artifact_id':'0'},
+        {'candidate_id':'1','candidate_version':1,'render_revision':1,'artifact_id':'1'}]}
+    records[1].update(artifact_id='replacement',render_revision=2,human_confirmed=False)
+    report=evaluate_pool(records,{})['relative_preferences']
+    assert report['confirmed_sets']==0 and report['excluded_stale_or_unverifiable_sets']==1
+
+
+def test_version_only_relative_comparison_remains_unverifiable():
+    from app.editorial_dataset import evaluate_pool
+    records=rows([0,0],['REJECTED','REJECTED'])
+    for row in records:row['candidate_version']=1
+    records[0]['relative_assessment']={'comparison_set_id':'legacy-comparison','confirmed_by':'human',
+        'preferred_candidate_id':'0','all_options_below_bar':True,
+        'alternatives':[{'candidate_id':'0','candidate_version':1},{'candidate_id':'1','candidate_version':1}]}
+    report=evaluate_pool(records,{})['relative_preferences']
+    assert report['confirmed_sets']==0 and report['excluded_stale_or_unverifiable_sets']==1

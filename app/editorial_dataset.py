@@ -57,7 +57,7 @@ def source_families(jobs,aliases=()):
     members={}
     for ident in list(parent):members.setdefault(find(ident),[]).append(ident)
     groups={root:'source:'+digest({'members':sorted(items)}) for root,items in members.items()}
-    return {j['id']:groups[find(j['id'])] for j in jobs}
+    return {ident:groups[find(ident)] for ident in parent}
 
 
 def _events(job,cutoff):
@@ -120,7 +120,8 @@ def build_dataset(jobs: list[dict],config: dict,output_dir: Path | None) -> dict
     records.sort(key=lambda r:(r['job_id'],r['rank'],r['candidate_id']))
     criteria={key:config.get(key,default) for key,default in [('cutoff',None),('seed',17),('confirmed_aliases',[]),('holdout_job_ids',[]),('administrative_job_ids',[]),('parent_dataset',None),('raw_input_sha256',{})]}
     manifest={'schema_version':'editorial-dataset-v1','cutoff':config['cutoff'],'criteria':criteria,'input_sha256':hashes,
-              'records_sha256':digest(records),'source_groups':len(set(families.values())),
+              'records_sha256':digest(records),'source_groups':len({families[j['id']] for j in jobs}),
+              'source_membership':{digest({'node_id':ident}):group for ident,group in sorted(families.items())},
               'candidate_count':len(records),'nonadministrative_candidate_count':sum(not r['administrative'] for r in records),
               'nonadministrative_source_groups':len({r['source_group_id'] for r in records if not r['administrative']}),'human_events_before_cutoff':event_count,
               'eligible_content_candidates':sum(r['content_grade'] is not None for r in records),
@@ -215,20 +216,26 @@ def evaluate_pool(records: list[dict],config: dict) -> dict:
             'rate_where_evaluated':problems/evaluated if evaluated else None,
             'rate_all_reviewed':problems/reviewed if reviewed else None,
             'coverage':evaluated/reviewed if reviewed else 0}
-    comparisons={}
+    comparisons={};unverifiable=set()
     for pool in pools.values():
-        versions={r['candidate_id']:r.get('candidate_version') for r in pool}
+        current={r['candidate_id']:r for r in pool}
         for row in pool:
             relative=row.get('relative_assessment')
             if not row.get('human_confirmed') or not relative or relative.get('confirmed_by')!='human':continue
-            if not all(versions.get(a['candidate_id'])==a['candidate_version'] for a in relative['alternatives']):continue
             ident=relative['comparison_set_id']
+            if not all(a['candidate_id'] in current and all(
+                    current[a['candidate_id']].get(key) is not None and a.get(key)==current[a['candidate_id']][key]
+                    for key in ('candidate_version','render_revision','artifact_id')) for a in relative['alternatives']):
+                unverifiable.add(ident)
+                continue
             if ident in comparisons and comparisons[ident]!=relative:raise ValueError('Conflicting relative comparison')
             comparisons[ident]=relative
+    comparisons={ident:value for ident,value in comparisons.items() if ident not in unverifiable}
     winners={}
     for relative in comparisons.values():
         winner=relative['preferred_candidate_id'];winners[winner]=winners.get(winner,0)+1
     relative_report={'confirmed_sets':len(comparisons),'winners_by_candidate':winners,
+                     'excluded_stale_or_unverifiable_sets':len(unverifiable),
                      'all_options_below_bar':sum(r['all_options_below_bar'] for r in comparisons.values()),
                      'ties':'NOT_RECORDED_BY_V2_CONTRACT'}
     mean=lambda xs:sum(xs)/len(xs) if xs else None
