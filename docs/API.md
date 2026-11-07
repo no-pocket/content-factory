@@ -190,4 +190,3 @@ mestre, WebM e timeline. Falha/retry preserva saídas anteriores. QC válido con
 obrigatório para aprovar; recusa técnica não exige reprodução válida. Ajustes não
 entram na lista compatível de aprovações limpas. Rollback desativa criação v2,
 preservando leitor, eventos e arquivos; não converta ajustes em aprovação limpa.
-

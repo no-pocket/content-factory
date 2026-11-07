@@ -58,7 +58,7 @@ def candidate_key(job_id: str, original_index: int) -> str:
 def project_legacy_review(job: dict, index: int) -> dict:
     _integer(index, 0, len(job.get('candidates', [])) - 1)
     decision = current_decisions(job).get(index)
-    if decision is None and not job.get('decision_history') and not job.get('review_invalidated_at') and not job.get('candidate_review_invalidated_at', {}).get(str(index)):
+    if decision is None and job.get('editorial_protocol', 1) != 2 and not job.get('decision_history') and not job.get('review_invalidated_at') and not job.get('candidate_review_invalidated_at', {}).get(str(index)):
         legacy = job.get('legacy_decision') or job
         if legacy.get('status') in {'APPROVED', 'REJECTED'}:
             decision = {'decision': 'APPROVED' if index in legacy.get('approved', []) else 'REJECTED'}

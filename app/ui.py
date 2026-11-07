@@ -14,6 +14,9 @@ from app.ui_settings import render_settings_controls
 from app.service import create_job, review_job, retry_candidate, retry_enqueue, verify_existing, review_candidate, reject_job
 from app.editorial import DIMENSIONS, summarize, current_decisions
 from app.quality import normalize_qc
+from app.service import get_editorial_view
+from app.editorial_ui import filter_candidates, render_v2_review, LABELS as REVIEW_LABELS
+from app.editorial import summarize_v2
 
 st.set_page_config(page_title="GTA VI — Clip Factory MVP", page_icon="🎬", layout="wide")
 st.title("🎬 Content Factory — Creator Clips")
@@ -99,20 +102,31 @@ jobs = all_jobs()
 if not jobs:
     st.info("Nenhum job. Envie um vídeo autorizado para testar.")
 else:
+    candidate_filter = st.selectbox('Filtrar candidatos', [None, 'PENDING', 'APPROVED', 'APPROVED_WITH_ADJUSTMENTS', 'REJECTED', 'UNCONFIRMED_LEGACY'],
+                                     format_func=lambda value: REVIEW_LABELS.get(value, 'Todos'), key='candidate_filter')
+    if candidate_filter:
+        jobs = [j for j in jobs if filter_candidates(get_editorial_view(j)['candidates'], {'decision': candidate_filter})]
+    if not jobs:
+        st.info('Nenhum candidato corresponde ao filtro.')
+        st.stop()
     grouped = {'Para revisar':[j for j in jobs if j['status'] not in {'APPROVED','REJECTED'}],
                'Aprovados':[j for j in jobs if j['status']=='APPROVED'],
                'Recusados':[j for j in jobs if j['status']=='REJECTED']}
-    view = st.selectbox('Exibir jobs', [k for k,v in grouped.items() if v] + ['Todos'], key='job_filter')
+    view = st.selectbox('Exibir jobs', ['Todos'] + [k for k,v in grouped.items() if v], key='job_filter')
     jobs = grouped.get(view, jobs)
-    options = {j['id']: f"{j['original_name']} · {j['creator']} · {j['status']} · {j['id'][:8]}" for j in reversed(jobs)}
+    def job_label(value):
+        status = 'Revisão individual' if value['status'] in {'APPROVED', 'REJECTED', 'NEEDS_REVIEW'} else value['status']
+        return f"{value['original_name']} · {value['creator']} · {status} · {value['id'][:8]}"
+    options = {j['id']: job_label(j) for j in reversed(jobs)}
     choice = st.selectbox("Selecione um job", list(options), format_func=options.__getitem__, key='selected_job')
     job = load(choice)
-    st.write(f"**Status:** `{job['status']}`  |  **Criador:** {job['creator']}")
+    st.write(f"**{job_label(job)}**")
     st.caption(f"Licença/registro: {job['license_note']}")
     if job.get('language'):
         st.caption(f"Idioma detectado na transcrição: {job['language']} · fala original preservada")
     if job.get('settings'):
-        st.caption('Ajustes deste job: ' + ', '.join(f'{key}={value}' for key, value in job['settings'].items()))
+        with st.expander('Ajustes salvos deste job'):
+            st.json(job['settings'])
     render_job_ai(job)
     if job.get('ai_events'):
         with st.expander('Histórico da seleção e fallbacks'):
@@ -130,71 +144,86 @@ else:
     if job["status"] in ("NEEDS_REVIEW", "PARTIAL_FAILED", "FAILED", "APPROVED", "REJECTED"):
         decisions = []
         previous = current_decisions(job)
+        editorial_view = get_editorial_view(job)
+        counts = editorial_view['counts']
+        st.caption(' · '.join(f'{REVIEW_LABELS[key]}: {count}' for key, count in counts.items() if count))
+        visible = {r['original_index']: r for r in filter_candidates(editorial_view['candidates'], {'decision': candidate_filter})}
         for idx, clip in enumerate(job["candidates"]):
+            if idx not in visible:
+                continue
+            row = visible[idx]
             file = Path(clip.get("file", ""))
             st.markdown(f"#### Candidato {idx+1} — {clip['start']:.1f}s a {clip['end']:.1f}s")
-            st.caption(f"Pontuação: {clip['score']} · {clip['reason']}")
+            st.caption(f"Sinal heurístico: {clip.get('score', 'n/d')} · {clip.get('reason', '')}")
             if clip.get("ai_reason"):
                 st.info("Análise local: " + clip["ai_reason"])
             st.caption(f"Direção: {clip.get('director_used', 'legado')} · Render: {clip.get('renderer_used', 'legado')} · Palavras sincronizadas: {clip.get('word_count', 'n/d')}")
             with st.expander("Transcrição e informações do corte"):
-                st.write(clip["text"])
+                st.write(clip.get('text', ''))
             state = clip.get('state', 'UNVERIFIED')
             st.caption(f"QC: {state} · Tentativas: {clip.get('attempts', 0)}")
             if clip.get('qc'):
                 with st.expander(f"Diagnóstico técnico {idx+1}"):
                     st.json(clip['qc'])
-            if state in {'VALID', 'WARNING'} and file.is_file():
-                quality_view = st.radio('Reprodução', ['Prévia WebM', 'MP4 mestre'], horizontal=True,
-                                        key=f"view_{job['id']}_{idx}")
-                preview, mime = browser_preview(file) if quality_view == 'Prévia WebM' else (file, 'video/mp4')
-                st.video(str(preview), format=mime)
-                st.caption('Prévia compacta. Use MP4 mestre para conferir a qualidade de imagem.')
-                with file.open('rb') as handle:
-                    st.download_button(f'Baixar MP4 {idx+1}', handle, file_name=file.name, mime='video/mp4', key=f"download_{job['id']}_{idx}")
-            else:
-                st.warning('Arquivo não verificado ou com falha técnica. Pode ser recusado com comentário.')
-                if st.button(f'Tentar novamente candidato {idx+1}', key=f"retry_{job['id']}_{idx}",
-                             disabled=state != 'FAILED' or clip.get('attempts', 0) >= normalize_qc(job.get('qc_settings'))['max_attempts']):
+            media_panel, review_panel = st.columns([1, 1.5], gap='large')
+            with media_panel:
+                if state in {'VALID', 'WARNING'} and file.is_file():
+                    quality_view = st.radio('Reprodução', ['Prévia WebM', 'MP4 mestre'], horizontal=True,
+                                            key=f"view_{job['id']}_{idx}")
+                    preview, mime = browser_preview(file) if quality_view == 'Prévia WebM' else (file, 'video/mp4')
+                    st.video(str(preview), format=mime)
+                    st.caption('Prévia compacta. Use MP4 mestre para conferir a qualidade de imagem.')
+                    with file.open('rb') as handle:
+                        st.download_button(f'Baixar MP4 {idx+1}', handle, file_name=file.name, mime='video/mp4', key=f"download_{job['id']}_{idx}")
+                else:
+                    st.warning('Arquivo não verificado ou com falha técnica. Pode ser recusado com comentário.')
+                    if st.button(f'Tentar novamente candidato {idx+1}', key=f"retry_{job['id']}_{idx}",
+                                 disabled=state != 'FAILED' or clip.get('attempts', 0) >= normalize_qc(job.get('qc_settings'))['max_attempts']):
+                        try:
+                            retry_candidate(job['id'], idx)
+                            st.rerun()
+                        except (ValueError, RuntimeError) as exc:
+                            st.error(str(exc))
+                if clip.get('renderer_used', '').startswith('ffmpeg'):
+                    st.warning('Edição simplificada FFmpeg: este arquivo não tem as animações e zooms do perfil Remotion aprovado.')
+                timeline_path = Path(clip.get('timeline_file') or '/not-found')
+                if timeline_path.is_file():
+                    with st.expander('Timeline do corte'):
+                        with timeline_path.open('rb') as timeline_handle:
+                            st.download_button('Baixar timeline JSON', timeline_handle, file_name=timeline_path.name,
+                                               mime='application/json', key=f"timeline_{job['id']}_{idx}")
+            with review_panel:
+                if job.get('editorial_protocol') == 2:
+                    render_v2_review(st, job, idx, row)
+                    continue
+                if row['legacy_decision']:
+                    st.info(('Aprovado' if row['legacy_decision'] == 'APPROVED' else 'Recusado')+' — condição não confirmada (legado)')
+                old = previous.get(idx, {})
+                reason = st.text_area('Comentário / motivo', value=old.get('reason', ''), key=f"reason_{job['id']}_{idx}")
+                with st.expander('Notas e retrabalho (opcional)'):
+                    labels = {'hook': 'Gancho', 'context': 'Contexto', 'closure': 'Fechamento', 'captions': 'Legendas'}
+                    ratings = {key: st.number_input(labels[key] + ' (1–5)', min_value=1, max_value=5,
+                               value=old.get(key), key=f"{key}_{job['id']}_{idx}") for key in DIMENSIONS}
+                    rework = st.checkbox('Requer retrabalho', value=old.get('rework', False), key=f"rework_{job['id']}_{idx}")
+                    adjustments = st.text_area('Ajustes necessários', value=old.get('adjustments', ''), key=f"adjustments_{job['id']}_{idx}")
+                approve_column, reject_column = st.columns(2)
+                approve_clicked = approve_column.button(f'Aprovar candidato {idx+1}', key=f"approve_{job['id']}_{idx}", disabled=state not in {'VALID','WARNING'})
+                reject_clicked = reject_column.button(f'Recusar candidato {idx+1}', key=f"reject_{job['id']}_{idx}")
+                if approve_clicked or reject_clicked:
                     try:
-                        retry_candidate(job['id'], idx)
+                        review_candidate(job['id'], idx, 'APPROVED' if approve_clicked else 'REJECTED', reason,
+                                         expected_revision=len(job.get('decision_history', [])), ratings=ratings,
+                                         rework=rework, adjustments=adjustments)
+                        st.session_state['review_feedback'] = f'Candidato {idx+1} ' + ('aprovado' if approve_clicked else 'recusado') + ' com comentário.'
                         st.rerun()
                     except (ValueError, RuntimeError) as exc:
                         st.error(str(exc))
-            if clip.get('renderer_used', '').startswith('ffmpeg'):
-                st.warning('Edição simplificada FFmpeg: este arquivo não tem as animações e zooms do perfil Remotion aprovado.')
-            timeline_path = Path(clip.get('timeline_file') or '/not-found')
-            if timeline_path.is_file():
-                with st.expander('Timeline do corte'):
-                    with timeline_path.open('rb') as timeline_handle:
-                        st.download_button('Baixar timeline JSON', timeline_handle, file_name=timeline_path.name,
-                                           mime='application/json', key=f"timeline_{job['id']}_{idx}")
-            old = previous.get(idx, {})
-            reason = st.text_area('Comentário / motivo', value=old.get('reason', ''), key=f"reason_{job['id']}_{idx}")
-            with st.expander('Notas e retrabalho (opcional)'):
-                labels = {'hook': 'Gancho', 'context': 'Contexto', 'closure': 'Fechamento', 'captions': 'Legendas'}
-                ratings = {key: st.number_input(labels[key] + ' (1–5)', min_value=1, max_value=5,
-                           value=old.get(key), key=f"{key}_{job['id']}_{idx}") for key in DIMENSIONS}
-                rework = st.checkbox('Requer retrabalho', value=old.get('rework', False), key=f"rework_{job['id']}_{idx}")
-                adjustments = st.text_area('Ajustes necessários', value=old.get('adjustments', ''), key=f"adjustments_{job['id']}_{idx}")
-            approve_column, reject_column = st.columns(2)
-            approve_clicked = approve_column.button(f'Aprovar candidato {idx+1}', key=f"approve_{job['id']}_{idx}", disabled=state not in {'VALID','WARNING'})
-            reject_clicked = reject_column.button(f'Recusar candidato {idx+1}', key=f"reject_{job['id']}_{idx}")
-            if approve_clicked or reject_clicked:
-                try:
-                    review_candidate(job['id'], idx, 'APPROVED' if approve_clicked else 'REJECTED', reason,
-                                     expected_revision=len(job.get('decision_history', [])), ratings=ratings,
-                                     rework=rework, adjustments=adjustments)
-                    st.session_state['review_feedback'] = f'Candidato {idx+1} ' + ('aprovado' if approve_clicked else 'recusado') + ' com comentário.'
-                    st.rerun()
-                except (ValueError, RuntimeError) as exc:
-                    st.error(str(exc))
-            if old:
-                st.caption('Decisão registrada: ' + ('Aprovado' if old['decision']=='APPROVED' else 'Recusado'))
+                if old:
+                    st.caption('Decisão registrada: ' + ('Aprovado' if old['decision']=='APPROVED' else 'Recusado'))
         st.caption(f"Revisões preservadas: {len(job.get('decision_history', []))}")
-        with st.expander('Recusar o job inteiro'):
+        with st.expander('Recusar o job inteiro (protocolo legado)'):
             rejection_reason = st.text_area('Comentário para todos os candidatos', key=f"reject_job_reason_{job['id']}")
-            if st.button('Recusar todos os candidatos deste job', key=f"reject_job_{job['id']}"):
+            if st.button('Recusar todos os candidatos deste job', key=f"reject_job_{job['id']}", disabled=job.get('editorial_protocol') == 2):
                 try:
                     reject_job(job['id'], rejection_reason)
                     st.session_state['review_feedback'] = 'Job recusado; arquivos e histórico preservados.'
@@ -214,5 +243,6 @@ else:
         st.rerun()
 
 with st.expander('Métricas editoriais e comparação de configurações'):
+    st.json(summarize_v2(all_jobs()))
     st.json(summarize(all_jobs()))
     st.caption('Sem atualização automática da seleção. Compare os mesmos vídeos antes e depois e registre avaliações reais.')

@@ -97,4 +97,3 @@ nova avaliação. Eventos antigos permanecem no histórico e não aprovam a saí
 Legados preservam decisão/comentário e são projetados como condição não confirmada;
 `rework=false` não vira rótulo de aprovação limpa. Nenhum job é migrado em leitura.
 Veja [API v2](API.md) e [contrato](../contracts/editorial-feedback-v2.schema.json).
-

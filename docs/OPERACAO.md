@@ -37,6 +37,15 @@ Não use `down -v` para reiniciar: `data/`, cache do Whisper, modelos Ollama e b
 
 ## Produzir e revisar
 
+Para revisão versionada, escolha protocolo editorial 2 nos ajustes de um job novo.
+A API mantém protocolo 1 como padrão. No protocolo 2, use **Aprovar**, **Aprovar com
+ajustes** ou **Recusar**; comentário/pedidos descrevem os ajustes e motivos/notas são
+opcionais. O filtro **Filtrar candidatos** encontra recusas dentro de jobs mistos.
+As contagens separam aprovação limpa, ajustes, pendência e legado não confirmado.
+O painel apresenta vídeo e revisão lado a lado no desktop e empilhados no celular.
+Uma alteração concorrente pede recarregar; o rascunho fica ligado ao render original.
+Nenhum botão aprova automaticamente uma versão corrigida.
+
 1. Em **Adicionar um vídeo autorizado**, escolha um MP4/MOV/MKV local ou uma URL individual do YouTube. Informe criador, referência da autorização e marque a confirmação. Download por URL exige também permissão aplicável da plataforma e a opção `ENABLE_YOUTUBE_DOWNLOAD=true`.
 2. Abra **Ajustes de processamento**. Defina quantidade e duração dos cortes, modelo Whisper, análise/direção Qwen, backend Ollama ou GPU K4200 e render. Esses valores são salvos no job; alterações posteriores do `.env` não mudam um job existente.
 3. Clique **Criar job de cortes**. A fila aceita um job por vez nesta implantação. O Doctor mostra a atividade da IA; em **Jobs e aprovação**, use **Atualizar status** para ver mudanças de etapa.

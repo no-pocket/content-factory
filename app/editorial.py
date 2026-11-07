@@ -112,3 +112,29 @@ def summarize(jobs: list[dict]) -> dict:
                               'sufficient_for_general_rule': False, 'automatic_selection_update': False,
                               'next_step': 'Review the authorized pilot corpus by language; inspect low dimensions, reasons and paired results before proposing a rule. Expand the corpus before generalizing.'})
     return result
+
+
+def summarize_v2(jobs: list[dict]) -> dict:
+    """Descriptive, source-grouped top-three yield with unknown coverage explicit."""
+    from .service import get_editorial_view
+    groups = {}
+    for job in jobs:
+        source = job.get('source_group_id') or job.get('source_fingerprint') or job.get('source_url') or job['id']
+        key = (source, job.get('comparison_set_id') or config_id(job))
+        if key not in groups or job.get('created_at', 0) > groups[key].get('created_at', 0):
+            groups[key] = job
+    views = [get_editorial_view(job) for job in groups.values()]
+    rows = [row for view in views for row in view['candidates']]
+    eligible = [view['candidates'][:3] for view in views if view['candidates'] and
+                all(r['normalized_decision'] in ('APPROVED', 'APPROVED_WITH_ADJUSTMENTS', 'REJECTED')
+                    for r in view['candidates'][:3])]
+    return {'queries_total': len(views), 'queries_eligible': len(eligible),
+            'review_coverage': len(eligible)/len(views) if views else None,
+            'clean_approved': sum(r['normalized_decision'] == 'APPROVED' for r in rows),
+            'approved_with_adjustments': sum(r['normalized_decision'] == 'APPROVED_WITH_ADJUSTMENTS' for r in rows),
+            'rejected': sum(r['normalized_decision'] == 'REJECTED' for r in rows),
+            'pending': sum(r['normalized_decision'] == 'PENDING' for r in rows),
+            'unconfirmed_legacy': sum(r['qualification_status'] == 'UNCONFIRMED_LEGACY' for r in rows),
+            'acceptance_at_3_clean': sum(sum(r['normalized_decision'] == 'APPROVED' for r in pool)/3 for pool in eligible)/len(eligible) if eligible else None,
+            'acceptance_at_3_adjustments': sum(sum(r['normalized_decision'] == 'APPROVED_WITH_ADJUSTMENTS' for r in pool)/3 for pool in eligible)/len(eligible) if eligible else None,
+            'note': 'Descriptive only; unknown reviews excluded, missing top-three slots contribute zero.'}
