@@ -5,6 +5,9 @@ from app.job_settings import DEFAULTS
 def test_settings_controls_expose_each_processing_option():
     shown = []
     class FakeStreamlit:
+        def text_input(self, label, **kwargs):
+            shown.append(kwargs['key'])
+            return kwargs['value']
         def number_input(self, label, **kwargs):
             shown.append(kwargs['key'])
             return kwargs['value']
@@ -19,6 +22,8 @@ def test_settings_controls_expose_each_processing_option():
 def test_gpu_choice_has_readable_label():
     seen = {}
     class FakeStreamlit:
+        def text_input(self, label, **kwargs):
+            return kwargs['value']
         def number_input(self, label, **kwargs):
             return kwargs['value']
         def selectbox(self, label, options, **kwargs):

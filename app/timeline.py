@@ -6,6 +6,7 @@ commands are permitted to reach FFmpeg/Remotion. Times are relative to the clip.
 from __future__ import annotations
 
 import json
+import math
 import re
 import unicodedata
 from pathlib import Path
@@ -43,34 +44,35 @@ def normalized_words(segments: list[dict], start: float, end: float) -> list[dic
     return sorted(output, key=lambda w: (w["start"], w["end"]))
 
 
-def fallback_hook(text: str) -> str:
-    # Only text already spoken; avoid creating misleading facts or empty clickbait.
-    clean = re.sub(r"\s+", " ", text).strip()
-    return " ".join(clean.split()[:7])[:62]
-
-
-def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None, assets: dict | None = None) -> dict:
+def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None, assets: dict | None = None,
+                   editorial_title: str | None = None) -> dict:
     """Build validated timeline from ASR + constrained director hints."""
-    start = as_float(clip["start"])
-    end = as_float(clip["end"])
-    duration = round(end - start, 3)
-    if not (0 < duration <= MAX_CLIP_SECONDS):
+    assembly = None
+    if clip.get('assembly'):
+        from .assembly import validate_assembly, map_words
+        assembly = validate_assembly(clip['assembly'], clip['assembly']['source_duration'])
+        words = map_words(assembly, [word for segment in segments for word in segment.get('words', [])])
+        start, end = 0, assembly['duration']
+    else:
+        start = as_float(clip["start"])
+        end = as_float(clip["end"])
+    duration = end-start if assembly else round(end - start, 3)
+    if not (0 < duration <= (120 if assembly else MAX_CLIP_SECONDS)):
         raise ValueError("Clip duration must be within 0..60 seconds")
-    words = normalized_words(segments, start, end)
+    if not assembly:
+        words = normalized_words(segments, start, end)
     edit = edit if isinstance(edit, dict) else {}
     assets = assets or {}
     text = str(clip.get("text", ""))
-    hook = str(edit.get("hook", "")).strip()[:62]
-    # Do not allow completely invented hooks: compare meaningful words with ASR.
-    def tokens(value):
-        normalized = unicodedata.normalize("NFKD", value.casefold())
-        normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
-        return set(re.findall(r"\w+", normalized))
-    # A title can reorder spoken words, but cannot inject an unsupported fact.
-    available = tokens(text)
-    hook_terms = [w for w in tokens(hook) if len(w) > 3]
-    if not hook or any(w not in available for w in hook_terms):
-        hook = fallback_hook(text)
+    from .editorial_context import validate_title
+    title_check = validate_title(edit.get('hook', ''), {'text': text})
+    hook = title_check['normalized'] if title_check['valid'] else ''
+    if editorial_title is not None:
+        if (not isinstance(editorial_title, str) or not 1 <= len(editorial_title.strip()) <= 80
+                or len(editorial_title.split()) > 12 or not any(c.isalpha() for c in editorial_title)
+                or any(ord(c) < 32 for c in editorial_title)):
+            raise ValueError('Editorial title must contain 1..80 characters and at most 12 words')
+        hook = editorial_title.strip()
 
     fx = []
     for effect in edit.get("effects", []) if isinstance(edit.get("effects"), list) else []:
@@ -108,21 +110,71 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
             "video": {"path": "base.mp4", "start": 0, "duration": duration},
             "audio": {"from": "base.mp4", "start": 0, "duration": duration},
             "captions": words,
-            "text": [{"text": hook, "at": 0.5, "duration": min(2.5, max(0.6, duration - 0.6)), "animation": "pop"}] if hook else [],
+            "text": [{"text": hook, "at": 0.5, "duration": min(2.5, max(0.6, duration - 0.6)), "animation": "pop",
+                      "style": "compact_editorial_v1", "origin": "human" if editorial_title is not None else "model"}] if hook else [],
             "effects": fx, "broll": broll,
         },
-        "caption_style": "bold_karaoke_v1"
+        "caption_style": "bold_karaoke_v1",
+        "finishing": {"tail_seconds": 0.35, "fade_seconds": 0.25},
     }
+    if clip.get('framing'):
+        from .framing import validate_scene
+        timeline['framing'] = validate_scene(clip['framing'])
+        if timeline['framing']['preset'] in {'web', 'tweet', 'document'}:
+            timeline['layers']['broll'] = []
+    if clip.get('framing_schedule'):
+        from .framing import validate_framing_schedule
+        timeline['framing_schedule']=validate_framing_schedule(clip['framing_schedule'],duration)
+        timeline['layers']['broll']=[piece for piece in timeline['layers']['broll'] if not any(
+            max(piece['at'],window['start'])<min(piece['at']+piece['duration'],window['end']) for window in timeline['framing_schedule'])]
+    if assembly:
+        timeline.pop('source_range')
+        timeline.update(schema_version='3.0', segments=assembly['segments'],
+                        source_duration=assembly['source_duration'], duration=assembly['duration'])
+        if 'reorder_approval' in assembly:
+            timeline['reorder_approval'] = assembly['reorder_approval']
     validate_timeline(timeline)
     return timeline
 
 
+def output_duration(timeline: dict) -> float:
+    """Legacy timelines have no tail; source range and caption timings remain unchanged."""
+    return round(timeline['duration'] + timeline.get('finishing', {}).get('tail_seconds', 0), 3)
+
+
+def candidate_duration(clip: dict) -> float:
+    return output_duration({'duration': clip['end'] - clip['start'], **(clip.get('timeline') or {})})
+
+
 def validate_timeline(timeline: dict) -> None:
-    if timeline.get("schema_version") != "2.0" or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
+    if 'framing_schedule' in timeline:
+        from .framing import validate_framing_schedule
+        validate_framing_schedule(timeline['framing_schedule'],timeline['duration'])
+    if 'framing' in timeline:
+        from .framing import validate_scene, validate_framing
+        validate_scene(timeline['framing'])
+        if 'framing_resolved' in timeline:
+            resolved = timeline['framing_resolved']
+            if resolved != validate_framing(timeline['framing'], tuple(resolved['source_size']), (720,1280)):
+                raise ValueError('Invalid resolved framing')
+    version = timeline.get('schema_version')
+    if version == '3.0':
+        from .assembly import validate_assembly
+        fields = ('schema_version','fps','duration','source_duration','segments','reorder_approval')
+        validate_assembly({key: timeline[key] for key in fields if key in timeline}, timeline['source_duration'])
+    if version not in ("2.0", "3.0") or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
         raise ValueError("Unsupported timeline schema or output settings")
     duration = as_float(timeline.get("duration"))
-    if not 0 < duration <= MAX_CLIP_SECONDS:
+    if not 0 < duration <= (120 if version == '3.0' else MAX_CLIP_SECONDS):
         raise ValueError("Invalid timeline duration")
+    if 'finishing' in timeline:
+        finishing = timeline['finishing']
+        if not isinstance(finishing, dict) or set(finishing) != {'tail_seconds', 'fade_seconds'}:
+            raise ValueError('Invalid finishing settings')
+        tail, fade = finishing['tail_seconds'], finishing['fade_seconds']
+        if (any(type(v) not in (int, float) or not math.isfinite(v) for v in (tail, fade))
+                or not 0 < fade <= tail <= 0.75):
+            raise ValueError('Invalid finishing duration')
     layers = timeline.get("layers")
     if not isinstance(layers, dict) or layers.get("video", {}).get("path") != "base.mp4":
         raise ValueError("Timeline can only reference staged base.mp4")
@@ -132,6 +184,18 @@ def validate_timeline(timeline: dict) -> None:
     for word in layers["captions"]:
         if not 0 <= as_float(word.get("start"), -1) < as_float(word.get("end"), -1) <= duration + 0.002:
             raise ValueError("Invalid subtitle timings")
+        if version == '3.0':
+            piece=next((s for s in timeline['segments'] if s['segment_id']==word.get('segment_id')),None)
+            values=[word.get(k) for k in ('start','end','source_start','source_end','output_segment_end')]
+            if piece is None or any(type(v) not in (int,float) or not math.isfinite(v) for v in values):
+                raise ValueError('Missing v3 caption source provenance')
+            if not piece['source_in']<=word['source_start']<word['source_end']<=piece['source_out']:
+                raise ValueError('V3 caption outside its source segment')
+            expected_start=piece['output_start']+word['source_start']-piece['source_in']
+            expected_end=piece['output_start']+word['source_end']-piece['source_in']
+            if (abs(word['start']-expected_start)>1e-7 or abs(word['end']-expected_end)>1e-7 or
+                    abs(word['output_segment_end']-(piece['output_start']+piece['duration']))>1e-7):
+                raise ValueError('V3 caption clock disagrees with source provenance')
     for item in layers["broll"]:
         if not ASSET_ID.fullmatch(item.get("asset_id", "")) or not 0 <= item["at"] < item["at"]+item["duration"] <= duration:
             raise ValueError("Invalid B-roll event")

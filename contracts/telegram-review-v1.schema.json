@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Backend-owned Telegram review card v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "job_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "candidate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "candidate_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "render_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "editorial_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "caption": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "media": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "media_kind": {
+      "enum": [
+        "video/mp4",
+        null
+      ]
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "APPROVED",
+          "APPROVED_WITH_ADJUSTMENTS",
+          "REJECTED"
+        ]
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true
+    }
+  },
+  "$comment": "Callback data is an opaque 49-byte token persisted in the local outbox; this schema describes backend output, not client-supplied file paths.",
+  "required": [
+    "schema_version",
+    "job_id",
+    "candidate_id",
+    "candidate_version",
+    "render_revision",
+    "editorial_revision",
+    "artifact_id",
+    "caption",
+    "media",
+    "media_kind",
+    "actions"
+  ]
+}

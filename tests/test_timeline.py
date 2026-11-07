@@ -30,7 +30,7 @@ def test_timeline_valid_and_saved(tmp_path):
 def test_director_cannot_invent_broll_or_hook():
     tl = build_timeline(CLIP, SEGMENTS, edit={"hook": "Trailer oficial confirma lançamento amanhã", "broll": [{"asset_id": "unknown", "at": 2, "duration": 3, "source_start": 0}], "effects": [{"type": "shell", "at": 3}]})
     assert tl["layers"]["broll"] == []
-    assert "amanhã" not in tl["layers"]["text"][0]["text"]
+    assert tl["layers"]["text"] == []
     assert tl["layers"]["effects"] == []
 
 
@@ -57,3 +57,33 @@ def test_refuse_overlong_clip():
 
 def test_no_fabricated_word_times():
     assert build_timeline(CLIP, [{"start": 10, "end": 12, "text": "sem palavras"}])["layers"]["captions"] == []
+
+
+def test_title_does_not_repeat_opening_and_human_title_is_distinct():
+    repeated = build_timeline(CLIP, SEGMENTS, edit={'hook': 'A Lucia aparece em Vice City'})
+    assert repeated['layers']['text'] == []
+    custom = build_timeline(CLIP, SEGMENTS, editorial_title='ÍCONE DOURADO NO GTA 6!! CROCODILO LENDÁRIO?!')
+    banner = custom['layers']['text'][0]
+    assert banner['text'] == 'ÍCONE DOURADO NO GTA 6!! CROCODILO LENDÁRIO?!'
+    assert banner['style'] == 'compact_editorial_v1'
+    assert banner['origin'] == 'human'
+    with pytest.raises(ValueError):
+        build_timeline(CLIP, SEGMENTS, editorial_title='x' * 81)
+
+
+def test_title_copy_detection_ignores_accents_and_punctuation():
+    clip = {'start':0,'end':20,'text':'Você sabia que o ícone dourado aparece no mapa?'}
+    timeline = build_timeline(clip, [], edit={'hook':'Voce sabia que o icone dourado aparece'})
+    assert timeline['layers']['text'] == []
+
+
+def test_finishing_extends_output_after_speech_and_is_optional_for_legacy():
+    from app.timeline import output_duration
+    new = build_timeline(CLIP, SEGMENTS)
+    assert output_duration(new) == 15.35
+    old = copy.deepcopy(new)
+    old.pop('finishing')
+    assert output_duration(old) == 15
+    new['finishing']['tail_seconds'] = float('nan')
+    with pytest.raises(ValueError):
+        validate_timeline(new)

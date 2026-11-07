@@ -1,0 +1,24 @@
+{
+  "configured": true,
+  "mode": "tailscale serve background TCP proxy",
+  "tailnet_only": true,
+  "funnel_enabled": false,
+  "docker_ui_bind": "127.0.0.1:8501",
+  "forward": "127.0.0.1:8501",
+  "urls": [
+    "http://100.78.0.122:8501/",
+    "http://workstation.taild835d6.ts.net:8501/"
+  ],
+  "health_ip": 200,
+  "health_dns": 200,
+  "browser": "Installed Edge via agent-browser",
+  "browser_tailnet_page_loaded": true,
+  "mobile_viewport": {
+    "width": 390,
+    "height": 844,
+    "document_width": 390,
+    "video_width": 340
+  },
+  "physical_phone_test": "Pending user confirmation; desktop mobile viewport is not a phone test",
+  "rollback": "tailscale serve --tcp=8501 off"
+}

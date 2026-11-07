@@ -1,0 +1,122 @@
+{
+  "synthetic": true,
+  "driver": "agent-browser CLI",
+  "job_id": "0418c6e8-a730-4b27-86d2-0af1a98184a1",
+  "status": "PARTIAL_FAILED",
+  "approved": [],
+  "revision_count": 2,
+  "decision_history": [
+    {
+      "revision": 1,
+      "at": 1793928230.0740068,
+      "decisions": [
+        {
+          "candidate": 0,
+          "decision": "APPROVED",
+          "reason": "SYNTHETIC approval browser test only",
+          "hook": 3,
+          "context": 3,
+          "closure": 3,
+          "captions": 3,
+          "rework": false,
+          "adjustments": ""
+        }
+      ],
+      "settings": {
+        "clip_count": 2,
+        "target_seconds": 8,
+        "min_seconds": 8,
+        "max_seconds": 15,
+        "proposal_max_chunks": 12,
+        "shortlist": 12,
+        "ollama_timeout": 180,
+        "whisper_model": "base",
+        "whisper_beam_size": 5,
+        "ranker_mode": "heuristic",
+        "llm_backend": "ollama",
+        "llm_model": "qwen2.5:3b",
+        "director_mode": "heuristic",
+        "render_engine": "ffmpeg"
+      },
+      "qc_settings": {
+        "duration_tolerance": 0.5,
+        "silence_db": -40.0,
+        "silence_seconds": 1.0,
+        "black_seconds": 0.5,
+        "black_pixel_threshold": 0.1,
+        "black_picture_ratio": 0.98,
+        "timeout_seconds": 300,
+        "max_attempts": 2
+      },
+      "configuration": "38d1fb11f11af808",
+      "evaluation": null,
+      "windows": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 16
+        }
+      ]
+    },
+    {
+      "revision": 2,
+      "at": 1793928335.7251284,
+      "decisions": [
+        {
+          "candidate": 0,
+          "decision": "REJECTED",
+          "reason": "SYNTHETIC rejection browser test only",
+          "hook": 3,
+          "context": 3,
+          "closure": 3,
+          "captions": 3,
+          "rework": true,
+          "adjustments": "SYNTHETIC adjustment: verify history and rework persistence"
+        }
+      ],
+      "settings": {
+        "clip_count": 2,
+        "target_seconds": 8,
+        "min_seconds": 8,
+        "max_seconds": 15,
+        "proposal_max_chunks": 12,
+        "shortlist": 12,
+        "ollama_timeout": 180,
+        "whisper_model": "base",
+        "whisper_beam_size": 5,
+        "ranker_mode": "heuristic",
+        "llm_backend": "ollama",
+        "llm_model": "qwen2.5:3b",
+        "director_mode": "heuristic",
+        "render_engine": "ffmpeg"
+      },
+      "qc_settings": {
+        "duration_tolerance": 0.5,
+        "silence_db": -40.0,
+        "silence_seconds": 1.0,
+        "black_seconds": 0.5,
+        "black_pixel_threshold": 0.1,
+        "black_picture_ratio": 0.98,
+        "timeout_seconds": 300,
+        "max_attempts": 2
+      },
+      "configuration": "38d1fb11f11af808",
+      "evaluation": null,
+      "windows": [
+        {
+          "start": 0,
+          "end": 8
+        },
+        {
+          "start": 8,
+          "end": 16
+        }
+      ]
+    }
+  ],
+  "reload_persistence_verified": true,
+  "production_editorial_decisions_created": 0
+}

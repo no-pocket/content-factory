@@ -1,0 +1,127 @@
+[
+  {
+    "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+    "bytes": 1117320800,
+    "gguf_version": 3,
+    "tensors": 339,
+    "metadata": {
+      "general.architecture": "qwen2",
+      "general.type": "model",
+      "general.name": "DeepSeek R1 Distill Qwen 1.5B",
+      "general.basename": "DeepSeek-R1-Distill-Qwen",
+      "general.size_label": "1.5B",
+      "qwen2.context_length": 131072,
+      "general.quantization_version": 2,
+      "general.file_type": 15
+    }
+  },
+  {
+    "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "bytes": 2019377696,
+    "gguf_version": 3,
+    "tensors": 255,
+    "metadata": {
+      "general.architecture": "llama",
+      "general.type": "model",
+      "general.name": "Llama 3.2 3B Instruct",
+      "general.finetune": "Instruct",
+      "general.basename": "Llama-3.2",
+      "general.size_label": "3B",
+      "general.license": "llama3.2",
+      "general.tags": null,
+      "general.languages": null,
+      "llama.context_length": 131072,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  },
+  {
+    "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "bytes": 491400032,
+    "gguf_version": 3,
+    "tensors": 291,
+    "metadata": {
+      "general.architecture": "qwen2",
+      "general.type": "model",
+      "general.name": "qwen2.5-0.5b-instruct",
+      "general.version": "v0.1",
+      "general.finetune": "qwen2.5-0.5b-instruct",
+      "general.size_label": "630M",
+      "qwen2.context_length": 32768,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  },
+  {
+    "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+    "bytes": 1117320736,
+    "gguf_version": 3,
+    "tensors": 339,
+    "metadata": {
+      "general.architecture": "qwen2",
+      "general.type": "model",
+      "general.name": "qwen2.5-1.5b-instruct",
+      "general.version": "v0.1",
+      "general.finetune": "qwen2.5-1.5b-instruct",
+      "general.size_label": "1.8B",
+      "qwen2.context_length": 32768,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  },
+  {
+    "file": "qwen2.5-3b-instruct-q4_k_m.gguf",
+    "bytes": 2104932768,
+    "gguf_version": 3,
+    "tensors": 435,
+    "metadata": {
+      "general.architecture": "qwen2",
+      "general.type": "model",
+      "general.name": "qwen2.5-3b-instruct",
+      "general.version": "v0.1-v0.1",
+      "general.finetune": "qwen2.5-3b-instruct",
+      "general.size_label": "3.4B",
+      "qwen2.context_length": 32768,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  },
+  {
+    "file": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "bytes": 1117320768,
+    "gguf_version": 3,
+    "tensors": 339,
+    "metadata": {
+      "general.architecture": "qwen2",
+      "general.type": "model",
+      "general.name": "Qwen2.5 Coder 1.5B Instruct GGUF",
+      "general.finetune": "Instruct-GGUF",
+      "general.basename": "Qwen2.5-Coder",
+      "general.size_label": "1.5B",
+      "qwen2.context_length": 32768,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  },
+  {
+    "file": "SmolLM2-1.7B-Instruct-Q4_K_M.gguf",
+    "bytes": 1055609824,
+    "gguf_version": 3,
+    "tensors": 218,
+    "metadata": {
+      "general.architecture": "llama",
+      "general.type": "model",
+      "general.name": "Smollm2 1.7B 8k Mix7 Ep2 v2",
+      "general.version": "v2",
+      "general.organization": "Loubnabnl",
+      "general.finetune": "8k-mix7-ep2",
+      "general.basename": "smollm2",
+      "general.size_label": "1.7B",
+      "general.license": "apache-2.0",
+      "general.languages": null,
+      "llama.context_length": 8192,
+      "general.file_type": 15,
+      "general.quantization_version": 2
+    }
+  }
+]

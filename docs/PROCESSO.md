@@ -14,21 +14,39 @@ A UI enfileira o ID em `clips:queue`. O worker move o ID para `clips:processing`
 
 ## 3. Propostas e classificação
 
+Sinais editoriais automáticos agora distinguem autopromoção dominante e finais
+claramente incompletos. Uma demonstração no contexto seguinte pode estender a janela
+até o fim do segmento, dentro do limite salvo; palavras não podem ser cortadas nessa
+fronteira. Sem conclusão avaliável, o resultado mantém incerteza e motivo explícitos;
+um final identificado como incompleto falha antes de renderizar. Pontuação de modelo,
+heurística e notas humanas continuam separadas. Fade/pausa não são prova de fechamento.
+
 `app/core.py` cria candidatos heurísticos. `app/ranker.py` pode pedir propostas ao Qwen em amostras da transcrição, ancoradas por IDs de segmentos, e reordenar uma shortlist. O backend é escolhido por job: Ollama ou ponte Kepler K4200 (`app/llm_routing.py`). Toda saída do modelo é tratada como dado não confiável: IDs, duração e sobreposição são validados. Contexto excedido, resposta truncada, JSON inválido ou serviço indisponível acionam a heurística; eventos e motivo ficam no job.
 
 A ponte GPU (`app/kepler_bridge.py`) usa o tokenizer do servidor para contar prompt com template, reserva a saída e recusa pedidos que não cabem no contexto real. Ela só aceita as opções Ollama implementadas e informa a razão de término. O modo GPU está sujeito aos limites em [GPU K4200](GPU_K4200.md).
 
 ## 4. Direção e timeline
 
+O contexto de cada candidato preserva trecho integral, segmentos/offsets de fonte,
+janela anterior/posterior e hashes. Títulos numéricos, eco da abertura e termos sem
+suporte são omitidos com validação determinística; títulos humanos explícitos
+continuam identificados como humanos. Orçamento insuficiente não produz prefixo
+silenciosamente truncado: comparação é dividida em blocos ou registra fallback.
+
 Para cada corte, `app/director.py` pode pedir título, zooms e B-roll ao Qwen. `app/timeline.py` converte sugestões aceitas em timeline v2; impõe duração, tempos, texto ancorado na fala e IDs de assets licenciados. Falha do diretor gera uma timeline heurística válida. O contrato JSON está em `contracts/timeline.schema.json`.
 
 ## 5. Render e prévia
 
-FFmpeg normaliza a fonte e o B-roll autorizado. Remotion compõe a versão animada. Se configurado, uma falha do Remotion usa FFmpeg com legendas simplificadas; o campo `renderer_used` informa qual caminho produziu o corte. O MP4 fica em `data/output/<id>/candidate_N.mp4`.
+FFmpeg normaliza a fonte e o B-roll autorizado. Remotion compõe a versão animada. No perfil standard, se configurado, uma falha do Remotion usa FFmpeg com legendas simplificadas; high falha explicitamente para preservar o estilo. O campo `renderer_used` informa qual caminho produziu o corte. Novas timelines usam título compacto independente das legendas e cauda suave após a fala; as antigas preservam sua composição. O MP4 fica em `data/output/<id>/candidate_N.mp4`.
 
 Depois do MP4, `app/edit_render.py` cria `candidate_N.preview.webm` com VP8/Opus, decodifica a prévia inteira e só então a publica para o navegador. A UI usa WebM para assistir e oferece MP4 separadamente para download. O JSON da timeline fica ao lado dos vídeos; a decisão de aprovação registra os índices aceitos, sem alterar os arquivos mestres.
 
 ## 6. Revisão humana e limites
+
+Jobs novos passam pelo [QC completo](CONTROLE_QUALIDADE.md) de MP4 e WebM. Falha parcial
+fica `PARTIAL_FAILED`, com revisão apenas dos bons; retry limitado é por candidato.
+As avaliações agora preservam histórico, notas, motivo e retrabalho; siga o
+[protocolo editorial](PROTOCOLO_EDITORIAL.md). UI, CLI e [API](API.md) usam o mesmo serviço.
 
 `NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. `APPROVED`/`REJECTED` são estados locais. Não há postagem automática nem edição manual de timeline pela UI atual.
 

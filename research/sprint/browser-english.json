@@ -1,0 +1,15 @@
+{
+  "job_id": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+  "browser": "Installed Microsoft Edge",
+  "driver": "agent-browser CLI",
+  "language_detected": "en",
+  "muted": true,
+  "playback_rate": 4,
+  "previews": [
+    {"index": 0, "outcome": "ended", "duration": 43.073, "error": null},
+    {"index": 1, "outcome": "ended", "duration": 44.673, "error": null},
+    {"index": 2, "outcome": "ended", "duration": 42.384, "error": null}
+  ],
+  "editorial_approval": null,
+  "scope": "Technical playback only; subtitle accuracy, audio perception and editorial quality require human review."
+}

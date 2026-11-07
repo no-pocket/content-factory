@@ -1,0 +1,4285 @@
+{
+  "model": "base",
+  "device": "cpu",
+  "compute_type": "int8",
+  "threads": 4,
+  "cached_model_revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
+  "runtime": {
+    "python": "3.11.18",
+    "faster_whisper": "1.2.1",
+    "ctranslate2": "4.8.5"
+  },
+  "beam_size": 5,
+  "task": "transcribe",
+  "language_forced": false,
+  "initial_prompt": "GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida.",
+  "vad_filter": true,
+  "word_timestamps": true,
+  "local_files_only": true,
+  "model_load_seconds": 1.018,
+  "process_peak_rss_MiB": 760.8515625,
+  "runs": [
+    {
+      "source_job": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+      "expected_corpus_language": "pt",
+      "repeat": 0,
+      "language_detected": "pt",
+      "language_probability": 0.9991605281829834,
+      "audio_sha256": "de494c665ae63ce98024c7523433878ea5630e8eed58455f4fe7c96b90c78995",
+      "audio_duration": 60.0,
+      "wall_seconds": 5.621,
+      "segments": [
+        {
+          "start": 0.59,
+          "end": 8.93,
+          "text": " Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "words": [
+            {
+              "start": 0.59,
+              "end": 1.35,
+              "text": " Estamos"
+            },
+            {
+              "start": 1.35,
+              "end": 1.87,
+              "text": " agora"
+            },
+            {
+              "start": 1.87,
+              "end": 3.33,
+              "text": " oficialmente"
+            },
+            {
+              "start": 3.33,
+              "end": 3.83,
+              "text": " no"
+            },
+            {
+              "start": 3.83,
+              "end": 4.15,
+              "text": " mês"
+            },
+            {
+              "start": 4.15,
+              "end": 4.51,
+              "text": " do"
+            },
+            {
+              "start": 4.51,
+              "end": 4.77,
+              "text": " GTA"
+            },
+            {
+              "start": 4.77,
+              "end": 5.35,
+              "text": " VI,"
+            },
+            {
+              "start": 6.03,
+              "end": 6.29,
+              "text": " começou"
+            },
+            {
+              "start": 6.29,
+              "end": 6.61,
+              "text": " no"
+            },
+            {
+              "start": 6.61,
+              "end": 7.03,
+              "text": " novembro,"
+            },
+            {
+              "start": 7.05,
+              "end": 7.31,
+              "text": " galera,"
+            },
+            {
+              "start": 7.71,
+              "end": 7.81,
+              "text": " de"
+            },
+            {
+              "start": 7.81,
+              "end": 8.35,
+              "text": " dois"
+            },
+            {
+              "start": 8.35,
+              "end": 8.51,
+              "text": " de"
+            },
+            {
+              "start": 8.51,
+              "end": 8.93,
+              "text": " novembro"
+            }
+          ]
+        },
+        {
+          "start": 8.93,
+          "end": 11.69,
+          "text": " que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado,",
+          "words": [
+            {
+              "start": 8.93,
+              "end": 9.05,
+              "text": " que"
+            },
+            {
+              "start": 9.05,
+              "end": 9.13,
+              "text": " eu"
+            },
+            {
+              "start": 9.13,
+              "end": 9.15,
+              "text": " estou"
+            },
+            {
+              "start": 9.15,
+              "end": 9.41,
+              "text": " gravando"
+            },
+            {
+              "start": 9.41,
+              "end": 9.61,
+              "text": " isso,"
+            },
+            {
+              "start": 9.63,
+              "end": 9.69,
+              "text": " de"
+            },
+            {
+              "start": 9.69,
+              "end": 9.85,
+              "text": " primeiro"
+            },
+            {
+              "start": 9.85,
+              "end": 10.07,
+              "text": " foi"
+            },
+            {
+              "start": 10.07,
+              "end": 10.35,
+              "text": " ontem,"
+            },
+            {
+              "start": 10.35,
+              "end": 10.53,
+              "text": " por"
+            },
+            {
+              "start": 10.53,
+              "end": 10.65,
+              "text": " isso"
+            },
+            {
+              "start": 10.65,
+              "end": 10.77,
+              "text": " que"
+            },
+            {
+              "start": 10.77,
+              "end": 10.77,
+              "text": " eu"
+            },
+            {
+              "start": 10.77,
+              "end": 10.83,
+              "text": " não"
+            },
+            {
+              "start": 10.83,
+              "end": 11.13,
+              "text": " gravei,"
+            },
+            {
+              "start": 11.17,
+              "end": 11.23,
+              "text": " eu"
+            },
+            {
+              "start": 11.23,
+              "end": 11.29,
+              "text": " já"
+            },
+            {
+              "start": 11.29,
+              "end": 11.69,
+              "text": " feriado,"
+            }
+          ]
+        },
+        {
+          "start": 11.71,
+          "end": 13.49,
+          "text": " mas estão aí.",
+          "words": [
+            {
+              "start": 11.71,
+              "end": 11.85,
+              "text": " mas"
+            },
+            {
+              "start": 11.85,
+              "end": 13.21,
+              "text": " estão"
+            },
+            {
+              "start": 13.21,
+              "end": 13.49,
+              "text": " aí."
+            }
+          ]
+        },
+        {
+          "start": 14.15,
+          "end": 19.55,
+          "text": " E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "words": [
+            {
+              "start": 14.15,
+              "end": 14.29,
+              "text": " E"
+            },
+            {
+              "start": 14.29,
+              "end": 14.73,
+              "text": " queria"
+            },
+            {
+              "start": 14.73,
+              "end": 14.97,
+              "text": " falar"
+            },
+            {
+              "start": 14.97,
+              "end": 15.11,
+              "text": " um"
+            },
+            {
+              "start": 15.11,
+              "end": 15.45,
+              "text": " pouquinho"
+            },
+            {
+              "start": 15.45,
+              "end": 15.85,
+              "text": " só,"
+            },
+            {
+              "start": 16.29,
+              "end": 16.43,
+              "text": " que"
+            },
+            {
+              "start": 16.43,
+              "end": 16.97,
+              "text": " finalmente"
+            },
+            {
+              "start": 16.97,
+              "end": 17.45,
+              "text": " parece"
+            },
+            {
+              "start": 17.45,
+              "end": 17.77,
+              "text": " até"
+            },
+            {
+              "start": 17.77,
+              "end": 18.31,
+              "text": " mentira,"
+            },
+            {
+              "start": 18.31,
+              "end": 18.63,
+              "text": " quer"
+            },
+            {
+              "start": 18.63,
+              "end": 18.69,
+              "text": " dizer"
+            },
+            {
+              "start": 18.69,
+              "end": 18.93,
+              "text": " que"
+            },
+            {
+              "start": 18.93,
+              "end": 19.29,
+              "text": " esse"
+            },
+            {
+              "start": 19.29,
+              "end": 19.55,
+              "text": " mês"
+            }
+          ]
+        },
+        {
+          "start": 20.15,
+          "end": 26.81,
+          "text": " nós jogaremos GTA VI e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa",
+          "words": [
+            {
+              "start": 20.15,
+              "end": 20.43,
+              "text": " nós"
+            },
+            {
+              "start": 20.43,
+              "end": 20.85,
+              "text": " jogaremos"
+            },
+            {
+              "start": 20.85,
+              "end": 21.15,
+              "text": " GTA"
+            },
+            {
+              "start": 21.15,
+              "end": 21.47,
+              "text": " VI"
+            },
+            {
+              "start": 21.47,
+              "end": 22.05,
+              "text": " e"
+            },
+            {
+              "start": 22.05,
+              "end": 22.15,
+              "text": " eu"
+            },
+            {
+              "start": 22.15,
+              "end": 22.87,
+              "text": " jogarei"
+            },
+            {
+              "start": 22.87,
+              "end": 23.27,
+              "text": " aqui"
+            },
+            {
+              "start": 23.27,
+              "end": 23.45,
+              "text": " com"
+            },
+            {
+              "start": 23.45,
+              "end": 23.73,
+              "text": " vocês"
+            },
+            {
+              "start": 23.73,
+              "end": 23.93,
+              "text": " ao"
+            },
+            {
+              "start": 23.93,
+              "end": 24.25,
+              "text": " vivo"
+            },
+            {
+              "start": 24.25,
+              "end": 24.77,
+              "text": " toda"
+            },
+            {
+              "start": 24.77,
+              "end": 25.15,
+              "text": " essa"
+            },
+            {
+              "start": 25.15,
+              "end": 25.77,
+              "text": " jornada,"
+            },
+            {
+              "start": 25.93,
+              "end": 26.01,
+              "text": " tá"
+            },
+            {
+              "start": 26.01,
+              "end": 26.21,
+              "text": " gente,"
+            },
+            {
+              "start": 26.47,
+              "end": 26.57,
+              "text": " toda"
+            },
+            {
+              "start": 26.57,
+              "end": 26.81,
+              "text": " essa"
+            }
+          ]
+        },
+        {
+          "start": 26.81,
+          "end": 27.37,
+          "text": " jornada.",
+          "words": [
+            {
+              "start": 26.81,
+              "end": 27.37,
+              "text": " jornada."
+            }
+          ]
+        },
+        {
+          "start": 27.37,
+          "end": 29.93,
+          "text": " E assim, como é que dá ansiedade aí para vocês?",
+          "words": [
+            {
+              "start": 27.37,
+              "end": 27.95,
+              "text": " E"
+            },
+            {
+              "start": 27.95,
+              "end": 28.17,
+              "text": " assim,"
+            },
+            {
+              "start": 28.59,
+              "end": 28.85,
+              "text": " como"
+            },
+            {
+              "start": 28.85,
+              "end": 28.95,
+              "text": " é"
+            },
+            {
+              "start": 28.95,
+              "end": 28.97,
+              "text": " que"
+            },
+            {
+              "start": 28.97,
+              "end": 29.03,
+              "text": " dá"
+            },
+            {
+              "start": 29.03,
+              "end": 29.43,
+              "text": " ansiedade"
+            },
+            {
+              "start": 29.43,
+              "end": 29.55,
+              "text": " aí"
+            },
+            {
+              "start": 29.55,
+              "end": 29.67,
+              "text": " para"
+            },
+            {
+              "start": 29.67,
+              "end": 29.93,
+              "text": " vocês?"
+            }
+          ]
+        },
+        {
+          "start": 30.61,
+          "end": 31.47,
+          "text": " Como é que dá a ansiedade?",
+          "words": [
+            {
+              "start": 30.61,
+              "end": 30.81,
+              "text": " Como"
+            },
+            {
+              "start": 30.81,
+              "end": 30.85,
+              "text": " é"
+            },
+            {
+              "start": 30.85,
+              "end": 30.91,
+              "text": " que"
+            },
+            {
+              "start": 30.91,
+              "end": 30.97,
+              "text": " dá"
+            },
+            {
+              "start": 30.97,
+              "end": 31.07,
+              "text": " a"
+            },
+            {
+              "start": 31.07,
+              "end": 31.47,
+              "text": " ansiedade?"
+            }
+          ]
+        },
+        {
+          "start": 31.61,
+          "end": 34.85,
+          "text": " Eu confesso que agora está pegando para mim a ansiedade, tá?",
+          "words": [
+            {
+              "start": 31.61,
+              "end": 31.71,
+              "text": " Eu"
+            },
+            {
+              "start": 31.71,
+              "end": 32.39,
+              "text": " confesso"
+            },
+            {
+              "start": 32.39,
+              "end": 32.55,
+              "text": " que"
+            },
+            {
+              "start": 32.55,
+              "end": 32.91,
+              "text": " agora"
+            },
+            {
+              "start": 32.91,
+              "end": 33.53,
+              "text": " está"
+            },
+            {
+              "start": 33.53,
+              "end": 33.89,
+              "text": " pegando"
+            },
+            {
+              "start": 33.89,
+              "end": 34.03,
+              "text": " para"
+            },
+            {
+              "start": 34.03,
+              "end": 34.15,
+              "text": " mim"
+            },
+            {
+              "start": 34.15,
+              "end": 34.27,
+              "text": " a"
+            },
+            {
+              "start": 34.27,
+              "end": 34.67,
+              "text": " ansiedade,"
+            },
+            {
+              "start": 34.73,
+              "end": 34.85,
+              "text": " tá?"
+            }
+          ]
+        },
+        {
+          "start": 37.05,
+          "end": 41.81,
+          "text": " Eu já falei para vocês como é que eu faço para controlar pico e ansiedade, eu fico sempre",
+          "words": [
+            {
+              "start": 37.05,
+              "end": 37.41,
+              "text": " Eu"
+            },
+            {
+              "start": 37.41,
+              "end": 37.77,
+              "text": " já"
+            },
+            {
+              "start": 37.77,
+              "end": 37.91,
+              "text": " falei"
+            },
+            {
+              "start": 37.91,
+              "end": 38.05,
+              "text": " para"
+            },
+            {
+              "start": 38.05,
+              "end": 38.21,
+              "text": " vocês"
+            },
+            {
+              "start": 38.21,
+              "end": 38.37,
+              "text": " como"
+            },
+            {
+              "start": 38.37,
+              "end": 38.45,
+              "text": " é"
+            },
+            {
+              "start": 38.45,
+              "end": 38.51,
+              "text": " que"
+            },
+            {
+              "start": 38.51,
+              "end": 38.57,
+              "text": " eu"
+            },
+            {
+              "start": 38.57,
+              "end": 38.69,
+              "text": " faço"
+            },
+            {
+              "start": 38.69,
+              "end": 38.93,
+              "text": " para"
+            },
+            {
+              "start": 38.93,
+              "end": 39.47,
+              "text": " controlar"
+            },
+            {
+              "start": 39.47,
+              "end": 40.71,
+              "text": " pico"
+            },
+            {
+              "start": 40.71,
+              "end": 40.71,
+              "text": " e"
+            },
+            {
+              "start": 40.71,
+              "end": 41.21,
+              "text": " ansiedade,"
+            },
+            {
+              "start": 41.35,
+              "end": 41.43,
+              "text": " eu"
+            },
+            {
+              "start": 41.43,
+              "end": 41.59,
+              "text": " fico"
+            },
+            {
+              "start": 41.59,
+              "end": 41.81,
+              "text": " sempre"
+            }
+          ]
+        },
+        {
+          "start": 41.81,
+          "end": 46.25,
+          "text": " marcando marcos até a coisa que eu preciso fazer, para quando é muito distante, para",
+          "words": [
+            {
+              "start": 41.81,
+              "end": 42.15,
+              "text": " marcando"
+            },
+            {
+              "start": 42.15,
+              "end": 42.51,
+              "text": " marcos"
+            },
+            {
+              "start": 42.51,
+              "end": 43.03,
+              "text": " até"
+            },
+            {
+              "start": 43.03,
+              "end": 43.23,
+              "text": " a"
+            },
+            {
+              "start": 43.23,
+              "end": 43.41,
+              "text": " coisa"
+            },
+            {
+              "start": 43.41,
+              "end": 43.57,
+              "text": " que"
+            },
+            {
+              "start": 43.57,
+              "end": 43.63,
+              "text": " eu"
+            },
+            {
+              "start": 43.63,
+              "end": 43.83,
+              "text": " preciso"
+            },
+            {
+              "start": 43.83,
+              "end": 44.25,
+              "text": " fazer,"
+            },
+            {
+              "start": 44.75,
+              "end": 44.87,
+              "text": " para"
+            },
+            {
+              "start": 44.87,
+              "end": 45.47,
+              "text": " quando"
+            },
+            {
+              "start": 45.47,
+              "end": 45.55,
+              "text": " é"
+            },
+            {
+              "start": 45.55,
+              "end": 45.75,
+              "text": " muito"
+            },
+            {
+              "start": 45.75,
+              "end": 46.09,
+              "text": " distante,"
+            },
+            {
+              "start": 46.23,
+              "end": 46.25,
+              "text": " para"
+            }
+          ]
+        },
+        {
+          "start": 46.25,
+          "end": 50.81,
+          "text": " gente não ficar ansioso muito tempo, então toda hora tem alguma coisa e a gente vai compartilhando",
+          "words": [
+            {
+              "start": 46.25,
+              "end": 46.33,
+              "text": " gente"
+            },
+            {
+              "start": 46.33,
+              "end": 46.41,
+              "text": " não"
+            },
+            {
+              "start": 46.41,
+              "end": 46.53,
+              "text": " ficar"
+            },
+            {
+              "start": 46.53,
+              "end": 46.69,
+              "text": " ansioso"
+            },
+            {
+              "start": 46.69,
+              "end": 46.95,
+              "text": " muito"
+            },
+            {
+              "start": 46.95,
+              "end": 47.21,
+              "text": " tempo,"
+            },
+            {
+              "start": 47.21,
+              "end": 47.41,
+              "text": " então"
+            },
+            {
+              "start": 47.41,
+              "end": 47.69,
+              "text": " toda"
+            },
+            {
+              "start": 47.69,
+              "end": 47.83,
+              "text": " hora"
+            },
+            {
+              "start": 47.83,
+              "end": 47.97,
+              "text": " tem"
+            },
+            {
+              "start": 47.97,
+              "end": 48.17,
+              "text": " alguma"
+            },
+            {
+              "start": 48.17,
+              "end": 48.47,
+              "text": " coisa"
+            },
+            {
+              "start": 48.47,
+              "end": 48.67,
+              "text": " e"
+            },
+            {
+              "start": 48.67,
+              "end": 48.73,
+              "text": " a"
+            },
+            {
+              "start": 48.73,
+              "end": 48.83,
+              "text": " gente"
+            },
+            {
+              "start": 48.83,
+              "end": 49.09,
+              "text": " vai"
+            },
+            {
+              "start": 49.09,
+              "end": 50.81,
+              "text": " compartilhando"
+            }
+          ]
+        },
+        {
+          "start": 50.81,
+          "end": 54.99,
+          "text": " mas quando acho que eu não perdo o negócio ficar doido, o negócio ficar doido.",
+          "words": [
+            {
+              "start": 50.81,
+              "end": 50.97,
+              "text": " mas"
+            },
+            {
+              "start": 50.97,
+              "end": 51.13,
+              "text": " quando"
+            },
+            {
+              "start": 51.13,
+              "end": 51.27,
+              "text": " acho"
+            },
+            {
+              "start": 51.27,
+              "end": 51.35,
+              "text": " que"
+            },
+            {
+              "start": 51.35,
+              "end": 51.37,
+              "text": " eu"
+            },
+            {
+              "start": 51.37,
+              "end": 51.45,
+              "text": " não"
+            },
+            {
+              "start": 51.45,
+              "end": 52.01,
+              "text": " perdo"
+            },
+            {
+              "start": 52.01,
+              "end": 52.93,
+              "text": " o"
+            },
+            {
+              "start": 52.93,
+              "end": 53.13,
+              "text": " negócio"
+            },
+            {
+              "start": 53.13,
+              "end": 53.45,
+              "text": " ficar"
+            },
+            {
+              "start": 53.45,
+              "end": 53.79,
+              "text": " doido,"
+            },
+            {
+              "start": 53.95,
+              "end": 54.35,
+              "text": " o"
+            },
+            {
+              "start": 54.35,
+              "end": 54.45,
+              "text": " negócio"
+            },
+            {
+              "start": 54.45,
+              "end": 54.71,
+              "text": " ficar"
+            },
+            {
+              "start": 54.71,
+              "end": 54.99,
+              "text": " doido."
+            }
+          ]
+        },
+        {
+          "start": 54.99,
+          "end": 58.53,
+          "text": " Se você está vendo aí o Bruno Mikali Doi todo dia postando o vídeo, faltando o secotinho",
+          "words": [
+            {
+              "start": 54.99,
+              "end": 55.35,
+              "text": " Se"
+            },
+            {
+              "start": 55.35,
+              "end": 55.43,
+              "text": " você"
+            },
+            {
+              "start": 55.43,
+              "end": 55.49,
+              "text": " está"
+            },
+            {
+              "start": 55.49,
+              "end": 55.63,
+              "text": " vendo"
+            },
+            {
+              "start": 55.63,
+              "end": 55.85,
+              "text": " aí"
+            },
+            {
+              "start": 55.85,
+              "end": 55.91,
+              "text": " o"
+            },
+            {
+              "start": 55.91,
+              "end": 56.03,
+              "text": " Bruno"
+            },
+            {
+              "start": 56.03,
+              "end": 56.31,
+              "text": " Mikali"
+            },
+            {
+              "start": 56.31,
+              "end": 56.63,
+              "text": " Doi"
+            },
+            {
+              "start": 56.63,
+              "end": 56.85,
+              "text": " todo"
+            },
+            {
+              "start": 56.85,
+              "end": 57.15,
+              "text": " dia"
+            },
+            {
+              "start": 57.15,
+              "end": 57.57,
+              "text": " postando"
+            },
+            {
+              "start": 57.57,
+              "end": 57.67,
+              "text": " o"
+            },
+            {
+              "start": 57.67,
+              "end": 57.77,
+              "text": " vídeo,"
+            },
+            {
+              "start": 57.89,
+              "end": 58.13,
+              "text": " faltando"
+            },
+            {
+              "start": 58.13,
+              "end": 58.27,
+              "text": " o"
+            },
+            {
+              "start": 58.27,
+              "end": 58.53,
+              "text": " secotinho"
+            }
+          ]
+        },
+        {
+          "start": 58.53,
+          "end": 59.31,
+          "text": " para o GTA VI.",
+          "words": [
+            {
+              "start": 58.53,
+              "end": 58.75,
+              "text": " para"
+            },
+            {
+              "start": 58.75,
+              "end": 58.99,
+              "text": " o"
+            },
+            {
+              "start": 58.99,
+              "end": 59.01,
+              "text": " GTA"
+            },
+            {
+              "start": 59.01,
+              "end": 59.31,
+              "text": " VI."
+            }
+          ]
+        },
+        {
+          "start": 59.51,
+          "end": 59.77,
+          "text": " Ah, galera.",
+          "words": [
+            {
+              "start": 59.51,
+              "end": 59.63,
+              "text": " Ah,"
+            },
+            {
+              "start": 59.77,
+              "end": 59.77,
+              "text": " galera."
+            }
+          ]
+        }
+      ],
+      "process_peak_rss_MiB_so_far": 693.515625
+    },
+    {
+      "source_job": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+      "expected_corpus_language": "pt",
+      "repeat": 1,
+      "language_detected": "pt",
+      "language_probability": 0.9991605281829834,
+      "audio_sha256": "de494c665ae63ce98024c7523433878ea5630e8eed58455f4fe7c96b90c78995",
+      "audio_duration": 60.0,
+      "wall_seconds": 5.876,
+      "segments": [
+        {
+          "start": 0.59,
+          "end": 8.93,
+          "text": " Estamos agora oficialmente no mês do GTA VI, começou no novembro, galera, de dois de novembro",
+          "words": [
+            {
+              "start": 0.59,
+              "end": 1.35,
+              "text": " Estamos"
+            },
+            {
+              "start": 1.35,
+              "end": 1.87,
+              "text": " agora"
+            },
+            {
+              "start": 1.87,
+              "end": 3.33,
+              "text": " oficialmente"
+            },
+            {
+              "start": 3.33,
+              "end": 3.83,
+              "text": " no"
+            },
+            {
+              "start": 3.83,
+              "end": 4.15,
+              "text": " mês"
+            },
+            {
+              "start": 4.15,
+              "end": 4.51,
+              "text": " do"
+            },
+            {
+              "start": 4.51,
+              "end": 4.77,
+              "text": " GTA"
+            },
+            {
+              "start": 4.77,
+              "end": 5.35,
+              "text": " VI,"
+            },
+            {
+              "start": 6.03,
+              "end": 6.29,
+              "text": " começou"
+            },
+            {
+              "start": 6.29,
+              "end": 6.61,
+              "text": " no"
+            },
+            {
+              "start": 6.61,
+              "end": 7.03,
+              "text": " novembro,"
+            },
+            {
+              "start": 7.05,
+              "end": 7.31,
+              "text": " galera,"
+            },
+            {
+              "start": 7.71,
+              "end": 7.81,
+              "text": " de"
+            },
+            {
+              "start": 7.81,
+              "end": 8.35,
+              "text": " dois"
+            },
+            {
+              "start": 8.35,
+              "end": 8.51,
+              "text": " de"
+            },
+            {
+              "start": 8.51,
+              "end": 8.93,
+              "text": " novembro"
+            }
+          ]
+        },
+        {
+          "start": 8.93,
+          "end": 11.69,
+          "text": " que eu estou gravando isso, de primeiro foi ontem, por isso que eu não gravei, eu já feriado,",
+          "words": [
+            {
+              "start": 8.93,
+              "end": 9.05,
+              "text": " que"
+            },
+            {
+              "start": 9.05,
+              "end": 9.13,
+              "text": " eu"
+            },
+            {
+              "start": 9.13,
+              "end": 9.15,
+              "text": " estou"
+            },
+            {
+              "start": 9.15,
+              "end": 9.41,
+              "text": " gravando"
+            },
+            {
+              "start": 9.41,
+              "end": 9.61,
+              "text": " isso,"
+            },
+            {
+              "start": 9.63,
+              "end": 9.69,
+              "text": " de"
+            },
+            {
+              "start": 9.69,
+              "end": 9.85,
+              "text": " primeiro"
+            },
+            {
+              "start": 9.85,
+              "end": 10.07,
+              "text": " foi"
+            },
+            {
+              "start": 10.07,
+              "end": 10.35,
+              "text": " ontem,"
+            },
+            {
+              "start": 10.35,
+              "end": 10.53,
+              "text": " por"
+            },
+            {
+              "start": 10.53,
+              "end": 10.65,
+              "text": " isso"
+            },
+            {
+              "start": 10.65,
+              "end": 10.77,
+              "text": " que"
+            },
+            {
+              "start": 10.77,
+              "end": 10.77,
+              "text": " eu"
+            },
+            {
+              "start": 10.77,
+              "end": 10.83,
+              "text": " não"
+            },
+            {
+              "start": 10.83,
+              "end": 11.13,
+              "text": " gravei,"
+            },
+            {
+              "start": 11.17,
+              "end": 11.23,
+              "text": " eu"
+            },
+            {
+              "start": 11.23,
+              "end": 11.29,
+              "text": " já"
+            },
+            {
+              "start": 11.29,
+              "end": 11.69,
+              "text": " feriado,"
+            }
+          ]
+        },
+        {
+          "start": 11.71,
+          "end": 13.49,
+          "text": " mas estão aí.",
+          "words": [
+            {
+              "start": 11.71,
+              "end": 11.85,
+              "text": " mas"
+            },
+            {
+              "start": 11.85,
+              "end": 13.21,
+              "text": " estão"
+            },
+            {
+              "start": 13.21,
+              "end": 13.49,
+              "text": " aí."
+            }
+          ]
+        },
+        {
+          "start": 14.15,
+          "end": 19.55,
+          "text": " E queria falar um pouquinho só, que finalmente parece até mentira, quer dizer que esse mês",
+          "words": [
+            {
+              "start": 14.15,
+              "end": 14.29,
+              "text": " E"
+            },
+            {
+              "start": 14.29,
+              "end": 14.73,
+              "text": " queria"
+            },
+            {
+              "start": 14.73,
+              "end": 14.97,
+              "text": " falar"
+            },
+            {
+              "start": 14.97,
+              "end": 15.11,
+              "text": " um"
+            },
+            {
+              "start": 15.11,
+              "end": 15.45,
+              "text": " pouquinho"
+            },
+            {
+              "start": 15.45,
+              "end": 15.85,
+              "text": " só,"
+            },
+            {
+              "start": 16.29,
+              "end": 16.43,
+              "text": " que"
+            },
+            {
+              "start": 16.43,
+              "end": 16.97,
+              "text": " finalmente"
+            },
+            {
+              "start": 16.97,
+              "end": 17.45,
+              "text": " parece"
+            },
+            {
+              "start": 17.45,
+              "end": 17.77,
+              "text": " até"
+            },
+            {
+              "start": 17.77,
+              "end": 18.31,
+              "text": " mentira,"
+            },
+            {
+              "start": 18.31,
+              "end": 18.63,
+              "text": " quer"
+            },
+            {
+              "start": 18.63,
+              "end": 18.69,
+              "text": " dizer"
+            },
+            {
+              "start": 18.69,
+              "end": 18.93,
+              "text": " que"
+            },
+            {
+              "start": 18.93,
+              "end": 19.29,
+              "text": " esse"
+            },
+            {
+              "start": 19.29,
+              "end": 19.55,
+              "text": " mês"
+            }
+          ]
+        },
+        {
+          "start": 20.15,
+          "end": 26.81,
+          "text": " nós jogaremos GTA VI e eu jogarei aqui com vocês ao vivo toda essa jornada, tá gente, toda essa",
+          "words": [
+            {
+              "start": 20.15,
+              "end": 20.43,
+              "text": " nós"
+            },
+            {
+              "start": 20.43,
+              "end": 20.85,
+              "text": " jogaremos"
+            },
+            {
+              "start": 20.85,
+              "end": 21.15,
+              "text": " GTA"
+            },
+            {
+              "start": 21.15,
+              "end": 21.47,
+              "text": " VI"
+            },
+            {
+              "start": 21.47,
+              "end": 22.05,
+              "text": " e"
+            },
+            {
+              "start": 22.05,
+              "end": 22.15,
+              "text": " eu"
+            },
+            {
+              "start": 22.15,
+              "end": 22.87,
+              "text": " jogarei"
+            },
+            {
+              "start": 22.87,
+              "end": 23.27,
+              "text": " aqui"
+            },
+            {
+              "start": 23.27,
+              "end": 23.45,
+              "text": " com"
+            },
+            {
+              "start": 23.45,
+              "end": 23.73,
+              "text": " vocês"
+            },
+            {
+              "start": 23.73,
+              "end": 23.93,
+              "text": " ao"
+            },
+            {
+              "start": 23.93,
+              "end": 24.25,
+              "text": " vivo"
+            },
+            {
+              "start": 24.25,
+              "end": 24.77,
+              "text": " toda"
+            },
+            {
+              "start": 24.77,
+              "end": 25.15,
+              "text": " essa"
+            },
+            {
+              "start": 25.15,
+              "end": 25.77,
+              "text": " jornada,"
+            },
+            {
+              "start": 25.93,
+              "end": 26.01,
+              "text": " tá"
+            },
+            {
+              "start": 26.01,
+              "end": 26.21,
+              "text": " gente,"
+            },
+            {
+              "start": 26.47,
+              "end": 26.57,
+              "text": " toda"
+            },
+            {
+              "start": 26.57,
+              "end": 26.81,
+              "text": " essa"
+            }
+          ]
+        },
+        {
+          "start": 26.81,
+          "end": 27.37,
+          "text": " jornada.",
+          "words": [
+            {
+              "start": 26.81,
+              "end": 27.37,
+              "text": " jornada."
+            }
+          ]
+        },
+        {
+          "start": 27.37,
+          "end": 29.93,
+          "text": " E assim, como é que dá ansiedade aí para vocês?",
+          "words": [
+            {
+              "start": 27.37,
+              "end": 27.95,
+              "text": " E"
+            },
+            {
+              "start": 27.95,
+              "end": 28.17,
+              "text": " assim,"
+            },
+            {
+              "start": 28.59,
+              "end": 28.85,
+              "text": " como"
+            },
+            {
+              "start": 28.85,
+              "end": 28.95,
+              "text": " é"
+            },
+            {
+              "start": 28.95,
+              "end": 28.97,
+              "text": " que"
+            },
+            {
+              "start": 28.97,
+              "end": 29.03,
+              "text": " dá"
+            },
+            {
+              "start": 29.03,
+              "end": 29.43,
+              "text": " ansiedade"
+            },
+            {
+              "start": 29.43,
+              "end": 29.55,
+              "text": " aí"
+            },
+            {
+              "start": 29.55,
+              "end": 29.67,
+              "text": " para"
+            },
+            {
+              "start": 29.67,
+              "end": 29.93,
+              "text": " vocês?"
+            }
+          ]
+        },
+        {
+          "start": 30.61,
+          "end": 31.47,
+          "text": " Como é que dá a ansiedade?",
+          "words": [
+            {
+              "start": 30.61,
+              "end": 30.81,
+              "text": " Como"
+            },
+            {
+              "start": 30.81,
+              "end": 30.85,
+              "text": " é"
+            },
+            {
+              "start": 30.85,
+              "end": 30.91,
+              "text": " que"
+            },
+            {
+              "start": 30.91,
+              "end": 30.97,
+              "text": " dá"
+            },
+            {
+              "start": 30.97,
+              "end": 31.07,
+              "text": " a"
+            },
+            {
+              "start": 31.07,
+              "end": 31.47,
+              "text": " ansiedade?"
+            }
+          ]
+        },
+        {
+          "start": 31.61,
+          "end": 34.85,
+          "text": " Eu confesso que agora está pegando para mim a ansiedade, tá?",
+          "words": [
+            {
+              "start": 31.61,
+              "end": 31.71,
+              "text": " Eu"
+            },
+            {
+              "start": 31.71,
+              "end": 32.39,
+              "text": " confesso"
+            },
+            {
+              "start": 32.39,
+              "end": 32.55,
+              "text": " que"
+            },
+            {
+              "start": 32.55,
+              "end": 32.91,
+              "text": " agora"
+            },
+            {
+              "start": 32.91,
+              "end": 33.53,
+              "text": " está"
+            },
+            {
+              "start": 33.53,
+              "end": 33.89,
+              "text": " pegando"
+            },
+            {
+              "start": 33.89,
+              "end": 34.03,
+              "text": " para"
+            },
+            {
+              "start": 34.03,
+              "end": 34.15,
+              "text": " mim"
+            },
+            {
+              "start": 34.15,
+              "end": 34.27,
+              "text": " a"
+            },
+            {
+              "start": 34.27,
+              "end": 34.67,
+              "text": " ansiedade,"
+            },
+            {
+              "start": 34.73,
+              "end": 34.85,
+              "text": " tá?"
+            }
+          ]
+        },
+        {
+          "start": 37.05,
+          "end": 41.81,
+          "text": " Eu já falei para vocês como é que eu faço para controlar pico e ansiedade, eu fico sempre",
+          "words": [
+            {
+              "start": 37.05,
+              "end": 37.41,
+              "text": " Eu"
+            },
+            {
+              "start": 37.41,
+              "end": 37.77,
+              "text": " já"
+            },
+            {
+              "start": 37.77,
+              "end": 37.91,
+              "text": " falei"
+            },
+            {
+              "start": 37.91,
+              "end": 38.05,
+              "text": " para"
+            },
+            {
+              "start": 38.05,
+              "end": 38.21,
+              "text": " vocês"
+            },
+            {
+              "start": 38.21,
+              "end": 38.37,
+              "text": " como"
+            },
+            {
+              "start": 38.37,
+              "end": 38.45,
+              "text": " é"
+            },
+            {
+              "start": 38.45,
+              "end": 38.51,
+              "text": " que"
+            },
+            {
+              "start": 38.51,
+              "end": 38.57,
+              "text": " eu"
+            },
+            {
+              "start": 38.57,
+              "end": 38.69,
+              "text": " faço"
+            },
+            {
+              "start": 38.69,
+              "end": 38.93,
+              "text": " para"
+            },
+            {
+              "start": 38.93,
+              "end": 39.47,
+              "text": " controlar"
+            },
+            {
+              "start": 39.47,
+              "end": 40.71,
+              "text": " pico"
+            },
+            {
+              "start": 40.71,
+              "end": 40.71,
+              "text": " e"
+            },
+            {
+              "start": 40.71,
+              "end": 41.21,
+              "text": " ansiedade,"
+            },
+            {
+              "start": 41.35,
+              "end": 41.43,
+              "text": " eu"
+            },
+            {
+              "start": 41.43,
+              "end": 41.59,
+              "text": " fico"
+            },
+            {
+              "start": 41.59,
+              "end": 41.81,
+              "text": " sempre"
+            }
+          ]
+        },
+        {
+          "start": 41.81,
+          "end": 46.25,
+          "text": " marcando marcos até a coisa que eu preciso fazer, para quando é muito distante, para",
+          "words": [
+            {
+              "start": 41.81,
+              "end": 42.15,
+              "text": " marcando"
+            },
+            {
+              "start": 42.15,
+              "end": 42.51,
+              "text": " marcos"
+            },
+            {
+              "start": 42.51,
+              "end": 43.03,
+              "text": " até"
+            },
+            {
+              "start": 43.03,
+              "end": 43.23,
+              "text": " a"
+            },
+            {
+              "start": 43.23,
+              "end": 43.41,
+              "text": " coisa"
+            },
+            {
+              "start": 43.41,
+              "end": 43.57,
+              "text": " que"
+            },
+            {
+              "start": 43.57,
+              "end": 43.63,
+              "text": " eu"
+            },
+            {
+              "start": 43.63,
+              "end": 43.83,
+              "text": " preciso"
+            },
+            {
+              "start": 43.83,
+              "end": 44.25,
+              "text": " fazer,"
+            },
+            {
+              "start": 44.75,
+              "end": 44.87,
+              "text": " para"
+            },
+            {
+              "start": 44.87,
+              "end": 45.47,
+              "text": " quando"
+            },
+            {
+              "start": 45.47,
+              "end": 45.55,
+              "text": " é"
+            },
+            {
+              "start": 45.55,
+              "end": 45.75,
+              "text": " muito"
+            },
+            {
+              "start": 45.75,
+              "end": 46.09,
+              "text": " distante,"
+            },
+            {
+              "start": 46.23,
+              "end": 46.25,
+              "text": " para"
+            }
+          ]
+        },
+        {
+          "start": 46.25,
+          "end": 50.81,
+          "text": " gente não ficar ansioso muito tempo, então toda hora tem alguma coisa e a gente vai compartilhando",
+          "words": [
+            {
+              "start": 46.25,
+              "end": 46.33,
+              "text": " gente"
+            },
+            {
+              "start": 46.33,
+              "end": 46.41,
+              "text": " não"
+            },
+            {
+              "start": 46.41,
+              "end": 46.53,
+              "text": " ficar"
+            },
+            {
+              "start": 46.53,
+              "end": 46.69,
+              "text": " ansioso"
+            },
+            {
+              "start": 46.69,
+              "end": 46.95,
+              "text": " muito"
+            },
+            {
+              "start": 46.95,
+              "end": 47.21,
+              "text": " tempo,"
+            },
+            {
+              "start": 47.21,
+              "end": 47.41,
+              "text": " então"
+            },
+            {
+              "start": 47.41,
+              "end": 47.69,
+              "text": " toda"
+            },
+            {
+              "start": 47.69,
+              "end": 47.83,
+              "text": " hora"
+            },
+            {
+              "start": 47.83,
+              "end": 47.97,
+              "text": " tem"
+            },
+            {
+              "start": 47.97,
+              "end": 48.17,
+              "text": " alguma"
+            },
+            {
+              "start": 48.17,
+              "end": 48.47,
+              "text": " coisa"
+            },
+            {
+              "start": 48.47,
+              "end": 48.67,
+              "text": " e"
+            },
+            {
+              "start": 48.67,
+              "end": 48.73,
+              "text": " a"
+            },
+            {
+              "start": 48.73,
+              "end": 48.83,
+              "text": " gente"
+            },
+            {
+              "start": 48.83,
+              "end": 49.09,
+              "text": " vai"
+            },
+            {
+              "start": 49.09,
+              "end": 50.81,
+              "text": " compartilhando"
+            }
+          ]
+        },
+        {
+          "start": 50.81,
+          "end": 54.99,
+          "text": " mas quando acho que eu não perdo o negócio ficar doido, o negócio ficar doido.",
+          "words": [
+            {
+              "start": 50.81,
+              "end": 50.97,
+              "text": " mas"
+            },
+            {
+              "start": 50.97,
+              "end": 51.13,
+              "text": " quando"
+            },
+            {
+              "start": 51.13,
+              "end": 51.27,
+              "text": " acho"
+            },
+            {
+              "start": 51.27,
+              "end": 51.35,
+              "text": " que"
+            },
+            {
+              "start": 51.35,
+              "end": 51.37,
+              "text": " eu"
+            },
+            {
+              "start": 51.37,
+              "end": 51.45,
+              "text": " não"
+            },
+            {
+              "start": 51.45,
+              "end": 52.01,
+              "text": " perdo"
+            },
+            {
+              "start": 52.01,
+              "end": 52.93,
+              "text": " o"
+            },
+            {
+              "start": 52.93,
+              "end": 53.13,
+              "text": " negócio"
+            },
+            {
+              "start": 53.13,
+              "end": 53.45,
+              "text": " ficar"
+            },
+            {
+              "start": 53.45,
+              "end": 53.79,
+              "text": " doido,"
+            },
+            {
+              "start": 53.95,
+              "end": 54.35,
+              "text": " o"
+            },
+            {
+              "start": 54.35,
+              "end": 54.45,
+              "text": " negócio"
+            },
+            {
+              "start": 54.45,
+              "end": 54.71,
+              "text": " ficar"
+            },
+            {
+              "start": 54.71,
+              "end": 54.99,
+              "text": " doido."
+            }
+          ]
+        },
+        {
+          "start": 54.99,
+          "end": 58.53,
+          "text": " Se você está vendo aí o Bruno Mikali Doi todo dia postando o vídeo, faltando o secotinho",
+          "words": [
+            {
+              "start": 54.99,
+              "end": 55.35,
+              "text": " Se"
+            },
+            {
+              "start": 55.35,
+              "end": 55.43,
+              "text": " você"
+            },
+            {
+              "start": 55.43,
+              "end": 55.49,
+              "text": " está"
+            },
+            {
+              "start": 55.49,
+              "end": 55.63,
+              "text": " vendo"
+            },
+            {
+              "start": 55.63,
+              "end": 55.85,
+              "text": " aí"
+            },
+            {
+              "start": 55.85,
+              "end": 55.91,
+              "text": " o"
+            },
+            {
+              "start": 55.91,
+              "end": 56.03,
+              "text": " Bruno"
+            },
+            {
+              "start": 56.03,
+              "end": 56.31,
+              "text": " Mikali"
+            },
+            {
+              "start": 56.31,
+              "end": 56.63,
+              "text": " Doi"
+            },
+            {
+              "start": 56.63,
+              "end": 56.85,
+              "text": " todo"
+            },
+            {
+              "start": 56.85,
+              "end": 57.15,
+              "text": " dia"
+            },
+            {
+              "start": 57.15,
+              "end": 57.57,
+              "text": " postando"
+            },
+            {
+              "start": 57.57,
+              "end": 57.67,
+              "text": " o"
+            },
+            {
+              "start": 57.67,
+              "end": 57.77,
+              "text": " vídeo,"
+            },
+            {
+              "start": 57.89,
+              "end": 58.13,
+              "text": " faltando"
+            },
+            {
+              "start": 58.13,
+              "end": 58.27,
+              "text": " o"
+            },
+            {
+              "start": 58.27,
+              "end": 58.53,
+              "text": " secotinho"
+            }
+          ]
+        },
+        {
+          "start": 58.53,
+          "end": 59.31,
+          "text": " para o GTA VI.",
+          "words": [
+            {
+              "start": 58.53,
+              "end": 58.75,
+              "text": " para"
+            },
+            {
+              "start": 58.75,
+              "end": 58.99,
+              "text": " o"
+            },
+            {
+              "start": 58.99,
+              "end": 59.01,
+              "text": " GTA"
+            },
+            {
+              "start": 59.01,
+              "end": 59.31,
+              "text": " VI."
+            }
+          ]
+        },
+        {
+          "start": 59.51,
+          "end": 59.77,
+          "text": " Ah, galera.",
+          "words": [
+            {
+              "start": 59.51,
+              "end": 59.63,
+              "text": " Ah,"
+            },
+            {
+              "start": 59.77,
+              "end": 59.77,
+              "text": " galera."
+            }
+          ]
+        }
+      ],
+      "process_peak_rss_MiB_so_far": 693.515625
+    },
+    {
+      "source_job": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "expected_corpus_language": "en",
+      "repeat": 0,
+      "language_detected": "en",
+      "language_probability": 0.9990861415863037,
+      "audio_sha256": "933d202bd526a1768de664f852446782256bd214ad1473f8f3d82f3590d296e0",
+      "audio_duration": 60.0,
+      "wall_seconds": 6.184,
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 27.36,
+          "text": " The download size for Grand Theft Auto VI has been reported, and this is a hefty unit. It's coming in at 210 gigabytes, which makes GTA VI one of the largest games of our lifetime. And the thing is, that's just at launch. Obviously we're going to have a day one patch. They're going to be all sorts of patches and updates and expansions and things like that that come out over the next decade that we're playing this game. So she's a big girl. And obviously there's a lot of size and detail in there. Now what?",
+          "words": [
+            {
+              "start": 0.0,
+              "end": 0.16,
+              "text": " The"
+            },
+            {
+              "start": 0.16,
+              "end": 0.4,
+              "text": " download"
+            },
+            {
+              "start": 0.4,
+              "end": 0.72,
+              "text": " size"
+            },
+            {
+              "start": 0.72,
+              "end": 0.98,
+              "text": " for"
+            },
+            {
+              "start": 0.98,
+              "end": 1.18,
+              "text": " Grand"
+            },
+            {
+              "start": 1.18,
+              "end": 1.46,
+              "text": " Theft"
+            },
+            {
+              "start": 1.46,
+              "end": 1.64,
+              "text": " Auto"
+            },
+            {
+              "start": 1.64,
+              "end": 1.92,
+              "text": " VI"
+            },
+            {
+              "start": 1.92,
+              "end": 2.2,
+              "text": " has"
+            },
+            {
+              "start": 2.2,
+              "end": 2.38,
+              "text": " been"
+            },
+            {
+              "start": 2.38,
+              "end": 2.8,
+              "text": " reported,"
+            },
+            {
+              "start": 3.06,
+              "end": 3.24,
+              "text": " and"
+            },
+            {
+              "start": 3.24,
+              "end": 3.56,
+              "text": " this"
+            },
+            {
+              "start": 3.56,
+              "end": 4.06,
+              "text": " is"
+            },
+            {
+              "start": 4.06,
+              "end": 4.38,
+              "text": " a"
+            },
+            {
+              "start": 4.38,
+              "end": 5.24,
+              "text": " hefty"
+            },
+            {
+              "start": 5.24,
+              "end": 5.7,
+              "text": " unit."
+            },
+            {
+              "start": 5.88,
+              "end": 6.04,
+              "text": " It's"
+            },
+            {
+              "start": 6.04,
+              "end": 6.26,
+              "text": " coming"
+            },
+            {
+              "start": 6.26,
+              "end": 6.52,
+              "text": " in"
+            },
+            {
+              "start": 6.52,
+              "end": 6.82,
+              "text": " at"
+            },
+            {
+              "start": 6.82,
+              "end": 7.82,
+              "text": " 210"
+            },
+            {
+              "start": 7.82,
+              "end": 8.7,
+              "text": " gigabytes,"
+            },
+            {
+              "start": 8.94,
+              "end": 9.1,
+              "text": " which"
+            },
+            {
+              "start": 9.1,
+              "end": 9.32,
+              "text": " makes"
+            },
+            {
+              "start": 9.32,
+              "end": 9.72,
+              "text": " GTA"
+            },
+            {
+              "start": 9.72,
+              "end": 10.1,
+              "text": " VI"
+            },
+            {
+              "start": 10.1,
+              "end": 10.7,
+              "text": " one"
+            },
+            {
+              "start": 10.7,
+              "end": 10.78,
+              "text": " of"
+            },
+            {
+              "start": 10.78,
+              "end": 10.9,
+              "text": " the"
+            },
+            {
+              "start": 10.9,
+              "end": 11.36,
+              "text": " largest"
+            },
+            {
+              "start": 11.36,
+              "end": 11.74,
+              "text": " games"
+            },
+            {
+              "start": 11.74,
+              "end": 12.18,
+              "text": " of"
+            },
+            {
+              "start": 12.18,
+              "end": 12.32,
+              "text": " our"
+            },
+            {
+              "start": 12.32,
+              "end": 12.72,
+              "text": " lifetime."
+            },
+            {
+              "start": 12.98,
+              "end": 13.02,
+              "text": " And"
+            },
+            {
+              "start": 13.02,
+              "end": 13.12,
+              "text": " the"
+            },
+            {
+              "start": 13.12,
+              "end": 13.26,
+              "text": " thing"
+            },
+            {
+              "start": 13.26,
+              "end": 13.42,
+              "text": " is,"
+            },
+            {
+              "start": 13.48,
+              "end": 13.64,
+              "text": " that's"
+            },
+            {
+              "start": 13.64,
+              "end": 13.8,
+              "text": " just"
+            },
+            {
+              "start": 13.8,
+              "end": 13.98,
+              "text": " at"
+            },
+            {
+              "start": 13.98,
+              "end": 14.16,
+              "text": " launch."
+            },
+            {
+              "start": 14.34,
+              "end": 14.74,
+              "text": " Obviously"
+            },
+            {
+              "start": 14.74,
+              "end": 14.9,
+              "text": " we're"
+            },
+            {
+              "start": 14.9,
+              "end": 14.98,
+              "text": " going"
+            },
+            {
+              "start": 14.98,
+              "end": 15.02,
+              "text": " to"
+            },
+            {
+              "start": 15.02,
+              "end": 15.14,
+              "text": " have"
+            },
+            {
+              "start": 15.14,
+              "end": 15.24,
+              "text": " a"
+            },
+            {
+              "start": 15.24,
+              "end": 15.36,
+              "text": " day"
+            },
+            {
+              "start": 15.36,
+              "end": 15.52,
+              "text": " one"
+            },
+            {
+              "start": 15.52,
+              "end": 15.82,
+              "text": " patch."
+            },
+            {
+              "start": 15.9,
+              "end": 16.06,
+              "text": " They're"
+            },
+            {
+              "start": 16.06,
+              "end": 16.14,
+              "text": " going"
+            },
+            {
+              "start": 16.14,
+              "end": 16.16,
+              "text": " to"
+            },
+            {
+              "start": 16.16,
+              "end": 16.26,
+              "text": " be"
+            },
+            {
+              "start": 16.26,
+              "end": 16.36,
+              "text": " all"
+            },
+            {
+              "start": 16.36,
+              "end": 16.64,
+              "text": " sorts"
+            },
+            {
+              "start": 16.64,
+              "end": 16.78,
+              "text": " of"
+            },
+            {
+              "start": 16.78,
+              "end": 17.04,
+              "text": " patches"
+            },
+            {
+              "start": 17.04,
+              "end": 17.26,
+              "text": " and"
+            },
+            {
+              "start": 17.26,
+              "end": 17.56,
+              "text": " updates"
+            },
+            {
+              "start": 17.56,
+              "end": 17.8,
+              "text": " and"
+            },
+            {
+              "start": 17.8,
+              "end": 18.38,
+              "text": " expansions"
+            },
+            {
+              "start": 18.38,
+              "end": 18.52,
+              "text": " and"
+            },
+            {
+              "start": 18.52,
+              "end": 18.68,
+              "text": " things"
+            },
+            {
+              "start": 18.68,
+              "end": 18.88,
+              "text": " like"
+            },
+            {
+              "start": 18.88,
+              "end": 19.12,
+              "text": " that"
+            },
+            {
+              "start": 19.12,
+              "end": 19.28,
+              "text": " that"
+            },
+            {
+              "start": 19.28,
+              "end": 19.42,
+              "text": " come"
+            },
+            {
+              "start": 19.42,
+              "end": 19.62,
+              "text": " out"
+            },
+            {
+              "start": 19.62,
+              "end": 19.82,
+              "text": " over"
+            },
+            {
+              "start": 19.82,
+              "end": 19.94,
+              "text": " the"
+            },
+            {
+              "start": 19.94,
+              "end": 20.1,
+              "text": " next"
+            },
+            {
+              "start": 20.1,
+              "end": 20.54,
+              "text": " decade"
+            },
+            {
+              "start": 20.54,
+              "end": 20.72,
+              "text": " that"
+            },
+            {
+              "start": 20.72,
+              "end": 20.84,
+              "text": " we're"
+            },
+            {
+              "start": 20.84,
+              "end": 21.12,
+              "text": " playing"
+            },
+            {
+              "start": 21.12,
+              "end": 21.32,
+              "text": " this"
+            },
+            {
+              "start": 21.32,
+              "end": 21.54,
+              "text": " game."
+            },
+            {
+              "start": 21.76,
+              "end": 21.86,
+              "text": " So"
+            },
+            {
+              "start": 21.86,
+              "end": 22.94,
+              "text": " she's"
+            },
+            {
+              "start": 22.94,
+              "end": 23.06,
+              "text": " a"
+            },
+            {
+              "start": 23.06,
+              "end": 23.2,
+              "text": " big"
+            },
+            {
+              "start": 23.2,
+              "end": 23.6,
+              "text": " girl."
+            },
+            {
+              "start": 23.62,
+              "end": 24.02,
+              "text": " And"
+            },
+            {
+              "start": 24.02,
+              "end": 24.5,
+              "text": " obviously"
+            },
+            {
+              "start": 24.5,
+              "end": 25.02,
+              "text": " there's"
+            },
+            {
+              "start": 25.02,
+              "end": 25.14,
+              "text": " a"
+            },
+            {
+              "start": 25.14,
+              "end": 25.3,
+              "text": " lot"
+            },
+            {
+              "start": 25.3,
+              "end": 25.46,
+              "text": " of"
+            },
+            {
+              "start": 25.46,
+              "end": 25.78,
+              "text": " size"
+            },
+            {
+              "start": 25.78,
+              "end": 26.08,
+              "text": " and"
+            },
+            {
+              "start": 26.08,
+              "end": 26.46,
+              "text": " detail"
+            },
+            {
+              "start": 26.46,
+              "end": 26.74,
+              "text": " in"
+            },
+            {
+              "start": 26.74,
+              "end": 26.92,
+              "text": " there."
+            },
+            {
+              "start": 26.92,
+              "end": 27.2,
+              "text": " Now"
+            },
+            {
+              "start": 27.2,
+              "end": 27.36,
+              "text": " what?"
+            }
+          ]
+        },
+        {
+          "start": 27.36,
+          "end": 57.34,
+          "text": " This information is coming from PlayStation game size. It tweeted this right here. And they have a longstanding track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105 gigabytes. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5.",
+          "words": [
+            {
+              "start": 27.36,
+              "end": 27.52,
+              "text": " This"
+            },
+            {
+              "start": 27.52,
+              "end": 27.94,
+              "text": " information"
+            },
+            {
+              "start": 27.94,
+              "end": 28.28,
+              "text": " is"
+            },
+            {
+              "start": 28.28,
+              "end": 28.46,
+              "text": " coming"
+            },
+            {
+              "start": 28.46,
+              "end": 28.68,
+              "text": " from"
+            },
+            {
+              "start": 28.68,
+              "end": 29.08,
+              "text": " PlayStation"
+            },
+            {
+              "start": 29.08,
+              "end": 29.6,
+              "text": " game"
+            },
+            {
+              "start": 29.6,
+              "end": 30.12,
+              "text": " size."
+            },
+            {
+              "start": 30.48,
+              "end": 30.68,
+              "text": " It"
+            },
+            {
+              "start": 30.68,
+              "end": 30.92,
+              "text": " tweeted"
+            },
+            {
+              "start": 30.92,
+              "end": 31.22,
+              "text": " this"
+            },
+            {
+              "start": 31.22,
+              "end": 31.58,
+              "text": " right"
+            },
+            {
+              "start": 31.58,
+              "end": 31.96,
+              "text": " here."
+            },
+            {
+              "start": 32.26,
+              "end": 32.44,
+              "text": " And"
+            },
+            {
+              "start": 32.44,
+              "end": 32.82,
+              "text": " they"
+            },
+            {
+              "start": 32.82,
+              "end": 32.94,
+              "text": " have"
+            },
+            {
+              "start": 32.94,
+              "end": 33.0,
+              "text": " a"
+            },
+            {
+              "start": 33.0,
+              "end": 33.54,
+              "text": " longstanding"
+            },
+            {
+              "start": 33.54,
+              "end": 33.9,
+              "text": " track"
+            },
+            {
+              "start": 33.9,
+              "end": 34.26,
+              "text": " record"
+            },
+            {
+              "start": 34.26,
+              "end": 34.54,
+              "text": " of"
+            },
+            {
+              "start": 34.54,
+              "end": 34.8,
+              "text": " being"
+            },
+            {
+              "start": 34.8,
+              "end": 35.32,
+              "text": " accurate."
+            },
+            {
+              "start": 35.44,
+              "end": 35.52,
+              "text": " I"
+            },
+            {
+              "start": 35.52,
+              "end": 35.88,
+              "text": " believe"
+            },
+            {
+              "start": 35.88,
+              "end": 36.12,
+              "text": " they"
+            },
+            {
+              "start": 36.12,
+              "end": 36.48,
+              "text": " scraped"
+            },
+            {
+              "start": 36.48,
+              "end": 36.58,
+              "text": " the"
+            },
+            {
+              "start": 36.58,
+              "end": 36.82,
+              "text": " back"
+            },
+            {
+              "start": 36.82,
+              "end": 37.04,
+              "text": " end"
+            },
+            {
+              "start": 37.04,
+              "end": 37.14,
+              "text": " of"
+            },
+            {
+              "start": 37.14,
+              "end": 37.22,
+              "text": " the"
+            },
+            {
+              "start": 37.22,
+              "end": 37.54,
+              "text": " PlayStation"
+            },
+            {
+              "start": 37.54,
+              "end": 38.06,
+              "text": " network"
+            },
+            {
+              "start": 38.06,
+              "end": 38.38,
+              "text": " data"
+            },
+            {
+              "start": 38.38,
+              "end": 38.62,
+              "text": " to"
+            },
+            {
+              "start": 38.62,
+              "end": 38.72,
+              "text": " be"
+            },
+            {
+              "start": 38.72,
+              "end": 38.86,
+              "text": " able"
+            },
+            {
+              "start": 38.86,
+              "end": 38.98,
+              "text": " to"
+            },
+            {
+              "start": 38.98,
+              "end": 39.08,
+              "text": " get"
+            },
+            {
+              "start": 39.08,
+              "end": 39.22,
+              "text": " the"
+            },
+            {
+              "start": 39.22,
+              "end": 39.52,
+              "text": " information"
+            },
+            {
+              "start": 39.52,
+              "end": 39.82,
+              "text": " on"
+            },
+            {
+              "start": 39.82,
+              "end": 39.96,
+              "text": " these"
+            },
+            {
+              "start": 39.96,
+              "end": 40.2,
+              "text": " games."
+            },
+            {
+              "start": 40.48,
+              "end": 40.58,
+              "text": " And"
+            },
+            {
+              "start": 40.58,
+              "end": 41.5,
+              "text": " I"
+            },
+            {
+              "start": 41.5,
+              "end": 41.6,
+              "text": " mean,"
+            },
+            {
+              "start": 41.66,
+              "end": 41.8,
+              "text": " this"
+            },
+            {
+              "start": 41.8,
+              "end": 41.92,
+              "text": " is"
+            },
+            {
+              "start": 41.92,
+              "end": 42.22,
+              "text": " just"
+            },
+            {
+              "start": 42.22,
+              "end": 42.48,
+              "text": " great."
+            },
+            {
+              "start": 42.48,
+              "end": 42.66,
+              "text": " So"
+            },
+            {
+              "start": 42.66,
+              "end": 42.86,
+              "text": " to"
+            },
+            {
+              "start": 42.86,
+              "end": 43.04,
+              "text": " put"
+            },
+            {
+              "start": 43.04,
+              "end": 43.14,
+              "text": " it"
+            },
+            {
+              "start": 43.14,
+              "end": 43.48,
+              "text": " into"
+            },
+            {
+              "start": 43.48,
+              "end": 44.14,
+              "text": " perspective"
+            },
+            {
+              "start": 44.14,
+              "end": 44.62,
+              "text": " at"
+            },
+            {
+              "start": 44.62,
+              "end": 45.06,
+              "text": " launch"
+            },
+            {
+              "start": 45.06,
+              "end": 45.5,
+              "text": " Red"
+            },
+            {
+              "start": 45.5,
+              "end": 45.58,
+              "text": " Dead"
+            },
+            {
+              "start": 45.58,
+              "end": 45.92,
+              "text": " Redemption"
+            },
+            {
+              "start": 45.92,
+              "end": 46.24,
+              "text": " 2,"
+            },
+            {
+              "start": 46.28,
+              "end": 46.46,
+              "text": " which"
+            },
+            {
+              "start": 46.46,
+              "end": 46.56,
+              "text": " it"
+            },
+            {
+              "start": 46.56,
+              "end": 46.66,
+              "text": " did"
+            },
+            {
+              "start": 46.66,
+              "end": 46.84,
+              "text": " launch"
+            },
+            {
+              "start": 46.84,
+              "end": 47.04,
+              "text": " on"
+            },
+            {
+              "start": 47.04,
+              "end": 47.5,
+              "text": " PS4."
+            },
+            {
+              "start": 47.68,
+              "end": 47.72,
+              "text": " So"
+            },
+            {
+              "start": 47.72,
+              "end": 47.86,
+              "text": " keep"
+            },
+            {
+              "start": 47.86,
+              "end": 48.0,
+              "text": " that"
+            },
+            {
+              "start": 48.0,
+              "end": 48.12,
+              "text": " in"
+            },
+            {
+              "start": 48.12,
+              "end": 48.26,
+              "text": " mind."
+            },
+            {
+              "start": 48.44,
+              "end": 48.54,
+              "text": " It"
+            },
+            {
+              "start": 48.54,
+              "end": 48.7,
+              "text": " was"
+            },
+            {
+              "start": 48.7,
+              "end": 49.9,
+              "text": " 105"
+            },
+            {
+              "start": 49.9,
+              "end": 50.9,
+              "text": " gigabytes."
+            },
+            {
+              "start": 51.34,
+              "end": 51.52,
+              "text": " So"
+            },
+            {
+              "start": 51.52,
+              "end": 51.9,
+              "text": " GTA"
+            },
+            {
+              "start": 51.9,
+              "end": 52.24,
+              "text": " VI"
+            },
+            {
+              "start": 52.24,
+              "end": 52.64,
+              "text": " is"
+            },
+            {
+              "start": 52.64,
+              "end": 53.14,
+              "text": " double"
+            },
+            {
+              "start": 53.14,
+              "end": 53.42,
+              "text": " the"
+            },
+            {
+              "start": 53.42,
+              "end": 53.84,
+              "text": " size"
+            },
+            {
+              "start": 53.84,
+              "end": 54.42,
+              "text": " of"
+            },
+            {
+              "start": 54.42,
+              "end": 54.64,
+              "text": " Red"
+            },
+            {
+              "start": 54.64,
+              "end": 54.78,
+              "text": " Dead"
+            },
+            {
+              "start": 54.78,
+              "end": 55.1,
+              "text": " Redemption"
+            },
+            {
+              "start": 55.1,
+              "end": 55.46,
+              "text": " 2"
+            },
+            {
+              "start": 55.46,
+              "end": 56.24,
+              "text": " at"
+            },
+            {
+              "start": 56.24,
+              "end": 56.58,
+              "text": " launch."
+            },
+            {
+              "start": 56.86,
+              "end": 57.1,
+              "text": " GTA"
+            },
+            {
+              "start": 57.1,
+              "end": 57.34,
+              "text": " 5."
+            }
+          ]
+        },
+        {
+          "start": 57.34,
+          "end": 59.9,
+          "text": " It was around 90 gigs at launch and then eventually I think it.",
+          "words": [
+            {
+              "start": 57.34,
+              "end": 57.46,
+              "text": " It"
+            },
+            {
+              "start": 57.46,
+              "end": 57.52,
+              "text": " was"
+            },
+            {
+              "start": 57.52,
+              "end": 57.72,
+              "text": " around"
+            },
+            {
+              "start": 57.72,
+              "end": 58.16,
+              "text": " 90"
+            },
+            {
+              "start": 58.16,
+              "end": 58.42,
+              "text": " gigs"
+            },
+            {
+              "start": 58.42,
+              "end": 58.62,
+              "text": " at"
+            },
+            {
+              "start": 58.62,
+              "end": 58.86,
+              "text": " launch"
+            },
+            {
+              "start": 58.86,
+              "end": 59.1,
+              "text": " and"
+            },
+            {
+              "start": 59.1,
+              "end": 59.2,
+              "text": " then"
+            },
+            {
+              "start": 59.2,
+              "end": 59.56,
+              "text": " eventually"
+            },
+            {
+              "start": 59.56,
+              "end": 59.7,
+              "text": " I"
+            },
+            {
+              "start": 59.7,
+              "end": 59.86,
+              "text": " think"
+            },
+            {
+              "start": 59.86,
+              "end": 59.9,
+              "text": " it."
+            }
+          ]
+        }
+      ],
+      "process_peak_rss_MiB_so_far": 760.8515625
+    },
+    {
+      "source_job": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "expected_corpus_language": "en",
+      "repeat": 1,
+      "language_detected": "en",
+      "language_probability": 0.9990861415863037,
+      "audio_sha256": "933d202bd526a1768de664f852446782256bd214ad1473f8f3d82f3590d296e0",
+      "audio_duration": 60.0,
+      "wall_seconds": 6.496,
+      "segments": [
+        {
+          "start": 0.0,
+          "end": 27.36,
+          "text": " The download size for Grand Theft Auto VI has been reported, and this is a hefty unit. It's coming in at 210 gigabytes, which makes GTA VI one of the largest games of our lifetime. And the thing is, that's just at launch. Obviously we're going to have a day one patch. They're going to be all sorts of patches and updates and expansions and things like that that come out over the next decade that we're playing this game. So she's a big girl. And obviously there's a lot of size and detail in there. Now what?",
+          "words": [
+            {
+              "start": 0.0,
+              "end": 0.16,
+              "text": " The"
+            },
+            {
+              "start": 0.16,
+              "end": 0.4,
+              "text": " download"
+            },
+            {
+              "start": 0.4,
+              "end": 0.72,
+              "text": " size"
+            },
+            {
+              "start": 0.72,
+              "end": 0.98,
+              "text": " for"
+            },
+            {
+              "start": 0.98,
+              "end": 1.18,
+              "text": " Grand"
+            },
+            {
+              "start": 1.18,
+              "end": 1.46,
+              "text": " Theft"
+            },
+            {
+              "start": 1.46,
+              "end": 1.64,
+              "text": " Auto"
+            },
+            {
+              "start": 1.64,
+              "end": 1.92,
+              "text": " VI"
+            },
+            {
+              "start": 1.92,
+              "end": 2.2,
+              "text": " has"
+            },
+            {
+              "start": 2.2,
+              "end": 2.38,
+              "text": " been"
+            },
+            {
+              "start": 2.38,
+              "end": 2.8,
+              "text": " reported,"
+            },
+            {
+              "start": 3.06,
+              "end": 3.24,
+              "text": " and"
+            },
+            {
+              "start": 3.24,
+              "end": 3.56,
+              "text": " this"
+            },
+            {
+              "start": 3.56,
+              "end": 4.06,
+              "text": " is"
+            },
+            {
+              "start": 4.06,
+              "end": 4.38,
+              "text": " a"
+            },
+            {
+              "start": 4.38,
+              "end": 5.24,
+              "text": " hefty"
+            },
+            {
+              "start": 5.24,
+              "end": 5.7,
+              "text": " unit."
+            },
+            {
+              "start": 5.88,
+              "end": 6.04,
+              "text": " It's"
+            },
+            {
+              "start": 6.04,
+              "end": 6.26,
+              "text": " coming"
+            },
+            {
+              "start": 6.26,
+              "end": 6.52,
+              "text": " in"
+            },
+            {
+              "start": 6.52,
+              "end": 6.82,
+              "text": " at"
+            },
+            {
+              "start": 6.82,
+              "end": 7.82,
+              "text": " 210"
+            },
+            {
+              "start": 7.82,
+              "end": 8.7,
+              "text": " gigabytes,"
+            },
+            {
+              "start": 8.94,
+              "end": 9.1,
+              "text": " which"
+            },
+            {
+              "start": 9.1,
+              "end": 9.32,
+              "text": " makes"
+            },
+            {
+              "start": 9.32,
+              "end": 9.72,
+              "text": " GTA"
+            },
+            {
+              "start": 9.72,
+              "end": 10.1,
+              "text": " VI"
+            },
+            {
+              "start": 10.1,
+              "end": 10.7,
+              "text": " one"
+            },
+            {
+              "start": 10.7,
+              "end": 10.78,
+              "text": " of"
+            },
+            {
+              "start": 10.78,
+              "end": 10.9,
+              "text": " the"
+            },
+            {
+              "start": 10.9,
+              "end": 11.36,
+              "text": " largest"
+            },
+            {
+              "start": 11.36,
+              "end": 11.74,
+              "text": " games"
+            },
+            {
+              "start": 11.74,
+              "end": 12.18,
+              "text": " of"
+            },
+            {
+              "start": 12.18,
+              "end": 12.32,
+              "text": " our"
+            },
+            {
+              "start": 12.32,
+              "end": 12.72,
+              "text": " lifetime."
+            },
+            {
+              "start": 12.98,
+              "end": 13.02,
+              "text": " And"
+            },
+            {
+              "start": 13.02,
+              "end": 13.12,
+              "text": " the"
+            },
+            {
+              "start": 13.12,
+              "end": 13.26,
+              "text": " thing"
+            },
+            {
+              "start": 13.26,
+              "end": 13.42,
+              "text": " is,"
+            },
+            {
+              "start": 13.48,
+              "end": 13.64,
+              "text": " that's"
+            },
+            {
+              "start": 13.64,
+              "end": 13.8,
+              "text": " just"
+            },
+            {
+              "start": 13.8,
+              "end": 13.98,
+              "text": " at"
+            },
+            {
+              "start": 13.98,
+              "end": 14.16,
+              "text": " launch."
+            },
+            {
+              "start": 14.34,
+              "end": 14.74,
+              "text": " Obviously"
+            },
+            {
+              "start": 14.74,
+              "end": 14.9,
+              "text": " we're"
+            },
+            {
+              "start": 14.9,
+              "end": 14.98,
+              "text": " going"
+            },
+            {
+              "start": 14.98,
+              "end": 15.02,
+              "text": " to"
+            },
+            {
+              "start": 15.02,
+              "end": 15.14,
+              "text": " have"
+            },
+            {
+              "start": 15.14,
+              "end": 15.24,
+              "text": " a"
+            },
+            {
+              "start": 15.24,
+              "end": 15.36,
+              "text": " day"
+            },
+            {
+              "start": 15.36,
+              "end": 15.52,
+              "text": " one"
+            },
+            {
+              "start": 15.52,
+              "end": 15.82,
+              "text": " patch."
+            },
+            {
+              "start": 15.9,
+              "end": 16.06,
+              "text": " They're"
+            },
+            {
+              "start": 16.06,
+              "end": 16.14,
+              "text": " going"
+            },
+            {
+              "start": 16.14,
+              "end": 16.16,
+              "text": " to"
+            },
+            {
+              "start": 16.16,
+              "end": 16.26,
+              "text": " be"
+            },
+            {
+              "start": 16.26,
+              "end": 16.36,
+              "text": " all"
+            },
+            {
+              "start": 16.36,
+              "end": 16.64,
+              "text": " sorts"
+            },
+            {
+              "start": 16.64,
+              "end": 16.78,
+              "text": " of"
+            },
+            {
+              "start": 16.78,
+              "end": 17.04,
+              "text": " patches"
+            },
+            {
+              "start": 17.04,
+              "end": 17.26,
+              "text": " and"
+            },
+            {
+              "start": 17.26,
+              "end": 17.56,
+              "text": " updates"
+            },
+            {
+              "start": 17.56,
+              "end": 17.8,
+              "text": " and"
+            },
+            {
+              "start": 17.8,
+              "end": 18.38,
+              "text": " expansions"
+            },
+            {
+              "start": 18.38,
+              "end": 18.52,
+              "text": " and"
+            },
+            {
+              "start": 18.52,
+              "end": 18.68,
+              "text": " things"
+            },
+            {
+              "start": 18.68,
+              "end": 18.88,
+              "text": " like"
+            },
+            {
+              "start": 18.88,
+              "end": 19.12,
+              "text": " that"
+            },
+            {
+              "start": 19.12,
+              "end": 19.28,
+              "text": " that"
+            },
+            {
+              "start": 19.28,
+              "end": 19.42,
+              "text": " come"
+            },
+            {
+              "start": 19.42,
+              "end": 19.62,
+              "text": " out"
+            },
+            {
+              "start": 19.62,
+              "end": 19.82,
+              "text": " over"
+            },
+            {
+              "start": 19.82,
+              "end": 19.94,
+              "text": " the"
+            },
+            {
+              "start": 19.94,
+              "end": 20.1,
+              "text": " next"
+            },
+            {
+              "start": 20.1,
+              "end": 20.54,
+              "text": " decade"
+            },
+            {
+              "start": 20.54,
+              "end": 20.72,
+              "text": " that"
+            },
+            {
+              "start": 20.72,
+              "end": 20.84,
+              "text": " we're"
+            },
+            {
+              "start": 20.84,
+              "end": 21.12,
+              "text": " playing"
+            },
+            {
+              "start": 21.12,
+              "end": 21.32,
+              "text": " this"
+            },
+            {
+              "start": 21.32,
+              "end": 21.54,
+              "text": " game."
+            },
+            {
+              "start": 21.76,
+              "end": 21.86,
+              "text": " So"
+            },
+            {
+              "start": 21.86,
+              "end": 22.94,
+              "text": " she's"
+            },
+            {
+              "start": 22.94,
+              "end": 23.06,
+              "text": " a"
+            },
+            {
+              "start": 23.06,
+              "end": 23.2,
+              "text": " big"
+            },
+            {
+              "start": 23.2,
+              "end": 23.6,
+              "text": " girl."
+            },
+            {
+              "start": 23.62,
+              "end": 24.02,
+              "text": " And"
+            },
+            {
+              "start": 24.02,
+              "end": 24.5,
+              "text": " obviously"
+            },
+            {
+              "start": 24.5,
+              "end": 25.02,
+              "text": " there's"
+            },
+            {
+              "start": 25.02,
+              "end": 25.14,
+              "text": " a"
+            },
+            {
+              "start": 25.14,
+              "end": 25.3,
+              "text": " lot"
+            },
+            {
+              "start": 25.3,
+              "end": 25.46,
+              "text": " of"
+            },
+            {
+              "start": 25.46,
+              "end": 25.78,
+              "text": " size"
+            },
+            {
+              "start": 25.78,
+              "end": 26.08,
+              "text": " and"
+            },
+            {
+              "start": 26.08,
+              "end": 26.46,
+              "text": " detail"
+            },
+            {
+              "start": 26.46,
+              "end": 26.74,
+              "text": " in"
+            },
+            {
+              "start": 26.74,
+              "end": 26.92,
+              "text": " there."
+            },
+            {
+              "start": 26.92,
+              "end": 27.2,
+              "text": " Now"
+            },
+            {
+              "start": 27.2,
+              "end": 27.36,
+              "text": " what?"
+            }
+          ]
+        },
+        {
+          "start": 27.36,
+          "end": 57.34,
+          "text": " This information is coming from PlayStation game size. It tweeted this right here. And they have a longstanding track record of being accurate. I believe they scraped the back end of the PlayStation network data to be able to get the information on these games. And I mean, this is just great. So to put it into perspective at launch Red Dead Redemption 2, which it did launch on PS4. So keep that in mind. It was 105 gigabytes. So GTA VI is double the size of Red Dead Redemption 2 at launch. GTA 5.",
+          "words": [
+            {
+              "start": 27.36,
+              "end": 27.52,
+              "text": " This"
+            },
+            {
+              "start": 27.52,
+              "end": 27.94,
+              "text": " information"
+            },
+            {
+              "start": 27.94,
+              "end": 28.28,
+              "text": " is"
+            },
+            {
+              "start": 28.28,
+              "end": 28.46,
+              "text": " coming"
+            },
+            {
+              "start": 28.46,
+              "end": 28.68,
+              "text": " from"
+            },
+            {
+              "start": 28.68,
+              "end": 29.08,
+              "text": " PlayStation"
+            },
+            {
+              "start": 29.08,
+              "end": 29.6,
+              "text": " game"
+            },
+            {
+              "start": 29.6,
+              "end": 30.12,
+              "text": " size."
+            },
+            {
+              "start": 30.48,
+              "end": 30.68,
+              "text": " It"
+            },
+            {
+              "start": 30.68,
+              "end": 30.92,
+              "text": " tweeted"
+            },
+            {
+              "start": 30.92,
+              "end": 31.22,
+              "text": " this"
+            },
+            {
+              "start": 31.22,
+              "end": 31.58,
+              "text": " right"
+            },
+            {
+              "start": 31.58,
+              "end": 31.96,
+              "text": " here."
+            },
+            {
+              "start": 32.26,
+              "end": 32.44,
+              "text": " And"
+            },
+            {
+              "start": 32.44,
+              "end": 32.82,
+              "text": " they"
+            },
+            {
+              "start": 32.82,
+              "end": 32.94,
+              "text": " have"
+            },
+            {
+              "start": 32.94,
+              "end": 33.0,
+              "text": " a"
+            },
+            {
+              "start": 33.0,
+              "end": 33.54,
+              "text": " longstanding"
+            },
+            {
+              "start": 33.54,
+              "end": 33.9,
+              "text": " track"
+            },
+            {
+              "start": 33.9,
+              "end": 34.26,
+              "text": " record"
+            },
+            {
+              "start": 34.26,
+              "end": 34.54,
+              "text": " of"
+            },
+            {
+              "start": 34.54,
+              "end": 34.8,
+              "text": " being"
+            },
+            {
+              "start": 34.8,
+              "end": 35.32,
+              "text": " accurate."
+            },
+            {
+              "start": 35.44,
+              "end": 35.52,
+              "text": " I"
+            },
+            {
+              "start": 35.52,
+              "end": 35.88,
+              "text": " believe"
+            },
+            {
+              "start": 35.88,
+              "end": 36.12,
+              "text": " they"
+            },
+            {
+              "start": 36.12,
+              "end": 36.48,
+              "text": " scraped"
+            },
+            {
+              "start": 36.48,
+              "end": 36.58,
+              "text": " the"
+            },
+            {
+              "start": 36.58,
+              "end": 36.82,
+              "text": " back"
+            },
+            {
+              "start": 36.82,
+              "end": 37.04,
+              "text": " end"
+            },
+            {
+              "start": 37.04,
+              "end": 37.14,
+              "text": " of"
+            },
+            {
+              "start": 37.14,
+              "end": 37.22,
+              "text": " the"
+            },
+            {
+              "start": 37.22,
+              "end": 37.54,
+              "text": " PlayStation"
+            },
+            {
+              "start": 37.54,
+              "end": 38.06,
+              "text": " network"
+            },
+            {
+              "start": 38.06,
+              "end": 38.38,
+              "text": " data"
+            },
+            {
+              "start": 38.38,
+              "end": 38.62,
+              "text": " to"
+            },
+            {
+              "start": 38.62,
+              "end": 38.72,
+              "text": " be"
+            },
+            {
+              "start": 38.72,
+              "end": 38.86,
+              "text": " able"
+            },
+            {
+              "start": 38.86,
+              "end": 38.98,
+              "text": " to"
+            },
+            {
+              "start": 38.98,
+              "end": 39.08,
+              "text": " get"
+            },
+            {
+              "start": 39.08,
+              "end": 39.22,
+              "text": " the"
+            },
+            {
+              "start": 39.22,
+              "end": 39.52,
+              "text": " information"
+            },
+            {
+              "start": 39.52,
+              "end": 39.82,
+              "text": " on"
+            },
+            {
+              "start": 39.82,
+              "end": 39.96,
+              "text": " these"
+            },
+            {
+              "start": 39.96,
+              "end": 40.2,
+              "text": " games."
+            },
+            {
+              "start": 40.48,
+              "end": 40.58,
+              "text": " And"
+            },
+            {
+              "start": 40.58,
+              "end": 41.5,
+              "text": " I"
+            },
+            {
+              "start": 41.5,
+              "end": 41.6,
+              "text": " mean,"
+            },
+            {
+              "start": 41.66,
+              "end": 41.8,
+              "text": " this"
+            },
+            {
+              "start": 41.8,
+              "end": 41.92,
+              "text": " is"
+            },
+            {
+              "start": 41.92,
+              "end": 42.22,
+              "text": " just"
+            },
+            {
+              "start": 42.22,
+              "end": 42.48,
+              "text": " great."
+            },
+            {
+              "start": 42.48,
+              "end": 42.66,
+              "text": " So"
+            },
+            {
+              "start": 42.66,
+              "end": 42.86,
+              "text": " to"
+            },
+            {
+              "start": 42.86,
+              "end": 43.04,
+              "text": " put"
+            },
+            {
+              "start": 43.04,
+              "end": 43.14,
+              "text": " it"
+            },
+            {
+              "start": 43.14,
+              "end": 43.48,
+              "text": " into"
+            },
+            {
+              "start": 43.48,
+              "end": 44.14,
+              "text": " perspective"
+            },
+            {
+              "start": 44.14,
+              "end": 44.62,
+              "text": " at"
+            },
+            {
+              "start": 44.62,
+              "end": 45.06,
+              "text": " launch"
+            },
+            {
+              "start": 45.06,
+              "end": 45.5,
+              "text": " Red"
+            },
+            {
+              "start": 45.5,
+              "end": 45.58,
+              "text": " Dead"
+            },
+            {
+              "start": 45.58,
+              "end": 45.92,
+              "text": " Redemption"
+            },
+            {
+              "start": 45.92,
+              "end": 46.24,
+              "text": " 2,"
+            },
+            {
+              "start": 46.28,
+              "end": 46.46,
+              "text": " which"
+            },
+            {
+              "start": 46.46,
+              "end": 46.56,
+              "text": " it"
+            },
+            {
+              "start": 46.56,
+              "end": 46.66,
+              "text": " did"
+            },
+            {
+              "start": 46.66,
+              "end": 46.84,
+              "text": " launch"
+            },
+            {
+              "start": 46.84,
+              "end": 47.04,
+              "text": " on"
+            },
+            {
+              "start": 47.04,
+              "end": 47.5,
+              "text": " PS4."
+            },
+            {
+              "start": 47.68,
+              "end": 47.72,
+              "text": " So"
+            },
+            {
+              "start": 47.72,
+              "end": 47.86,
+              "text": " keep"
+            },
+            {
+              "start": 47.86,
+              "end": 48.0,
+              "text": " that"
+            },
+            {
+              "start": 48.0,
+              "end": 48.12,
+              "text": " in"
+            },
+            {
+              "start": 48.12,
+              "end": 48.26,
+              "text": " mind."
+            },
+            {
+              "start": 48.44,
+              "end": 48.54,
+              "text": " It"
+            },
+            {
+              "start": 48.54,
+              "end": 48.7,
+              "text": " was"
+            },
+            {
+              "start": 48.7,
+              "end": 49.9,
+              "text": " 105"
+            },
+            {
+              "start": 49.9,
+              "end": 50.9,
+              "text": " gigabytes."
+            },
+            {
+              "start": 51.34,
+              "end": 51.52,
+              "text": " So"
+            },
+            {
+              "start": 51.52,
+              "end": 51.9,
+              "text": " GTA"
+            },
+            {
+              "start": 51.9,
+              "end": 52.24,
+              "text": " VI"
+            },
+            {
+              "start": 52.24,
+              "end": 52.64,
+              "text": " is"
+            },
+            {
+              "start": 52.64,
+              "end": 53.14,
+              "text": " double"
+            },
+            {
+              "start": 53.14,
+              "end": 53.42,
+              "text": " the"
+            },
+            {
+              "start": 53.42,
+              "end": 53.84,
+              "text": " size"
+            },
+            {
+              "start": 53.84,
+              "end": 54.42,
+              "text": " of"
+            },
+            {
+              "start": 54.42,
+              "end": 54.64,
+              "text": " Red"
+            },
+            {
+              "start": 54.64,
+              "end": 54.78,
+              "text": " Dead"
+            },
+            {
+              "start": 54.78,
+              "end": 55.1,
+              "text": " Redemption"
+            },
+            {
+              "start": 55.1,
+              "end": 55.46,
+              "text": " 2"
+            },
+            {
+              "start": 55.46,
+              "end": 56.24,
+              "text": " at"
+            },
+            {
+              "start": 56.24,
+              "end": 56.58,
+              "text": " launch."
+            },
+            {
+              "start": 56.86,
+              "end": 57.1,
+              "text": " GTA"
+            },
+            {
+              "start": 57.1,
+              "end": 57.34,
+              "text": " 5."
+            }
+          ]
+        },
+        {
+          "start": 57.34,
+          "end": 59.9,
+          "text": " It was around 90 gigs at launch and then eventually I think it.",
+          "words": [
+            {
+              "start": 57.34,
+              "end": 57.46,
+              "text": " It"
+            },
+            {
+              "start": 57.46,
+              "end": 57.52,
+              "text": " was"
+            },
+            {
+              "start": 57.52,
+              "end": 57.72,
+              "text": " around"
+            },
+            {
+              "start": 57.72,
+              "end": 58.16,
+              "text": " 90"
+            },
+            {
+              "start": 58.16,
+              "end": 58.42,
+              "text": " gigs"
+            },
+            {
+              "start": 58.42,
+              "end": 58.62,
+              "text": " at"
+            },
+            {
+              "start": 58.62,
+              "end": 58.86,
+              "text": " launch"
+            },
+            {
+              "start": 58.86,
+              "end": 59.1,
+              "text": " and"
+            },
+            {
+              "start": 59.1,
+              "end": 59.2,
+              "text": " then"
+            },
+            {
+              "start": 59.2,
+              "end": 59.56,
+              "text": " eventually"
+            },
+            {
+              "start": 59.56,
+              "end": 59.7,
+              "text": " I"
+            },
+            {
+              "start": 59.7,
+              "end": 59.86,
+              "text": " think"
+            },
+            {
+              "start": 59.86,
+              "end": 59.9,
+              "text": " it."
+            }
+          ]
+        }
+      ],
+      "process_peak_rss_MiB_so_far": 760.8515625
+    }
+  ],
+  "reference_transcript": null,
+  "WER": null,
+  "human_quality_verdict": null,
+  "limits": "Two 60-second excerpts, two repetitions. Probability is not accuracy; no human reference. Linux RSS is per isolated model process, includes runtime."
+}

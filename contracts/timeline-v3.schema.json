@@ -1,0 +1,499 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One-source multisegment timeline v3",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "width",
+    "height",
+    "fps",
+    "duration",
+    "layers",
+    "caption_style",
+    "source_duration",
+    "segments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "3.0"
+    },
+    "width": {
+      "const": 720
+    },
+    "height": {
+      "const": 1280
+    },
+    "fps": {
+      "const": 30
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 120
+    },
+    "caption_style": {
+      "const": "bold_karaoke_v1"
+    },
+    "layers": {
+      "type": "object",
+      "required": [
+        "video",
+        "audio",
+        "captions",
+        "text",
+        "effects",
+        "broll"
+      ],
+      "properties": {
+        "video": {
+          "type": "object",
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "const": "base.mp4"
+            }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "required": [
+            "from"
+          ],
+          "properties": {
+            "from": {
+              "const": "base.mp4"
+            }
+          }
+        },
+        "captions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "start",
+              "end",
+              "source_start",
+              "source_end",
+              "word_id",
+              "segment_id",
+              "output_segment_end"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "source_start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "source_end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "word_id": {
+                "type": "string"
+              },
+              "segment_id": {
+                "type": "string"
+              },
+              "output_segment_end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "at",
+              "duration",
+              "animation"
+            ]
+          }
+        },
+        "effects": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "at",
+              "duration"
+            ],
+            "properties": {
+              "type": {
+                "const": "punch_zoom"
+              }
+            }
+          }
+        },
+        "broll": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "asset_id",
+              "at",
+              "duration",
+              "source_start",
+              "path"
+            ],
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,50}$"
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^broll_[0-9]+\\.mp4$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "finishing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tail_seconds",
+        "fade_seconds"
+      ],
+      "properties": {
+        "tail_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.75
+        },
+        "fade_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 0.75
+        }
+      },
+      "description": "Optional post-speech tail; fade_seconds must not exceed tail_seconds. Output duration = duration + tail_seconds."
+    },
+    "framing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preset",
+        "roi"
+      ],
+      "properties": {
+        "preset": {
+          "enum": [
+            "face",
+            "gameplay",
+            "web",
+            "tweet",
+            "document"
+          ]
+        },
+        "roi": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "width": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "height": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "layout_version": {
+          "enum": [
+            "fit_v1",
+            "proof_compact_v2"
+          ]
+        }
+      }
+    },
+    "framing_resolved": {
+      "type": "object",
+      "required": [
+        "mode",
+        "roi",
+        "source_size",
+        "caption_safe_area",
+        "title_safe_area",
+        "projected_roi",
+        "content_box"
+      ],
+      "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+    },
+    "source_duration": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "segment_id",
+          "source_in",
+          "source_out",
+          "output_start",
+          "purpose",
+          "frame_count",
+          "duration"
+        ],
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,50}$"
+          },
+          "source_in": {
+            "type": "number",
+            "minimum": 0
+          },
+          "source_out": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "output_start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "frame_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "duration": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "framing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "preset",
+              "roi"
+            ],
+            "properties": {
+              "preset": {
+                "enum": [
+                  "face",
+                  "gameplay",
+                  "web",
+                  "tweet",
+                  "document"
+                ]
+              },
+              "roi": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "width",
+                  "height"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "layout_version": {
+                "enum": [
+                  "fit_v1",
+                  "proof_compact_v2"
+                ]
+              }
+            }
+          },
+          "framing_resolved": {
+            "type": "object",
+            "required": [
+              "mode",
+              "roi",
+              "source_size",
+              "caption_safe_area",
+              "title_safe_area",
+              "projected_roi",
+              "content_box"
+            ],
+            "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+          }
+        }
+      }
+    },
+    "reorder_approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "actor"
+      ],
+      "properties": {
+        "kind": {
+          "const": "human"
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "framing_schedule": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end",
+          "framing"
+        ],
+        "properties": {
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "framing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "preset",
+              "roi"
+            ],
+            "properties": {
+              "preset": {
+                "enum": [
+                  "face",
+                  "gameplay",
+                  "web",
+                  "tweet",
+                  "document"
+                ]
+              },
+              "roi": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "width",
+                  "height"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "layout_version": {
+                "enum": [
+                  "fit_v1",
+                  "proof_compact_v2"
+                ]
+              }
+            }
+          },
+          "framing_resolved": {
+            "type": "object",
+            "required": [
+              "mode",
+              "roi",
+              "source_size",
+              "caption_safe_area",
+              "title_safe_area",
+              "projected_roi",
+              "content_box"
+            ],
+            "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+          }
+        }
+      }
+    }
+  }
+}

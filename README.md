@@ -2,6 +2,8 @@
 
 **Documentação:** [índice de operação, processo, arquitetura, GPU e testes](docs/README.md).
 
+Sprint em validação: [QC, avaliação editorial e API local v1](research/SPRINT_QUALIDADE_RESULTADOS.md).
+
 Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in Streamlit. No paid AI API, Hermes account, or autoposting required.
 
 
@@ -14,9 +16,9 @@ docker compose up --build -d
 docker compose logs -f worker
 ```
 
-By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The **Ajustes de processamento** panel saves model, beam size, highlight count/duration, Qwen analysis limits and engine choices with each job; `app.submit` accepts the same `settings` object. The render step uses the FFmpeg fallback if Remotion fails; **the fallback does not have animated typography or B-roll**. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
+By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The **Ajustes de processamento** panel saves model, beam size, highlight count/duration, Qwen analysis limits and engine choices with each job; `app.submit` accepts the same `settings` object. New UI forms start with K4200/Qwen, Remotion and high fidelity. High fidelity fails explicitly if Remotion fails; the standard profile can use the configured FFmpeg fallback, which lacks animated typography and B-roll. Existing job snapshots are preserved. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
 
-Each finished candidate keeps its 720×1280 MP4 for download and gets a smaller VP8/Opus WebM preview for browser playback. The preview is decoded completely before it appears in the UI. Existing MP4s are used as a fallback when a preview has not been generated yet.
+Each finished candidate keeps its 720×1280 MP4 for download and gets a VP8/Opus WebM preview (720×1280 high fidelity; 540×960 standard). The UI displays a compact player and offers both formats. Both outputs must pass complete decoding and technical QC before approval. Rejection with comments is available even for failed candidates. Legacy files require an explicit QC pass; a missing preview is a technical failure, while the existing master remains on disk. See [candidate QC and retries](docs/CONTROLE_QUALIDADE.md).
 
 ### Enable local Qwen with Ollama
 

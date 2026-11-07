@@ -1,0 +1,16 @@
+{
+  "authorized_corpus_media": true,
+  "production_mutated": false,
+  "source": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+  "bytes": 479409962,
+  "editorial_decisions_created": 0,
+  "http_status": 201,
+  "wall_seconds": 9.495,
+  "job_id": "42222acb-19ce-41d4-be2b-3c3c91414bd8",
+  "status": "QUEUED",
+  "sha256": "3169beab40846c986679ecddd3443ae14b10722d71141357633d4f0ceb16121b",
+  "binary_integrity_verified": true,
+  "queued": 1,
+  "memory_after_upload": "19.18MiB / 15.58GiB",
+  "passed": true
+}

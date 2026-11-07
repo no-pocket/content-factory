@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "synthetic": true,
+  "ai_inference_performed": false,
+  "image_id": "sha256:e9c0e556f937942443656b5c4ffb2e4b33009cd615f089218e5ffb2f03a8fa29",
+  "component_snapshot": {
+    "schema_version": "1.0",
+    "git_head": "2aabcda439291a9f41c9f9eae1984b8336763d97",
+    "dirty_patch_sha256": "9c494ab0a3736283035a79bef4d6e5cd5a69f7efc9f444873797febe6849c708",
+    "prompts": {
+      "ranker": {
+        "id": "ranker-full-context-v1",
+        "module_sha256": "2972ffaad84f9cb1b5717823e85d865e5668b7cb79f5f77b8bbedd3d2830941c"
+      },
+      "director": {
+        "id": "director-full-context-v1",
+        "module_sha256": "786777b348f685807249d366fc282f290e0080ebce0ae9cacd6e8414a37d14db"
+      }
+    },
+    "dependencies": {
+      "streamlit": "1.66.1",
+      "faster-whisper": "1.2.1",
+      "redis": "6.4.0"
+    },
+    "component_file_hashes": {
+      "app/core.py": "4a3f2957318ddaf9db2dc1c5715e645c997cb4307cf00ee0e599931c3ce14ed2",
+      "app/edit_render.py": "aabf6450b2b6ca64c37e5cbe43097b61c0b376fee47a3764faa5fb691653c830",
+      "app/candidates.py": "b4ce2baa3b0a09b25548aa366c094e3523051a9225fa8f8b6d6a34c6057b1cf7",
+      "app/worker.py": "331cfee0a6ead16f25298bdbab6e80f40e18440a0c5f990ae332be2efbccdc36",
+      "app/telemetry.py": "b3af3455a4590692a49d598470155f500b2bac36c8580e7fd35c1bb6666d4d1c",
+      "app/job_settings.py": "8bef9ef83cb3fd77818f56f6f3bbc069beb878bfe7440f3b37589f44cbf18677",
+      "app/provenance.py": "bbf0eebd286d7b866818216469741bc03950baa5689e59a3d74c894992c28c3e",
+      "app/timeline.py": "2f64924fbeffdb6a5f0011e8751f747fee5faff54b11c4b80578ebefa46ad3a1",
+      "app/assembly.py": "b7366adea7015958b7fc74140a97e8454861c6f048feac7ebbf2ecf7d65dcd35",
+      "app/framing.py": "937aa8a4437fe383ab224202217785abcd13b8853118cbc0845a52300384dc9c",
+      "renderer/src/vertical-clip.tsx": "529403f743fedbbee1cf6daa7df754e6a297d93fba7b16d3cc72dabd343771f8",
+      "renderer/src/index.tsx": "e044e65ad2fe8cd255b8c0cfdb5247e55a60e48b0c642ff36f9e28e9cdd5c30c",
+      "requirements.lock": "52cdf82f5385ea0d4286d97b4493bd35c53e2d28fc753722ff13f23254e37ada",
+      "renderer/package-lock.json": "b9448c29c1a9a3c63eb23327184eadc45ac07cbf0324d5c188541286fd9fd451"
+    },
+    "build_source_sha256": "c750d09119ba603de551001de73a298f61ef3c3ebd3526d9ee3e10ce9453b395",
+    "model_requested": "qwen2.5:3b",
+    "model_resolved": "UNKNOWN",
+    "backend_requested": "ollama",
+    "context_window": 8192,
+    "renderer_requested": "remotion",
+    "timeline_schema": "2.0",
+    "ranker_rules": "full-context-v1",
+    "retrieval": null,
+    "dataset": null,
+    "snapshot_id": "a6af44e1d48471e73bf3ce4b9bc7309bfa84d0e920f38029013a692915e4d5bf"
+  },
+  "baseline_seconds": [
+    17.80183758799103,
+    17.205576815002132,
+    16.85692020598799
+  ],
+  "candidate_seconds": [
+    16.883599826993304,
+    16.58227187700686,
+    16.99880337101058
+  ],
+  "baseline_mean": 17.28811153632705,
+  "candidate_mean": 16.821558358336915,
+  "relative_wall_gain": 0.026986937064223615,
+  "comparisons": [
+    {
+      "full_ssim": 0.997603,
+      "tail_ssim": 0.997125
+    },
+    {
+      "full_ssim": 0.997603,
+      "tail_ssim": 0.997125
+    },
+    {
+      "full_ssim": 0.997603,
+      "tail_ssim": 0.997125
+    }
+  ],
+  "quality_thresholds": {
+    "full_ssim": 0.98,
+    "tail_ssim": 0.95,
+    "rms_tail_max": 50
+  },
+  "synthetic_quality_gate": true,
+  "promotion": "NOT_PROMOTED_REQUIRES_HUMAN_REVIEW",
+  "limitations": "Three repetitions on one synthetic source; no statistical/editorial generalization.",
+  "resource_measurements": "Unavailable in benchmark cgroup; Docker quota 2 CPUs. No peak-resource improvement claim.",
+  "source_identity_note": "Intermediate image supplies dependencies; readonly source mounted at recorded dirty commit/file hashes. Not final deployment image."
+}
