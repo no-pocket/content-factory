@@ -42,6 +42,14 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
     if payload.get('rights_confirmed') is not True:
         raise PermissionError('Rights confirmation required')
     settings = normalize_job_settings(payload.get('settings'))
+    assembly = payload.get('assembly_plan')
+    if assembly is not None:
+        if not settings['timeline_v3']:
+            raise ValueError('assembly_plan requires timeline_v3 opt-in')
+        from .assembly import validate_assembly
+        if not isinstance(assembly, dict) or assembly.get('schema_version') != '3.0':
+            raise ValueError('assembly_plan requires schema 3.0')
+        assembly = validate_assembly(assembly, assembly.get('source_duration'))
     qc = normalize_qc(payload.get('qc_settings'))
     evaluation = payload.get('evaluation')
     if evaluation is not None:
@@ -73,6 +81,8 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
     job = store.new_job(path, name, payload['creator'].strip(), payload['license_note'].strip(),
                         source_url=source_url, platform_permission=bool(source_url), settings=settings)
     job.update(qc_settings=qc, source_fingerprint=fingerprint, pipeline_version='quality-v2')
+    if assembly is not None:
+        job['assembly_plan'] = assembly
     if evaluation is not None:
         job['evaluation'] = evaluation
     store.save(job)
