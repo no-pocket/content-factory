@@ -34,3 +34,5 @@ Para revisão no celular: [acesso privado via Tailscale](OPERACAO.md#acessar-pel
 Rodada atual para avaliação: [cinco vídeos, quinze candidatos GPU/Qwen 2.5](../research/TESTES_GPU_5_VIDEOS_2026-11-06.md).
 
 Os relatórios em [`research/`](../research/) registram experimentos, resultados e limitações. O [relatório REA da K4200](../research/AUDITORIA_REA_K4200_2026-11-05.md) contém o benchmark CPU/GPU e o manifesto do ambiente. A [auditoria de produto](AUDITORIA_E_OPCOES_2026-11-04.md) é um retrato histórico; consulte os guias acima para o comportamento atual.
+
+Execução atual: [aceitação e limites da evolução editorial](planning/content-factory-next/ACCEPTANCE_STATUS.md); proposta de [brief DRAFT](planning/content-factory-next/EDITORIAL_BRIEF_DRAFT.json), sem ativação automática.
