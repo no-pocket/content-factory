@@ -157,6 +157,10 @@ else:
             st.caption(f"Sinal heurístico: {clip.get('score', 'n/d')} · {clip.get('reason', '')}")
             if clip.get("ai_reason"):
                 st.info("Análise local: " + clip["ai_reason"])
+            if clip.get('story_assessment', {}).get('quality_uncertain'):
+                st.caption('Avaliação automática incerta: confira relevância, demonstração e fechamento.')
+                with st.expander('Sinais editoriais automáticos'):
+                    st.json(clip['story_assessment'])
             st.caption(f"Direção: {clip.get('director_used', 'legado')} · Render: {clip.get('renderer_used', 'legado')} · Palavras sincronizadas: {clip.get('word_count', 'n/d')}")
             with st.expander("Transcrição e informações do corte"):
                 st.write(clip.get('text', ''))

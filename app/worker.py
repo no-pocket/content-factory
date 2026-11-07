@@ -128,9 +128,13 @@ def process(jid: str) -> None:
             else:
                 job['ranker_used'] = 'heuristic'
                 job['ai_activity'] = {'state': 'disabled', 'updated_at': time.time()}
-                clips = propose_clips(segments, duration, count=settings['clip_count'],
+                clips = propose_clips(segments, duration, count=max(16, settings['clip_count']),
                                       target=settings['target_seconds'], min_seconds=settings['min_seconds'],
                                       max_seconds=settings['max_seconds'])
+                from .editorial_story import annotate_candidates
+                from .ranker import _select
+                clips = _select(annotate_candidates(clips, segments, job.get('editorial_policy'),
+                                                    max_seconds=settings['max_seconds']), settings['clip_count'])
         if not clips:
             raise ValueError("No usable speech windows found; try a longer video with speech")
         job.update({"language": transcript['language'], "duration": duration, "status": "RENDERING", "candidates": clips})

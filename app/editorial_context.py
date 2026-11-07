@@ -21,6 +21,9 @@ def build_candidate_context(job: dict, index: int, transcript: dict, *, before_s
             raise ValueError('Invalid transcript segment')
         item = {'segment_id': position, 'source_start': a, 'source_end': b, 'text': str(segment.get('text', '')),
                 'candidate_start': a-start, 'candidate_end': b-start}
+        item['words'] = [{'word_id': f'{position}:{word_index}', 'source_start': word['start'],
+                          'source_end': word['end'], 'text': word.get('text', word.get('word', ''))}
+                         for word_index, word in enumerate(segment.get('words', []))]
         if a < end and b > start:
             groups['segments'].append(item)
         elif b <= start and b > start-before_seconds:

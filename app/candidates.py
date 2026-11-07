@@ -56,6 +56,13 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             job['status'] = 'RENDERING'
             save(job)
             try:
+                if clip.get('editorial_context'):
+                    from .editorial_story import assess_story, validate_story_boundary
+                    story = assess_story(clip['editorial_context'], {}, None)
+                    clip['story_assessment'] = story
+                    validate_story_boundary({'source_start': clip['start'], 'source_end': clip['end']}, clip['editorial_context'])
+                    if story['closure'] == 'INCOMPLETE':
+                        raise ValueError('Editorial story incomplete: no validated payoff within selected duration; choose another interval')
                 if 'timeline' not in clip:
                     job['status'] = 'DIRECTING'
                     save(job)
@@ -66,6 +73,10 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                                                        mode=settings['director_mode'],
                                                        model=settings['llm_model'],
                                                        llm_backend=settings['llm_backend'])
+                    if clip.get('editorial_context'):
+                        clip['story_assessment'] = assess_story(clip['editorial_context'], {}, hints.get('story'))
+                        if clip['story_assessment']['closure'] == 'INCOMPLETE':
+                            raise ValueError('Editorial model found incomplete closure; a new validated boundary is required')
                     clip['timeline'] = build_timeline(clip, segments, edit=hints, assets=assets)
                     clip['director_used'] = director_used
                     save(job)

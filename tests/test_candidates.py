@@ -70,3 +70,16 @@ def test_v2_retry_uses_new_paths_and_preserves_old_bytes(monkeypatch, tmp_path):
     assert second.read_bytes() == b'master'
     assert record['candidates'][0]['render_revision'] == 2
     assert len(record['candidates'][0]['render_history']) == 1
+
+
+def test_incomplete_story_fails_before_render(monkeypatch, tmp_path):
+    calls, _ = setup(monkeypatch, tmp_path)
+    record = job()
+    record['candidates'][0]['editorial_context'] = {
+        'text': 'Agora vou mostrar', 'source_range': {'start': 0, 'end': 10},
+        'segments': [{'segment_id': 0, 'source_start': 0, 'source_end': 10, 'text': 'Agora vou mostrar'}],
+        'before': [], 'after': []}
+    candidates.render_candidates(record, Path('source'), [], {}, False, only=0)
+    assert calls == []
+    assert record['candidates'][0]['state'] == 'FAILED'
+    assert 'incomplete' in record['candidates'][0]['attempt_history'][0]['error']

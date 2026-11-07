@@ -37,6 +37,8 @@ def select_highlights(segments: list[dict], duration: float, *, count: int = 3, 
         discovered = propose_from_transcript(segments, duration, on_event=on_event, policy=policy)
     combined = discovered + [c for c in heuristic if not any(
         abs(c['start'] - p['start']) < 1 and abs(c['end'] - p['end']) < 1 for p in discovered)]
+    from .editorial_story import annotate_candidates
+    combined = annotate_candidates(combined, segments, policy, max_seconds=settings['max_seconds'] if settings else 60)
     return rerank_with_ollama(combined, count=count, on_event=on_event,
                               shortlist_limit=settings['shortlist'] if settings else None,
                               timeout=settings['ollama_timeout'] if settings else None,
@@ -170,7 +172,7 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
         emit('fallback', reason='Ollama URL inválida')
         return fallback
 
-    shortlist = sorted(candidates, key=lambda x: (x.get('proposal_source') != 'transcript', -x['score']))[:shortlist_limit if shortlist_limit is not None else int(os.getenv('OLLAMA_SHORTLIST', '12'))]
+    shortlist = sorted(candidates, key=lambda x: (x.get('editorial_penalty', 0), x.get('proposal_source') != 'transcript', -x['score']))[:shortlist_limit if shortlist_limit is not None else int(os.getenv('OLLAMA_SHORTLIST', '12'))]
     brief = [{"index": i, "start": c['start'], "end": c['end'], "transcript": c['text']} for i, c in enumerate(shortlist)]
     prompt = (
         'Você é um editor de vídeos curtos em português brasileiro especializado em games. '
@@ -244,6 +246,7 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
             raise ValueError('no valid model decisions')
         # Fill the selected slots from heuristic candidates, preserving non-overlap.
         ordered.extend(c for c in sorted(candidates, key=lambda c: -c['score']) if c not in ordered)
+        ordered.sort(key=lambda c: c.get('editorial_penalty', 0))
         chosen = _select(ordered, count)
         emit('completed', selected_count=len(chosen), model=model)
         return chosen

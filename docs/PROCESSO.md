@@ -14,6 +14,13 @@ A UI enfileira o ID em `clips:queue`. O worker move o ID para `clips:processing`
 
 ## 3. Propostas e classificação
 
+Sinais editoriais automáticos agora distinguem autopromoção dominante e finais
+claramente incompletos. Uma demonstração no contexto seguinte pode estender a janela
+até o fim do segmento, dentro do limite salvo; palavras não podem ser cortadas nessa
+fronteira. Sem conclusão avaliável, o resultado mantém incerteza e motivo explícitos;
+um final identificado como incompleto falha antes de renderizar. Pontuação de modelo,
+heurística e notas humanas continuam separadas. Fade/pausa não são prova de fechamento.
+
 `app/core.py` cria candidatos heurísticos. `app/ranker.py` pode pedir propostas ao Qwen em amostras da transcrição, ancoradas por IDs de segmentos, e reordenar uma shortlist. O backend é escolhido por job: Ollama ou ponte Kepler K4200 (`app/llm_routing.py`). Toda saída do modelo é tratada como dado não confiável: IDs, duração e sobreposição são validados. Contexto excedido, resposta truncada, JSON inválido ou serviço indisponível acionam a heurística; eventos e motivo ficam no job.
 
 A ponte GPU (`app/kepler_bridge.py`) usa o tokenizer do servidor para contar prompt com template, reserva a saída e recusa pedidos que não cabem no contexto real. Ela só aceita as opções Ollama implementadas e informa a razão de término. O modo GPU está sujeito aos limites em [GPU K4200](GPU_K4200.md).
