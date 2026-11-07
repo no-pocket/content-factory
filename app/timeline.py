@@ -56,23 +56,13 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
     edit = edit if isinstance(edit, dict) else {}
     assets = assets or {}
     text = str(clip.get("text", ""))
-    hook = str(edit.get("hook", "")).strip()[:62]
-    # Do not allow completely invented hooks: compare meaningful words with ASR.
-    def token_list(value):
-        normalized = unicodedata.normalize("NFKD", value.casefold())
-        normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
-        return re.findall(r"\w+", normalized)
-    # A title can reorder spoken words, but cannot inject an unsupported fact.
-    available = set(token_list(text))
-    hook_terms = [w for w in token_list(hook) if len(w) > 3]
-    opening = token_list(text)
-    title_words = token_list(hook)
-    repeats_opening = bool(title_words) and title_words == opening[:len(title_words)]
-    if not hook or any(w not in available for w in hook_terms) or repeats_opening or len(hook.split()) > 10:
-        hook = ''
+    from .editorial_context import validate_title
+    title_check = validate_title(edit.get('hook', ''), {'text': text})
+    hook = title_check['normalized'] if title_check['valid'] else ''
     if editorial_title is not None:
         if (not isinstance(editorial_title, str) or not 1 <= len(editorial_title.strip()) <= 80
-                or len(editorial_title.split()) > 12 or any(ord(c) < 32 for c in editorial_title)):
+                or len(editorial_title.split()) > 12 or not any(c.isalpha() for c in editorial_title)
+                or any(ord(c) < 32 for c in editorial_title)):
             raise ValueError('Editorial title must contain 1..80 characters and at most 12 words')
         hook = editorial_title.strip()
 

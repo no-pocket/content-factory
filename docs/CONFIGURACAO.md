@@ -2,6 +2,28 @@
 
 ## Ajustes na interface
 
+Novos jobs guardam snapshots de política e componentes (`editorial_policy`,
+`component_snapshot`, `processing_snapshot`), com hashes do código/prompts disponíveis,
+Git/patch local, modelos solicitados e dependências conhecidas. Dados indisponíveis
+continuam `UNKNOWN`; nenhuma configuração atual é atribuída retrospectivamente ao
+legado. A transcrição integral e seu hash ficam ligados ao contexto temporal de cada
+candidato. O renderer mantém a aparência aprovada.
+
+O brief inicial de `app.editorial_policy.initial_brief()` é **DRAFT**, sem ativação.
+`save_policy_draft()` grava um ID novo; `approve_policy(id, expected_revision, actor)`
+é a operação humana explícita que ativa/reverte o ponteiro. Arquivos ficam em
+`data/editorial/briefs` e `active_policy.json`. Não execute aprovação para testes no
+diretório real. IDs aprovados são imutáveis; uma alteração exige outro ID/parent.
+Novos jobs resolvem a política uma vez; jobs existentes preservam seu snapshot.
+
+Contexto não usa prefixos de 700/900/2200 caracteres. O pré-check local conserva o
+texto completo e usa um limite superior por bytes UTF-8, com reserva de geração e
+template, claramente identificado como estimativa conservadora. O bridge GPU ainda
+valida o prompt com tokenizer/contexto reais antes da inferência. Pools grandes são
+comparados em blocos sem alegar ordenação global pelo modelo; a direção que não cabe
+usa fallback explícito, com motivo. Esta opção pode recusar prompts que caberiam no
+tokenizer; não indica melhoria editorial comprovada ou ganho de desempenho.
+
 Abra **Adicionar um vídeo autorizado → Ajustes de processamento**. Todos os campos abaixo são salvos no JSON do job e validados em `app/job_settings.py`. O valor salvo prevalece sobre mudanças futuras dos padrões do worker.
 
 | Campo (`settings`) | Padrão | Limite / efeito |

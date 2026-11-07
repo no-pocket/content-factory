@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import hashlib
 import logging
 import os
 import time
@@ -86,6 +87,9 @@ def process(jid: str) -> None:
         source = Path(job["source"])
         if not source.exists():
             raise FileNotFoundError(source)
+        if not job.get('source_fingerprint'):
+            with source.open('rb') as handle:
+                job['source_fingerprint'] = hashlib.file_digest(handle, 'sha256').hexdigest()
         duration = get_duration(source)
         transcript_path = JOBS / f"{jid}.transcript.json"
         if transcript_path.is_file():
@@ -118,6 +122,7 @@ def process(jid: str) -> None:
             if mode == "ollama":
                 record_ai_event(job, 'queued', {'transcript_segments': len(segments)})
                 clips = select_highlights(segments, duration, count=settings['clip_count'], settings=settings,
+                                          policy=job.get('editorial_policy'),
                                           on_event=lambda event, details: record_ai_event(job, event, details))
                 log.info("Ranker=ollama transcript discovery, clips=%s", len(clips))
             else:
@@ -129,6 +134,25 @@ def process(jid: str) -> None:
         if not clips:
             raise ValueError("No usable speech windows found; try a longer video with speech")
         job.update({"language": transcript['language'], "duration": duration, "status": "RENDERING", "candidates": clips})
+        from .editorial_context import build_candidate_context
+        from .artifacts import digest
+        job.setdefault('transcript_sha256', digest(transcript))
+        if 'processing_snapshot' not in job:
+            from .provenance import component_snapshot
+            snapshot = component_snapshot(settings)
+            snapshot.update(source_sha256=job['source_fingerprint'], transcript_sha256=job['transcript_sha256'],
+                            brief=job.get('editorial_policy', {'status': 'UNKNOWN'}))
+            snapshot['snapshot_id'] = digest({k: v for k, v in snapshot.items() if k != 'snapshot_id'})
+            job['processing_snapshot'] = snapshot
+            if job.get('editorial_versions'):
+                job['editorial_versions']['component_snapshot_id'] = snapshot['snapshot_id']
+        for index, clip in enumerate(clips):
+            if 'editorial_context' not in clip:
+                clip['editorial_context'] = build_candidate_context(job, index, transcript)
+                # Older persisted candidates keep their selection, but direction gets a
+                # complete source-anchored context rather than a silently sliced prefix.
+                clip['text'] = clip['editorial_context']['text']
+                clip['editorial_policy'] = job.get('editorial_policy', {'status': 'UNKNOWN', 'brief': None})
         if 'audio_expected' not in job:
             job['audio_expected'] = expects_audio(source)
         save(job)

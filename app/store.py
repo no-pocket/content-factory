@@ -31,6 +31,13 @@ def new_job(path: Path | None, filename: str, creator: str, license_note: str, *
               "qc_settings": normalize_qc(), "decision_history": [],
               "settings": normalize_job_settings(settings), "model": os.getenv("WHISPER_MODEL", "base")}
     record['editorial_protocol'] = record['settings']['editorial_protocol']
+    from .editorial_policy import resolve_policy
+    from .provenance import component_snapshot
+    record['editorial_policy'] = resolve_policy(None)
+    record['component_snapshot'] = component_snapshot(record['settings'])
+    record['editorial_versions'] = {'brief_id': record['editorial_policy']['brief_id'],
+                                    'brief_sha256': record['editorial_policy']['brief_sha256'],
+                                    'component_snapshot_id': record['component_snapshot']['snapshot_id']}
     save(record)
     return record
 
@@ -70,7 +77,14 @@ def job_lock(jid: str):
     """Cross-process lock for idle-job mutations (HTTP and Streamlit)."""
     if not jid or not all(c.isalnum() or c == '-' for c in jid):
         raise ValueError('invalid id')
-    with (JOBS / (jid + '.lock')).open('a+b') as handle:
+    with file_lock(JOBS / (jid + '.lock')):
+        yield
+
+
+@contextmanager
+def file_lock(path: Path):
+    """Lock a backend-owned local record across Streamlit/API processes."""
+    with path.open('a+b') as handle:
         if os.name == 'nt':
             import msvcrt
             handle.seek(0)

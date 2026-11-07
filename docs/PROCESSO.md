@@ -20,6 +20,12 @@ A ponte GPU (`app/kepler_bridge.py`) usa o tokenizer do servidor para contar pro
 
 ## 4. Direção e timeline
 
+O contexto de cada candidato preserva trecho integral, segmentos/offsets de fonte,
+janela anterior/posterior e hashes. Títulos numéricos, eco da abertura e termos sem
+suporte são omitidos com validação determinística; títulos humanos explícitos
+continuam identificados como humanos. Orçamento insuficiente não produz prefixo
+silenciosamente truncado: comparação é dividida em blocos ou registra fallback.
+
 Para cada corte, `app/director.py` pode pedir título, zooms e B-roll ao Qwen. `app/timeline.py` converte sugestões aceitas em timeline v2; impõe duração, tempos, texto ancorado na fala e IDs de assets licenciados. Falha do diretor gera uma timeline heurística válida. O contrato JSON está em `contracts/timeline.schema.json`.
 
 ## 5. Render e prévia
