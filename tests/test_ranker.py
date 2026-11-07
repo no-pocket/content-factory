@@ -28,6 +28,18 @@ def test_ollama_fallback(monkeypatch):
     assert len(rerank_with_ollama(sample())) == 3
 
 
+def test_semantically_invalid_proposals_record_rejection_reasons(monkeypatch):
+    import io
+    reply = {'response': json.dumps({'clips': [{'start_segment': 0, 'end_segment': 3, 'reason': 'Synthetic too long'}]}),
+             'done_reason': 'stop'}
+    monkeypatch.setattr('app.ranker.urllib.request.urlopen', lambda *a, **k: io.BytesIO(json.dumps(reply).encode()))
+    events = []
+    segments = [{'start': n*30, 'end': (n+1)*30, 'text': 'Synthetic English speech'} for n in range(4)]
+    assert propose_from_transcript(segments, 120, on_event=lambda event, details: events.append((event, details))) == []
+    assert events[-1][0] == 'proposal_chunk_rejected'
+    assert events[-1][1]['rejections'] == {'duration': 1}
+
+
 def test_ranker_rejects_valid_json_cut_off_by_token_limit(monkeypatch):
     class Reply:
         def __enter__(self): return self

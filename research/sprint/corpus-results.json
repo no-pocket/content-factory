@@ -1,0 +1,2663 @@
+{
+  "videos": [
+    {
+      "job_id": "255f7f42-5d82-45ae-9707-0fa142c2d985",
+      "source": "GTA 6 - URGENTE! NOVAS IMAGENS DE GTA 6.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 663.146,
+      "processing_runs": [
+        {
+          "started_at": 1793926614.4961917,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793926799.3826663,
+          "finished_at": 1793926799.3962967,
+          "timing_complete": true,
+          "seconds": 184.9
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 19.58,
+          "end": 64.49,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.934,
+                  "audio_streams": 1,
+                  "bytes": 3759986,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 0.136104,
+                      "end": 1.42302
+                    },
+                    {
+                      "start": 7.80558,
+                      "end": 8.80646
+                    },
+                    {
+                      "start": 13.2487,
+                      "end": 15.0127
+                    },
+                    {
+                      "start": 16.4977,
+                      "end": 17.5265
+                    },
+                    {
+                      "start": 29.3406,
+                      "end": 32.7521
+                    },
+                    {
+                      "start": 40.5013,
+                      "end": 42.4167
+                    }
+                  ]
+                },
+                "checked_at": 1793926725.5787437,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.94,
+                  "audio_streams": 1,
+                  "bytes": 6981317,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 0.143667,
+                      "end": 1.43052
+                    },
+                    {
+                      "start": 7.81296,
+                      "end": 8.8139
+                    },
+                    {
+                      "start": 13.2562,
+                      "end": 15.0203
+                    },
+                    {
+                      "start": 16.5053,
+                      "end": 17.534
+                    },
+                    {
+                      "start": 29.3482,
+                      "end": 32.7596
+                    },
+                    {
+                      "start": 40.5304,
+                      "end": 42.4242
+                    }
+                  ]
+                },
+                "checked_at": 1793926726.650142,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 121.63,
+          "end": 165.21,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.6,
+                  "audio_streams": 1,
+                  "bytes": 3642177,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 3.3999,
+                      "end": 6.11135
+                    }
+                  ]
+                },
+                "checked_at": 1793926764.381009,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.607,
+                  "audio_streams": 1,
+                  "bytes": 5380413,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 3.4074,
+                      "end": 6.1191
+                    }
+                  ]
+                },
+                "checked_at": 1793926765.441807,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 351.22,
+          "end": 391.76,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 40.567,
+                  "audio_streams": 1,
+                  "bytes": 3530496,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 10.5437,
+                      "end": 11.9475
+                    },
+                    {
+                      "start": 26.1067,
+                      "end": 27.4571
+                    },
+                    {
+                      "start": 29.1497,
+                      "end": 30.4717
+                    }
+                  ]
+                },
+                "checked_at": 1793926797.4287143,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 40.573,
+                  "audio_streams": 1,
+                  "bytes": 8347406,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 10.5511,
+                      "end": 11.955
+                    },
+                    {
+                      "start": 26.1142,
+                      "end": 27.4645
+                    },
+                    {
+                      "start": 29.1575,
+                      "end": 30.4792
+                    }
+                  ]
+                },
+                "checked_at": 1793926798.4535303,
+                "path": "/data/output/255f7f42-5d82-45ae-9707-0fa142c2d985/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-255f7f42-5d82-45ae-9707-0fa142c2d985.json"
+    },
+    {
+      "job_id": "df57ad76-3234-4110-9619-372f06ed7579",
+      "source": "GTA 6 no PC PANTERA GARANTIDA e PINTURA NOVA.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 674.823,
+      "processing_runs": [
+        {
+          "started_at": 1793926799.4337022,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793927098.9442246,
+          "finished_at": 1793927098.9593606,
+          "timing_complete": true,
+          "seconds": 299.526
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 28.89,
+          "end": 78.49,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 49.6,
+                  "audio_streams": 1,
+                  "bytes": 10845933,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793926976.54679,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 49.608,
+                  "audio_streams": 1,
+                  "bytes": 10410286,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793926977.906235,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 158.13,
+          "end": 203.41,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 45.3,
+                  "audio_streams": 1,
+                  "bytes": 3926221,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927041.263724,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 45.307,
+                  "audio_streams": 1,
+                  "bytes": 5512881,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927042.3872488,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 203.87,
+          "end": 246.31,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.467,
+                  "audio_streams": 1,
+                  "bytes": 6695672,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927096.8030708,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.473,
+                  "audio_streams": 1,
+                  "bytes": 8880250,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927097.9741828,
+                "path": "/data/output/df57ad76-3234-4110-9619-372f06ed7579/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-df57ad76-3234-4110-9619-372f06ed7579.json"
+    },
+    {
+      "job_id": "3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741",
+      "source": "GTA 6 tem o MAIOR VILÃO já criado pela Rockstar.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 835.143,
+      "processing_runs": [
+        {
+          "started_at": 1793927099.0004191,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793927370.1357334,
+          "finished_at": 1793927370.1503506,
+          "timing_complete": true,
+          "seconds": 271.15
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 46.14,
+          "end": 92.28,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.167,
+                  "audio_streams": 1,
+                  "bytes": 10068781,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927264.1262214,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.173,
+                  "audio_streams": 1,
+                  "bytes": 9682427,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927266.450579,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 687.7,
+          "end": 728.4,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 40.7,
+                  "audio_streams": 1,
+                  "bytes": 6863755,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927325.0387766,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 40.712,
+                  "audio_streams": 1,
+                  "bytes": 8433372,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927326.2727706,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 723.22,
+          "end": 764.44,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 41.234,
+                  "audio_streams": 1,
+                  "bytes": 6225848,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927367.9463065,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 41.245,
+                  "audio_streams": 1,
+                  "bytes": 8372416,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927369.194363,
+                "path": "/data/output/3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741.json"
+    },
+    {
+      "job_id": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "source": "GTA-6-File-Size-is-Absolutely-Insane_001_1080p.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "en",
+      "duration": 510.584,
+      "processing_runs": [
+        {
+          "started_at": 1793927370.1920648,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793927598.0649223,
+          "finished_at": 1793927598.0796337,
+          "timing_complete": true,
+          "seconds": 227.888
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 202.92,
+          "end": 245.96,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.067,
+                  "audio_streams": 1,
+                  "bytes": 10320908,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927475.6210678,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.073,
+                  "audio_streams": 1,
+                  "bytes": 8221904,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927476.8083966,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 265.58,
+          "end": 310.22,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 44.667,
+                  "audio_streams": 1,
+                  "bytes": 7615171,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927541.9941504,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 44.673,
+                  "audio_streams": 1,
+                  "bytes": 9435732,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927543.2665925,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 333.3,
+          "end": 375.66,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.367,
+                  "audio_streams": 1,
+                  "bytes": 5893081,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927595.8422055,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.384,
+                  "audio_streams": 1,
+                  "bytes": 5578000,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927597.1160107,
+                "path": "/data/output/a5f108ff-c572-42db-905a-a73def7c4ba1/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-a5f108ff-c572-42db-905a-a73def7c4ba1.json"
+    },
+    {
+      "job_id": "551502d9-fcc5-4a66-9175-b7077c89194b",
+      "source": "GTA-6-GANHA-SnapYT.App.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 554.47,
+      "processing_runs": [
+        {
+          "started_at": 1793927598.1200967,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793927833.62013,
+          "finished_at": 1793927833.6351116,
+          "timing_complete": true,
+          "seconds": 235.515
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 35.37,
+          "end": 78.57,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.2,
+                  "audio_streams": 1,
+                  "bytes": 2930372,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 29.7468,
+                      "end": 30.7932
+                    }
+                  ]
+                },
+                "checked_at": 1793927743.7231736,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.22,
+                  "audio_streams": 1,
+                  "bytes": 6750351,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 29.7544,
+                      "end": 30.8008
+                    }
+                  ]
+                },
+                "checked_at": 1793927744.7879333,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 415.14,
+          "end": 459.48,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.367,
+                  "audio_streams": 1,
+                  "bytes": 2531040,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 3.35469,
+                      "end": 4.61787
+                    },
+                    {
+                      "start": 6.68755,
+                      "end": 7.84118
+                    },
+                    {
+                      "start": 38.3902,
+                      "end": 39.8302
+                    }
+                  ]
+                },
+                "checked_at": 1793927790.194531,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.373,
+                  "audio_streams": 1,
+                  "bytes": 8780482,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 3.36217,
+                      "end": 4.62715
+                    },
+                    {
+                      "start": 6.69506,
+                      "end": 7.84852
+                    },
+                    {
+                      "start": 38.3977,
+                      "end": 39.8377
+                    }
+                  ]
+                },
+                "checked_at": 1793927791.2965286,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 452.38,
+          "end": 496.26,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.9,
+                  "audio_streams": 1,
+                  "bytes": 2667388,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 1.15025,
+                      "end": 2.5902
+                    },
+                    {
+                      "start": 14.2448,
+                      "end": 15.3091
+                    }
+                  ]
+                },
+                "checked_at": 1793927831.535734,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 43.907,
+                  "audio_streams": 1,
+                  "bytes": 8276122,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 1.15773,
+                      "end": 2.59769
+                    },
+                    {
+                      "start": 14.2523,
+                      "end": 15.3166
+                    }
+                  ]
+                },
+                "checked_at": 1793927832.584116,
+                "path": "/data/output/551502d9-fcc5-4a66-9175-b7077c89194b/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-551502d9-fcc5-4a66-9175-b7077c89194b.json"
+    },
+    {
+      "job_id": "526f20e5-4cf3-4055-95af-161a20dfebd7",
+      "source": "GTA-6-SnapYT.App.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 980.658,
+      "processing_runs": [
+        {
+          "started_at": 1793927833.6799047,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793928061.8121119,
+          "finished_at": 1793928061.8268058,
+          "timing_complete": true,
+          "seconds": 228.147
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 1.04,
+          "end": 47.44,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.4,
+                  "audio_streams": 1,
+                  "bytes": 4321707,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927968.5622785,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.408,
+                  "audio_streams": 1,
+                  "bytes": 9669332,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793927969.8344002,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 262.78,
+          "end": 305.24,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.467,
+                  "audio_streams": 1,
+                  "bytes": 2015663,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928013.2857084,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.482,
+                  "audio_streams": 1,
+                  "bytes": 8588992,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928014.3182583,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 329.64,
+          "end": 373.52,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.9,
+                  "audio_streams": 1,
+                  "bytes": 3548903,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928059.70397,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.907,
+                  "audio_streams": 1,
+                  "bytes": 9075495,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928060.8003027,
+                "path": "/data/output/526f20e5-4cf3-4055-95af-161a20dfebd7/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-526f20e5-4cf3-4055-95af-161a20dfebd7.json"
+    },
+    {
+      "job_id": "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+      "source": "JOGANDOO GTA 6 AGORAAA!!!! TÁ ACONTECENDO GALERA GTA 6 É REALIDADE.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 377.58,
+      "processing_runs": [
+        {
+          "started_at": 1793928061.8671467,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793928356.8239954,
+          "finished_at": 1793928356.837018,
+          "timing_complete": true,
+          "seconds": 294.97
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 76.86,
+          "end": 120.76,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.9,
+                  "audio_streams": 1,
+                  "bytes": 7206405,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928184.703924,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 43.916,
+                  "audio_streams": 1,
+                  "bytes": 9073405,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928186.9446852,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 249.78,
+          "end": 309.74,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.967,
+                  "audio_streams": 1,
+                  "bytes": 6004743,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928309.780204,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.985,
+                  "audio_streams": 1,
+                  "bytes": 10869062,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928311.2777076,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 309.74,
+          "end": 352.3,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.567,
+                  "audio_streams": 1,
+                  "bytes": 2224834,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928354.8563414,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 42.573,
+                  "audio_streams": 1,
+                  "bytes": 8060069,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928355.8714578,
+                "path": "/data/output/583bd5d7-6373-4e21-8926-7fd1b02dc914/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-583bd5d7-6373-4e21-8926-7fd1b02dc914.json"
+    },
+    {
+      "job_id": "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39",
+      "source": "RETROSPECTIVA-GTA-6-SnapYT.App.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 248.57,
+      "processing_runs": [
+        {
+          "started_at": 1793928356.8740916,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793928459.5761673,
+          "finished_at": 1793928459.589605,
+          "timing_complete": true,
+          "seconds": 102.716
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 31.16,
+          "end": 71.66,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 40.5,
+                  "audio_streams": 1,
+                  "bytes": 2586172,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 10.8783,
+                      "end": 13.5202
+                    }
+                  ]
+                },
+                "checked_at": 1793928401.6382804,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 40.526,
+                  "audio_streams": 1,
+                  "bytes": 8146761,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 10.8858,
+                      "end": 13.5278
+                    }
+                  ]
+                },
+                "checked_at": 1793928402.577649,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 129.08,
+          "end": 173.34,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.267,
+                  "audio_streams": 1,
+                  "bytes": 3750523,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 39.2912,
+                      "end": 42.7536
+                    }
+                  ]
+                },
+                "checked_at": 1793928429.9340467,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.288,
+                  "audio_streams": 1,
+                  "bytes": 8436868,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 39.3085,
+                      "end": 42.7613
+                    }
+                  ]
+                },
+                "checked_at": 1793928431.0024273,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 171.76,
+          "end": 215.92,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.167,
+                  "audio_streams": 1,
+                  "bytes": 4004091,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 16.7454,
+                      "end": 17.7715
+                    },
+                    {
+                      "start": 22.2192,
+                      "end": 25.5461
+                    }
+                  ]
+                },
+                "checked_at": 1793928457.520029,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 44.173,
+                  "audio_streams": 1,
+                  "bytes": 8780438,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 16.753,
+                      "end": 17.779
+                    },
+                    {
+                      "start": 22.2368,
+                      "end": 25.5536
+                    }
+                  ]
+                },
+                "checked_at": 1793928458.6263142,
+                "path": "/data/output/127b2a1a-c5c5-451e-88bf-f4ad3cb22a39/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-127b2a1a-c5c5-451e-88bf-f4ad3cb22a39.json"
+    },
+    {
+      "job_id": "7256c7f7-ab16-464b-8314-ce84e138f0e1",
+      "source": "Rockstar-Updated-the-GTA-6-Release-Time_003_1080p.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "en",
+      "duration": 237.564,
+      "processing_runs": [
+        {
+          "started_at": 1793928459.6294675,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793928795.8388767,
+          "finished_at": 1793928795.8617005,
+          "timing_complete": true,
+          "seconds": 336.232
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 59.62,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.634,
+                  "audio_streams": 1,
+                  "bytes": 9283075,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928595.2505524,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.64,
+                  "audio_streams": 1,
+                  "bytes": 9660884,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928596.8266082,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 59.62,
+          "end": 119.46,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.867,
+                  "audio_streams": 1,
+                  "bytes": 11526304,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928718.3636436,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 59.873,
+                  "audio_streams": 1,
+                  "bytes": 12604669,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928719.947342,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 119.46,
+          "end": 165.64,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.2,
+                  "audio_streams": 1,
+                  "bytes": 6727084,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928793.4681797,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.207,
+                  "audio_streams": 1,
+                  "bytes": 6892134,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928794.7490017,
+                "path": "/data/output/7256c7f7-ab16-464b-8314-ce84e138f0e1/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-7256c7f7-ab16-464b-8314-ce84e138f0e1.json"
+    },
+    {
+      "job_id": "91714be6-b6f3-4076-95f5-0893cd062002",
+      "source": "SAIU A INFORMAÇÃO DE GTA 6 MAIS IMPRESSIONANTE DO DIA E TIVEMOS ADIAMENTO.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 435.579,
+      "processing_runs": [
+        {
+          "started_at": 1793928795.9072642,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793929099.2959297,
+          "finished_at": 1793929099.311066,
+          "timing_complete": true,
+          "seconds": 303.404
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 51.39,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 51.4,
+                  "audio_streams": 1,
+                  "bytes": 8515042,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928895.3265927,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 51.407,
+                  "audio_streams": 1,
+                  "bytes": 10439860,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793928896.7519045,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 201.35,
+          "end": 261.33,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 60.0,
+                  "audio_streams": 1,
+                  "bytes": 2056786,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929004.1841602,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 60.007,
+                  "audio_streams": 1,
+                  "bytes": 7830214,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929005.4525242,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 345.81,
+          "end": 393.73,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 47.934,
+                  "audio_streams": 1,
+                  "bytes": 3221836,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929097.1317286,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 47.944,
+                  "audio_streams": 1,
+                  "bytes": 7992622,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929098.2508855,
+                "path": "/data/output/91714be6-b6f3-4076-95f5-0893cd062002/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-91714be6-b6f3-4076-95f5-0893cd062002.json"
+    },
+    {
+      "job_id": "87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb",
+      "source": "YTDown.com_YouTube_Media_mOIvpOm1J9U_GTA-6-Is-BIGGER-Than-We-Think-Downloading-EARLY-The-FINAL-Update-Surprise-Announ_003_720p.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "en",
+      "duration": 619.323,
+      "processing_runs": [
+        {
+          "started_at": 1793929099.3493512,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793929341.7849717,
+          "finished_at": 1793929341.7995057,
+          "timing_complete": true,
+          "seconds": 242.45
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 276.34,
+          "end": 327.6,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 51.267,
+                  "audio_streams": 1,
+                  "bytes": 1582358,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929209.2801788,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 51.277,
+                  "audio_streams": 1,
+                  "bytes": 6021802,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929210.356579,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 389.6,
+          "end": 435.82,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.234,
+                  "audio_streams": 1,
+                  "bytes": 8569071,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929268.7133248,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 46.24,
+                  "audio_streams": 1,
+                  "bytes": 9731902,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929269.9738095,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 447.2,
+          "end": 497.54,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 50.367,
+                  "audio_streams": 1,
+                  "bytes": 7888514,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929339.3854594,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 50.373,
+                  "audio_streams": 1,
+                  "bytes": 7950434,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929340.7372956,
+                "path": "/data/output/87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb.json"
+    },
+    {
+      "job_id": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+      "source": "videoplayback.mp4",
+      "status": "NEEDS_REVIEW",
+      "language": "pt",
+      "duration": 612.217,
+      "processing_runs": [
+        {
+          "started_at": 1793929341.8424833,
+          "state": "COMPLETED",
+          "last_checkpoint_at": 1793929499.9290416,
+          "finished_at": 1793929499.9433708,
+          "timing_complete": true,
+          "seconds": 158.101
+        }
+      ],
+      "error": null,
+      "candidates": [
+        {
+          "start": 54.99,
+          "end": 95.13,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 40.167,
+                  "audio_streams": 1,
+                  "bytes": 8018524,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929426.3290396,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_1.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 40.173,
+                  "audio_streams": 1,
+                  "bytes": 8280889,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929427.475477,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_1.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 90.95,
+          "end": 133.55,
+          "state": "WARNING",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "WARNING",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 42.6,
+                  "audio_streams": 1,
+                  "bytes": 8127030,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 8.02279,
+                      "end": 9.0761
+                    },
+                    {
+                      "start": 35.2617,
+                      "end": 36.3051
+                    },
+                    {
+                      "start": 39.4631,
+                      "end": 40.6128
+                    }
+                  ]
+                },
+                "checked_at": 1793929460.8878574,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_2.mp4"
+              },
+              "webm": {
+                "state": "WARNING",
+                "errors": [],
+                "warnings": [
+                  "silence_intervals_context_required"
+                ],
+                "measurements": {
+                  "duration": 42.616,
+                  "audio_streams": 1,
+                  "bytes": 8543774,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": [
+                    {
+                      "start": 8.03031,
+                      "end": 9.08358
+                    },
+                    {
+                      "start": 35.2691,
+                      "end": 36.3031
+                    },
+                    {
+                      "start": 39.5059,
+                      "end": 40.6203
+                    }
+                  ]
+                },
+                "checked_at": 1793929462.0334888,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_2.preview.webm"
+              }
+            }
+          }
+        },
+        {
+          "start": 340.41,
+          "end": 384.93,
+          "state": "VALID",
+          "attempts": 1,
+          "qc": {
+            "version": 1,
+            "state": "VALID",
+            "limits": {
+              "duration_tolerance": 0.5,
+              "silence_db": -40.0,
+              "silence_seconds": 1.0,
+              "black_seconds": 0.5,
+              "black_pixel_threshold": 0.1,
+              "black_picture_ratio": 0.98,
+              "timeout_seconds": 300,
+              "max_attempts": 2
+            },
+            "files": {
+              "mp4": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 44.534,
+                  "audio_streams": 1,
+                  "bytes": 8460204,
+                  "resolution": [
+                    720,
+                    1280
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929497.6664548,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_3.mp4"
+              },
+              "webm": {
+                "state": "VALID",
+                "errors": [],
+                "warnings": [],
+                "measurements": {
+                  "duration": 44.543,
+                  "audio_streams": 1,
+                  "bytes": 9202863,
+                  "resolution": [
+                    540,
+                    960
+                  ],
+                  "decoded_complete": true,
+                  "black": [],
+                  "silence": []
+                },
+                "checked_at": 1793929498.9465492,
+                "path": "/data/output/0d0714a6-aca1-41d6-b5b8-7fd983358887/candidate_3.preview.webm"
+              }
+            }
+          }
+        }
+      ],
+      "signals_report": "signals-0d0714a6-aca1-41d6-b5b8-7fd983358887.json"
+    }
+  ],
+  "editorial_decisions": null,
+  "expected_videos": 12,
+  "processing_and_signal_analysis_complete": true
+}

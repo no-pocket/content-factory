@@ -8,18 +8,13 @@ import json
 from pathlib import Path
 from app.store import new_job, rconn
 from app.youtube import normalize_youtube_url
+from app.service import create_job
 
 
 def submit(payload: dict) -> dict:
-    required = ("source_url", "creator", "license_note")
-    if any(not isinstance(payload.get(k), str) or not payload[k].strip() for k in required):
-        raise ValueError("source_url, creator e license_note são obrigatórios")
-    if payload.get("rights_confirmed") is not True or payload.get("platform_permission") is not True:
-        raise PermissionError("A autorização do titular e da plataforma deve ser confirmada")
-    url = normalize_youtube_url(payload["source_url"])
-    job = new_job(None, url, payload["creator"].strip(), payload["license_note"].strip(),
-                  source_url=url, platform_permission=True, settings=payload.get('settings'))
-    rconn().lpush("clips:queue", job["id"])
+    if not payload.get('source_url'):
+        raise ValueError('source_url required')
+    job = create_job(payload, queue=rconn())
     return {"job_id": job["id"], "status": job["status"]}
 
 

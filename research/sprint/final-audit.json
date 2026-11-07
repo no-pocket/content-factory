@@ -1,0 +1,553 @@
+{
+  "authenticated_api": 200,
+  "unauthenticated_api": 401,
+  "corpus_videos": 12,
+  "languages": {
+    "pt": 9,
+    "en": 3
+  },
+  "candidate_states": {
+    "WARNING": 10,
+    "VALID": 26
+  },
+  "stored_full_decode_checks_and_existing_files": 72,
+  "recovery_real_passed": true,
+  "streaming_upload_passed": true,
+  "approved_reference_unchanged": true,
+  "title_ending_variant_approved": true,
+  "metrics": {
+    "reviewed_videos": 20,
+    "reviewed_candidates": 51,
+    "approved_candidates": 4,
+    "approved_per_video": 0.2,
+    "rework_rate": 0.0,
+    "processing_mean_seconds": 219.47442857142852,
+    "processing_measured_videos": 14,
+    "video_configuration_pairs": 22,
+    "interrupted_timing_jobs": 0,
+    "unreviewed_jobs": 0,
+    "by_configuration": {
+      "d1d0e32a75af2a23": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 1,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "10d193b12c4150bc": {
+        "reviewed_videos": 12,
+        "reviewed_candidates": 36,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 240.4165833333333,
+        "processing_measured_videos": 12
+      },
+      "7cb77edcd4a1fb99": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 1,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 56.068,
+        "processing_measured_videos": 1
+      },
+      "a858528ed54a038c": {
+        "reviewed_videos": 2,
+        "reviewed_candidates": 3,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "20367c9149303230": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 3,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "810e5bb5cd51fc3f": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 3,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "567a16770ab25527": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 1,
+        "approved_candidates": 1,
+        "approved_per_video": 1.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 87.496,
+        "processing_measured_videos": 1
+      },
+      "b56d0a76df7afe2b": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 1,
+        "approved_candidates": 1,
+        "approved_per_video": 1.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 131.575,
+        "processing_measured_videos": 1
+      },
+      "055f3ad22e4e12c6": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 3,
+        "approved_candidates": 3,
+        "approved_per_video": 3.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "3c48befb09dd2a0d": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 1,
+        "approved_candidates": 1,
+        "approved_per_video": 1.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 217.506,
+        "processing_measured_videos": 1
+      }
+    },
+    "conclusion": "Descriptive only; requires paired videos and human review before changing selection",
+    "paired_comparisons": [
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "10d193b12c4150bc",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "20367c9149303230",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "3c48befb09dd2a0d",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "567a16770ab25527",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "7cb77edcd4a1fb99",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "055f3ad22e4e12c6",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "20367c9149303230",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "3c48befb09dd2a0d",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "567a16770ab25527",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "7cb77edcd4a1fb99",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "10d193b12c4150bc",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "3c48befb09dd2a0d",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "567a16770ab25527",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "7cb77edcd4a1fb99",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "20367c9149303230",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "567a16770ab25527",
+        "paired_videos": 1,
+        "approval_delta_per_video": 0.0,
+        "rows": [
+          {
+            "source": "c9280032ae3e8f000819dc30da92898a48b19c68a454f5c2b7b0562f7efe0343",
+            "baseline_job": "90dda26b-ae0d-4ee1-8b3f-643c554eb078",
+            "variant_job": "700982a4-ca3d-4f4a-be5f-887d9cf08a29",
+            "approval_delta": 0,
+            "rework_delta": 0.0
+          }
+        ],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "7cb77edcd4a1fb99",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 1,
+        "approval_delta_per_video": 0.0,
+        "rows": [
+          {
+            "source": "c9280032ae3e8f000819dc30da92898a48b19c68a454f5c2b7b0562f7efe0343",
+            "baseline_job": "90dda26b-ae0d-4ee1-8b3f-643c554eb078",
+            "variant_job": "77b79d5e-c999-45bf-86ee-a4ddfacaaf6e",
+            "approval_delta": 0,
+            "rework_delta": 0.0
+          }
+        ],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "3c48befb09dd2a0d",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "567a16770ab25527",
+        "configuration_b": "7cb77edcd4a1fb99",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "567a16770ab25527",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "567a16770ab25527",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "567a16770ab25527",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 1,
+        "approval_delta_per_video": 0.0,
+        "rows": [
+          {
+            "source": "c9280032ae3e8f000819dc30da92898a48b19c68a454f5c2b7b0562f7efe0343",
+            "baseline_job": "700982a4-ca3d-4f4a-be5f-887d9cf08a29",
+            "variant_job": "77b79d5e-c999-45bf-86ee-a4ddfacaaf6e",
+            "approval_delta": 0,
+            "rework_delta": 0.0
+          }
+        ],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "567a16770ab25527",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "7cb77edcd4a1fb99",
+        "configuration_b": "810e5bb5cd51fc3f",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "7cb77edcd4a1fb99",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "7cb77edcd4a1fb99",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "7cb77edcd4a1fb99",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "810e5bb5cd51fc3f",
+        "configuration_b": "a858528ed54a038c",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "810e5bb5cd51fc3f",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "810e5bb5cd51fc3f",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "a858528ed54a038c",
+        "configuration_b": "b56d0a76df7afe2b",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "a858528ed54a038c",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      },
+      {
+        "configuration_a": "b56d0a76df7afe2b",
+        "configuration_b": "d1d0e32a75af2a23",
+        "paired_videos": 0,
+        "approval_delta_per_video": null,
+        "rows": [],
+        "note": "B minus A; configuration labels are hashes, not quality ordering"
+      }
+    ],
+    "by_language": {
+      "pt": {
+        "reviewed_videos": 16,
+        "reviewed_candidates": 42,
+        "approved_candidates": 4,
+        "approved_per_video": 0.25,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 206.00654545454543,
+        "processing_measured_videos": 11
+      },
+      "unknown": {
+        "reviewed_videos": 1,
+        "reviewed_candidates": 0,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": null,
+        "processing_mean_seconds": null,
+        "processing_measured_videos": 0
+      },
+      "en": {
+        "reviewed_videos": 3,
+        "reviewed_candidates": 9,
+        "approved_candidates": 0,
+        "approved_per_video": 0.0,
+        "rework_rate": 0.0,
+        "processing_mean_seconds": 268.8566666666667,
+        "processing_measured_videos": 3
+      }
+    },
+    "technical_failed_candidates": 0,
+    "legacy_approved_jobs": 0,
+    "refinement": {
+      "dimension_means": {
+        "hook": 3.0,
+        "context": 3.0,
+        "closure": 3.0,
+        "captions": 3.0
+      },
+      "reviewed_sources": 20,
+      "sufficient_for_general_rule": false,
+      "automatic_selection_update": false,
+      "next_step": "Review the authorized pilot corpus by language; inspect low dimensions, reasons and paired results before proposing a rule. Expand the corpus before generalizing."
+    }
+  },
+  "limits": "QC evidence is technical; no corpus-wide editorial improvement claimed. Model comparisons did not establish a winner."
+}

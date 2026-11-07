@@ -1,0 +1,35 @@
+[
+  {
+    "connected": true,
+    "duration": 37.021,
+    "error": null,
+    "index": 0,
+    "outcome": "ended",
+    "resolution": [
+      720,
+      1280
+    ]
+  },
+  {
+    "connected": true,
+    "duration": 35.25,
+    "error": null,
+    "index": 1,
+    "outcome": "ended",
+    "resolution": [
+      720,
+      1280
+    ]
+  },
+  {
+    "connected": true,
+    "duration": 31.645,
+    "error": null,
+    "index": 2,
+    "outcome": "ended",
+    "resolution": [
+      720,
+      1280
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "editorial-brief-v1-review-20261107",
+  "parent_id": null,
+  "status": "DRAFT",
+  "scope": "GTA_VI",
+  "priorities": [
+    "Novidades, análises, descobertas e demonstrações com evidência",
+    "Cumprir a promessa e concluir a ideia; duração subordinada à história"
+  ],
+  "penalties": [
+    "Autopromoção dominante",
+    "Promessa sem demonstração ou conclusão"
+  ],
+  "visual_rules": [
+    "Manter o vertical aprovado; adaptar apenas enquanto página ou tweet estiver em exibição.",
+    "Preservar legendas por palavra, cores, fontes e animações aprovadas.",
+    "Preservar a região de prova e aproximar a legenda sem cobrir a página; usar intervalos/ROI manuais validados."
+  ],
+  "title_rules": [
+    "Título distinto da fala, apoiado na evidência"
+  ],
+  "feedback_references": [],
+  "author": "content-factory-plan",
+  "approval": null
+}

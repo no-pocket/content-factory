@@ -1,0 +1,180 @@
+{
+  "job": "530ade0e-7027-46ff-8173-5da8e5166ef4",
+  "prompt_sha256": "36f7cef2f5cd192f1cfc04b6b149ccdd8fc6809c2c16e25bafe7e46128e24b80",
+  "segment_count": 12,
+  "available": [
+    {
+      "name": "qwen2.5:1.5b",
+      "model": "qwen2.5:1.5b",
+      "modified_at": "2026-11-05T01:48:17.924319628Z",
+      "size": 986061892,
+      "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 1536,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    },
+    {
+      "name": "qwen2.5:3b",
+      "model": "qwen2.5:3b",
+      "modified_at": "2026-11-03T22:35:26.510977743Z",
+      "size": 1929912432,
+      "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "3.1B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 32768,
+        "embedding_length": 2048,
+        "runner": "ggml"
+      },
+      "capabilities": [
+        "completion",
+        "tools"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 0,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"answer\": \"Eu confesso que agora está pegando pra mim a ansiedade, tá?\" }",
+      "done_reason": "stop",
+      "total_duration": 39455493265,
+      "load_duration": 7112849936,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 31013278000,
+      "eval_count": 23,
+      "eval_duration": 1291404000,
+      "contract_valid": false,
+      "wall_seconds": 39.471
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 1,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"answer\": \"eu uso muito tempo\" }",
+      "done_reason": "stop",
+      "total_duration": 1206246899,
+      "load_duration": 22634576,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 124004000,
+      "eval_count": 12,
+      "eval_duration": 1014306000,
+      "contract_valid": false,
+      "wall_seconds": 1.219
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "repeat": 2,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"answer\": \"eu uso muito tempo\" }",
+      "done_reason": "stop",
+      "total_duration": 1155380320,
+      "load_duration": 2114920,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 102690000,
+      "eval_count": 12,
+      "eval_duration": 1013744000,
+      "contract_valid": false,
+      "wall_seconds": 1.17
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 0,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"intent\": \"informative\", \"timestamps\": [30.81, 31.61, 41.81, 46.33, 50.81], \"text\": \"O texto parece ser uma conversa sobre ansiedade e como controlar picos de ansiedade. A pessoa fala sobre como controla picos de ansiedade marcando marcos para coisas que precisa fazer, especialmente quando essas coisas estão muito distantes. Ela também menciona que não gosta de gastar muito tempo pensando em coisas, pois isso faz com que sempre haja algo para pensar. As principais palavras-chave são ansiedade, controle, picos de ansiedade, marcos e compartilhamento.\"}",
+      "done_reason": "stop",
+      "total_duration": 92015261470,
+      "load_duration": 13938390330,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 62657935000,
+      "eval_count": 166,
+      "eval_duration": 15389025000,
+      "contract_valid": false,
+      "wall_seconds": 92.034
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 1,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"intent\": \"informative\", \"timestamps\": [30.81, 31.61, 41.81, 46.33, 50.81], \"text\": \"O texto parece ser uma conversa sobre ansiedade e como controlar picos de ansiedade. A pessoa fala sobre como controla picos de ansiedade marcando marcos para quando precisa fazer algo, mesmo que seja algo distante. Ela também menciona que não deve ficar se preocupando muito tempo, pois isso pode levar a ter sempre algo para fazer. As principais frases são: 'Como é que eu faço pra controlar picos de ansiedade? Eu fico sempre marcando marcos até a coisa que eu preciso fazer pra quando é muito distante, pra gente vai compartilh",
+      "done_reason": "length",
+      "total_duration": 18548289912,
+      "load_duration": 1234970,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 120264000,
+      "eval_count": 180,
+      "eval_duration": 18398138000,
+      "contract_valid": false,
+      "wall_seconds": 18.565
+    },
+    {
+      "model": "qwen2.5:3b",
+      "repeat": 2,
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 180,
+        "num_ctx": 4096
+      },
+      "response": "{ \"intent\": \"informative\", \"timestamps\": [30.81, 31.61, 41.81, 46.33, 50.81], \"text\": \"O texto parece ser uma conversa sobre ansiedade e como controlar picos de ansiedade. A pessoa fala sobre como controla picos de ansiedade marcando marcos para quando precisa fazer algo, mesmo que seja algo distante. Ela também menciona que não deve ficar se preocupando muito tempo, pois isso pode levar a ter sempre algo para fazer. As principais frases são: 'Como é que eu faço pra controlar picos de ansiedade? Eu fico sempre marcando marcos até a coisa que eu preciso fazer pra quando é muito distante, pra gente vai compartilh",
+      "done_reason": "length",
+      "total_duration": 25556577122,
+      "load_duration": 1334976,
+      "prompt_eval_count": 2050,
+      "prompt_eval_duration": 128606000,
+      "eval_count": 180,
+      "eval_duration": 25393344000,
+      "contract_valid": false,
+      "wall_seconds": 25.568
+    }
+  ],
+  "editorial_verdict": null,
+  "default_changed": false,
+  "limits": "One video, one task prompt. No quality verdict or general reliability estimate."
+}

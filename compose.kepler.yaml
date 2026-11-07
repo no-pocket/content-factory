@@ -41,6 +41,7 @@ services:
       KEPLER_BRIDGE_URL: http://kepler-bridge:11434
     volumes:
       - ./app:/app/app:ro
+      - ./renderer/src:/app/renderer/src:ro
   ui:
     environment:
       KEPLER_BRIDGE_URL: http://kepler-bridge:11434

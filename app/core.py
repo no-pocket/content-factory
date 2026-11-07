@@ -4,6 +4,8 @@ import json
 import math
 import re
 import subprocess
+import logging
+import textwrap
 from pathlib import Path
 
 HOOK_WORDS = ("gta", "rockstar", "vice city", "lucia", "jason", "incrível", "segredo", "revel", "surpresa", "importante", "descob", "never", "wow", "crazy", "secret", "insane", "actually", "first", "new")
@@ -42,8 +44,8 @@ def propose_clips(segments: list[dict], duration: float, *, count: int = 3, targ
         word_count = len(content.split())
         density = word_count / max(length, 1)
         score = round(hits * 2 + min(density, 3) + (2 if 28 <= length <= 52 else 0), 2)
-        candidates.append({"start": round(start, 2), "end": round(end, 2), "score": score,
-                           "text": content[:700], "reason": f"{hits} palavras-chave; {word_count} palavras; {length:.0f}s"})
+        candidates.append({"start": start, "end": end, "score": score,
+                           "text": content, "reason": f"{hits} palavras-chave; {word_count} palavras; {length:.0f}s"})
     chosen = []
     for c in sorted(candidates, key=lambda x: (-x["score"], x["start"])):
         if all(max(0, min(c["end"], x["end"]) - max(c["start"], x["start"])) < 0.20 * min(c["end"]-c["start"], x["end"]-x["start"]) for x in chosen):
@@ -62,18 +64,37 @@ def srt_time(seconds: float) -> str:
 
 
 def write_srt(segments: list[dict], clip_start: float, clip_end: float, path: Path) -> None:
+    """Short cues from actual word timing; segment-only fallback is explicitly approximate."""
+    from .timeline import normalized_words
+    words = normalized_words(segments, clip_start, clip_end)
+    cues = []
+    if words:
+        group = []
+        for word in words:
+            if group and (len(group) >= 3 or word['start'] - group[-1]['end'] > .6 or
+                          word['end'] - group[0]['start'] > 1.6 or
+                          sum(len(w['text'])+1 for w in group) + len(word['text']) > 40):
+                cues.append((group[0]['start'], group[-1]['end'], ' '.join(w['text'] for w in group)))
+                group = []
+            group.append(word)
+        if group:
+            cues.append((group[0]['start'], group[-1]['end'], ' '.join(w['text'] for w in group)))
+    else:
+        logging.getLogger(__name__).warning('Word timestamps unavailable: FFmpeg phrase timing is estimated from segments')
+        for segment in segments:
+            start, end = max(clip_start, float(segment['start'])), min(clip_end, float(segment['end']))
+            tokens = str(segment.get('text', '')).split()
+            if end <= start or not tokens:
+                continue
+            for offset in range(0, len(tokens), 3):
+                stop = min(offset+3, len(tokens))
+                cues.append((start-clip_start+(end-start)*offset/len(tokens),
+                             start-clip_start+(end-start)*stop/len(tokens), ' '.join(tokens[offset:stop])))
     lines = []
-    n = 0
-    for s in segments:
-        a, b = max(clip_start, float(s["start"])), min(clip_end, float(s["end"]))
-        if b <= a:
-            continue
-        caption = re.sub(r"[\r\n]+", " ", str(s["text"])).strip()
-        if not caption:
-            continue
-        n += 1
-        lines.extend([str(n), f"{srt_time(a-clip_start)} --> {srt_time(b-clip_start)}", caption, ""])
-    path.write_text("\n".join(lines), encoding="utf-8")
+    for ordinal, (start, end, text) in enumerate(cues, 1):
+        caption = '\n'.join(textwrap.wrap(re.sub(r'[\r\n]+', ' ', text), width=32))
+        lines.extend([str(ordinal), f'{srt_time(start)} --> {srt_time(end)}', caption, ''])
+    path.write_text('\n'.join(lines), encoding='utf-8')
 
 
 def get_duration(source: Path) -> float:
@@ -81,7 +102,7 @@ def get_duration(source: Path) -> float:
     return float(cp.stdout.strip())
 
 
-def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True) -> None:
+def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True, crf: int = 24, framing: dict | None = None, framing_schedule: list | None = None) -> None:
     """Center-crop landscape to 9:16. Produces a preview, not automatic face tracking."""
     if start < 0 or end <= start or end - start > 60.01:
         raise ValueError("Interval must be between 0 and 60 seconds")
@@ -89,11 +110,22 @@ def render(source: Path, start: float, end: float, segments: list[dict], target:
     subtitle = target.with_suffix(".srt")
     write_srt(segments, start, end, subtitle)
     vf = f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1"
+    if framing:
+        from .framing import video_filter
+        vf = video_filter(framing, width, height)+',setsar=1'
     # Use the local SRT filename relative to CWD to avoid FFmpeg filter path escaping.
-    if burn_subtitles and subtitle.stat().st_size > 0:
-        vf += ",subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'"
-    args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(start), "-i", str(source), "-t", str(end-start), "-vf", vf,
-            "-map", "0:v:0", "-map", "0:a?", "-c:v", "libx264", "-preset", "veryfast", "-crf", "24", "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", str(target)]
+    caption_filter = ("subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'") if burn_subtitles and subtitle.stat().st_size>0 else None
+    video_args=['-vf',vf+(','+caption_filter if caption_filter else ''),'-map','0:v:0']
+    if framing_schedule:
+        from .framing import validate_framing_schedule, framing_graph
+        size=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(source)]))['streams'][0]
+        schedule=validate_framing_schedule(framing_schedule,end-start,(size['width'],size['height']))
+        graph=framing_graph('0:v:0','scheduled',framing=framing,schedule=schedule,width=width,height=height)
+        if caption_filter:
+            graph+=';[scheduled]'+caption_filter+'[subtitled]'
+        video_args=['-filter_complex',graph,'-map','[subtitled]' if caption_filter else '[scheduled]']
+    args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(start), "-i", str(source), "-t", str(end-start), *video_args,
+            "-map", "0:a?", "-c:v", "libx264", "-preset", "veryfast", "-crf", str(crf), "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", str(target)]
     subprocess.run(args, check=True, cwd=str(target.parent), capture_output=True, text=True)
 
 

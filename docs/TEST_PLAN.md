@@ -5,7 +5,7 @@ Use este roteiro ao publicar uma versão ou alterar a seleção, o render, a fil
 ## Verificações automatizadas
 
 1. Execute a suíte Python na imagem do worker e confira `docker compose -f compose.yaml -f compose.kepler.yaml config --quiet`.
-2. Confirme testes para qualquer bug corrigido ou feature nova; nesta versão, 92 testes passaram.
+2. Confirme testes para qualquer bug corrigido ou feature nova; os 92 testes eram a baseline anterior à sprint de QC/API. Consulte o relatório da sprint para a suíte ampliada e sua execução observada.
 3. Confira `git diff --check` e revise o diff antes de commit/push.
 
 ## Fluxo real na workstation

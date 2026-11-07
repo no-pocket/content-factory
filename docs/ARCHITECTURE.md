@@ -33,6 +33,13 @@ Cada job salva uma cópia validada de seus ajustes. A UI e `app/submit.py` usam 
 
 ## Limites atuais
 
-Whisper continua em CPU nesta workstation. A K4200 acelera leitura de prompts, mas a geração 3B foi mais lenta nos testes pareados; a escolha de backend permanece por job. NVENC funcionou isoladamente no container com a capacidade `video`, mas não foi integrado nem validado em qualidade no pipeline, que usa `libx264`. A fila não oferece vários workers, leases nem idempotência detalhada por etapa. A UI só deve ficar em localhost, túnel SSH ou VPN.
+O serviço compartilhado `app/service.py` agora centraliza criação, revisão com histórico,
+QC de legados e retry por candidato para Streamlit/CLI/HTTP. O adaptador opcional
+`app/api.py` publica v1 com Bearer em localhost via `compose.api.yaml`.
+`app/candidates.py` mantém checkpoints e tentativas; `app/quality.py` valida os dois
+formatos. Veja [contrato](API.md) e [QC](CONTROLE_QUALIDADE.md). O reinício reaproveita
+transcrição, seleção e timelines persistidas; continua limitado a um worker.
+
+Whisper continua em CPU nesta workstation. A K4200 acelera leitura de prompts, mas a geração 3B foi mais lenta nos testes pareados; a escolha de backend permanece por job. NVENC funcionou isoladamente no container com a capacidade `video`, mas não foi integrado nem validado em qualidade no pipeline, que usa `libx264`. Há checkpoints locais de transcrição, seleção, timeline e candidatos, mas não há transação distribuída Redis/arquivos nem leases multiworker. A UI só deve ficar em localhost, túnel SSH ou VPN.
 
 Leia [Processo de produção](PROCESSO.md) para a sequência operacional, [GPU K4200](GPU_K4200.md) para o caminho legado e [Testes](TESTES.md) para validação.

@@ -1,0 +1,130 @@
+{
+  "instruction": "Reject every existing job except 7cb2fb21; explicit user decision, no invented ratings",
+  "preserved_job": "7cb2fb21-353c-4805-9fbb-b3c10603be44",
+  "preserved_status": "APPROVED",
+  "preserved_approved": [
+    0,
+    1,
+    2
+  ],
+  "preserved_record_and_media_hashes": {
+    "/data/work/7cb2fb21-353c-4805-9fbb-b3c10603be44.json": "8c6ef2b23f68a5708d890c65effe71960dd52df95ad6c1676c0b2ae41a95ed1f",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_1.mp4": "649fc0b41b30edc640d533d6b8190301ab9d369f7e096192fb57a8edd068ee4e",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_2.mp4": "63117c269b4f0540f0c01c09add902afa96f3e2051160aefc641f5be287ce16c",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_3.mp4": "97df4a6be33709ca04071b7c62585e5b89fc379cdd5c5b6ef4816a2d74793da0",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_1.preview.webm": "fec2914585780d1cda87f05b48f780dc9bdd5d9868deafb300dd1c9bd7df91d9",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_2.preview.webm": "7a9ff42cea6b9e9b0b6826b6f9873d00ba2f69479c503cdc44a16bb37b49e231",
+    "/data/output/7cb2fb21-353c-4805-9fbb-b3c10603be44/candidate_3.preview.webm": "fbc4e963058f5dd65fde25146701dd80e7ae5523b480ea7c8aae8d68098ead04"
+  },
+  "rejected_jobs": [
+    {
+      "id": "05eb97a2-c0c7-4d88-80aa-0e7cec1f12b0",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "0d0714a6-aca1-41d6-b5b8-7fd983358887",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "127b2a1a-c5c5-451e-88bf-f4ad3cb22a39",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "255f7f42-5d82-45ae-9707-0fa142c2d985",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "27e1ff51-6607-4586-b192-f45eabec7aa0",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "2f7440e8-8ee6-47b3-95ae-755fe1eb1a9d",
+      "before": "FAILED",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "2fc2af3e-9852-4fbd-b935-ef8575b469ae",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "3aad3ea8-42ef-4e2b-8ce9-54b9b06cf741",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "526f20e5-4cf3-4055-95af-161a20dfebd7",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "530ade0e-7027-46ff-8173-5da8e5166ef4",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "551502d9-fcc5-4a66-9175-b7077c89194b",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "583bd5d7-6373-4e21-8926-7fd1b02dc914",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "604914ee-c712-41bb-98d8-f5872fb59335",
+      "before": "APPROVED",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "7256c7f7-ab16-464b-8314-ce84e138f0e1",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "87ea2ec6-5ca1-44c0-acff-0dd25bd2dffb",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "91714be6-b6f3-4076-95f5-0893cd062002",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "a5f108ff-c572-42db-905a-a73def7c4ba1",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    },
+    {
+      "id": "df57ad76-3234-4110-9619-372f06ed7579",
+      "before": "NEEDS_REVIEW",
+      "after": "REJECTED",
+      "revision": 1
+    }
+  ],
+  "rejected_count": 18
+}

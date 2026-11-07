@@ -1,0 +1,52 @@
+{
+  "synthetic": true,
+  "production_mutated": false,
+  "job": "0418c6e8-a730-4b27-86d2-0af1a98184a1",
+  "qa_directory": "E:\\CodexFiles\\content-factory\\content-factory\\research\\pytest_temp_recovery_real\\aa9da06c35fd4f568b4f723f93637f3f",
+  "after_kill": {
+    "status": "RENDERING",
+    "states": [
+      "VALID",
+      "RENDERING"
+    ],
+    "attempts": [
+      1,
+      1
+    ],
+    "processing": "1"
+  },
+  "after_restart": {
+    "status": "NEEDS_REVIEW",
+    "states": [
+      "VALID",
+      "VALID"
+    ],
+    "attempts": [
+      1,
+      2
+    ],
+    "first_master_unchanged": true,
+    "first_master_sha256_before": "ee46ece8c11ef397d736dc02d36723eba9e8d722dbdb53ee7dc167220f5d2410",
+    "first_master_sha256_after": "ee46ece8c11ef397d736dc02d36723eba9e8d722dbdb53ee7dc167220f5d2410",
+    "processing": "0",
+    "processing_runs": [
+      {
+        "started_at": 1793927264.4478648,
+        "state": "INTERRUPTED",
+        "last_checkpoint_at": 1793927276.524999,
+        "timing_complete": false,
+        "seconds": 12.077134132385254
+      },
+      {
+        "started_at": 1793927280.1499228,
+        "state": "COMPLETED",
+        "last_checkpoint_at": 1793927295.575369,
+        "finished_at": 1793927295.592867,
+        "timing_complete": true,
+        "seconds": 15.443
+      }
+    ]
+  },
+  "corruption_and_limit": "{\"status\": \"PARTIAL_FAILED\", \"states\": [\"VALID\", \"FAILED\"]}\nLIMIT_BLOCKED Attempt limit exhausted",
+  "passed": true
+}

@@ -20,7 +20,10 @@ const Root: React.FC = () => (
     fps={30}
     durationInFrames={300}
     defaultProps={defaultProps}
-    calculateMetadata={({ props }) => ({ durationInFrames: Math.max(1, Math.ceil(props.timeline.duration * 30)) })}
+    calculateMetadata={({ props }) => ({ durationInFrames: Math.max(1, props.timeline.schema_version === '3.0'
+      ? (props.timeline.segments ?? []).reduce((total, segment) => total + segment.frame_count, 0)
+      : Math.ceil(props.timeline.duration * 30)) + (props.composeFinishing
+        ? Math.ceil((props.timeline.finishing?.tail_seconds ?? 0) * props.timeline.fps) : 0) })}
   />
 );
 registerRoot(Root);

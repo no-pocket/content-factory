@@ -1,0 +1,57 @@
+[
+  {
+    "name": "auto-editor",
+    "commit": "5ad05f9ee76bc9fe4126bd25463eada082576f88",
+    "license_sha256": "a4ef5224f5b38684bbc95521f04b96325c2402c03da3ecb35e232d82a996282f"
+  },
+  {
+    "name": "celery",
+    "commit": "2fe0ead077408eae9c1ff883b9d995792fbc0170",
+    "license_sha256": "d36d294203afaaac0560bd8fe22489273f170c9a07e0a80c5c03f4f916086724"
+  },
+  {
+    "name": "faster-whisper",
+    "commit": "2a3a857737d17d974f30d818ebec69ce11929e5c",
+    "license_sha256": "125d17a0c65b9cf442ebffd4a681264b1b140ab47e0cd47caa78b91dbd5c1bcd"
+  },
+  {
+    "name": "llama-b4300",
+    "commit": "dafae66cc242eb766797194d3c85c5e502625623",
+    "license_sha256": "173fa96d2bc8be3fc3a29f98ae2a10d3bdcaafbbb66cd358110b863da71f9591"
+  },
+  {
+    "name": "llama-cuda102",
+    "commit": "c16c35b8142ac34b4559a5e8584e8daaf3958416",
+    "license_sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285"
+  },
+  {
+    "name": "llama-jetson-cuda102",
+    "commit": "cba793e345442fc9f542f3418ae4b0070bd37b06",
+    "license_sha256": "6e430eede705c8d9a9a9042857cdbd588f19d553ddf82181ed7eae4b8b402282"
+  },
+  {
+    "name": "llamacpp-kepler",
+    "commit": "b367989573b1a97e37b001cbf6718365844b94ca",
+    "license_sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285"
+  },
+  {
+    "name": "mediapipe",
+    "commit": "03322747e96377e6ee40b51f038b4c108add7774",
+    "license_sha256": "364aafdc6c88e810a89323e46a2c50b7e5e2e67076c89d20eb9732031fa36a3b"
+  },
+  {
+    "name": "PySceneDetect",
+    "commit": "c5ce29c73751e77139e838bd9ce9ab66a8e71a23",
+    "license_sha256": "6c13853e127501aff0f514411cb7ad362a4dbae588f4c75895f28a06b2e64a60"
+  },
+  {
+    "name": "rq",
+    "commit": "e672abe7305ee26a768df35a372f4adbb7ceb676",
+    "license_sha256": "6eb6200331305a1bf61cffa5d3e550d7f517815232784477ed7775afc47865ca"
+  },
+  {
+    "name": "whisperX",
+    "commit": "5d3678b8535698a2826a5db9eb3e4105aef85dd9",
+    "license_sha256": "9cc4ca2215c7bc9c70bef054bd1d82f80e0728b6c7ee94778f6214b5dcc14375"
+  }
+]

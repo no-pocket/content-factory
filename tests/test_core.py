@@ -29,3 +29,12 @@ def test_srt_relative_time(tmp_path):
 
 def test_empty():
     assert propose_clips([], 100) == []
+def test_srt_uses_short_word_timed_phrases(tmp_path):
+    from app.core import write_srt
+    words = [{'start': n*.25, 'end': n*.25+.22, 'text': 'word'+str(n)} for n in range(40)]
+    dest = tmp_path/'captions.srt'
+    write_srt([{'start':0,'end':10,'text':' '.join(w['text'] for w in words),'words':words}],0,10,dest)
+    cues=dest.read_text(encoding='utf-8').strip().split('\n\n')
+    assert len(cues) >= 14
+    assert all(len(' '.join(c.splitlines()[2:]).split()) <= 3 for c in cues)
+    assert all(len(c.splitlines()[2:]) <= 2 for c in cues)

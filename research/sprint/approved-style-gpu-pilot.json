@@ -1,0 +1,55 @@
+{
+  "source_parent_job": "7cb2fb21-353c-4805-9fbb-b3c10603be44",
+  "source_seconds": 60,
+  "source_sha256": "c9280032ae3e8f000819dc30da92898a48b19c68a454f5c2b7b0562f7efe0343",
+  "transcription_reused": true,
+  "cohort": "approved-style-gpu-v1",
+  "models": [
+    {
+      "model": "qwen2.5:1.5b",
+      "filename": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+      "job_id": "77b79d5e-c999-45bf-86ee-a4ddfacaaf6e",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds_including_load": 177.969,
+      "gpu_memory_sample": "2176 MiB, 4096 MiB",
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 25.28,
+          "state": "VALID",
+          "director_used": "kepler_gpu",
+          "renderer_used": "remotion",
+          "word_count": 92
+        }
+      ],
+      "error": null,
+      "passed": true
+    },
+    {
+      "model": "qwen2.5:3b",
+      "filename": "qwen2.5-3b-instruct-q4_k_m.gguf",
+      "model_sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d",
+      "job_id": "90dda26b-ae0d-4ee1-8b3f-643c554eb078",
+      "status": "NEEDS_REVIEW",
+      "ranker_used": "kepler_gpu",
+      "seconds_including_load": 303.236,
+      "gpu_memory_sample": "3183 MiB, 4096 MiB",
+      "candidates": [
+        {
+          "start": 0.0,
+          "end": 25.28,
+          "state": "VALID",
+          "director_used": "heuristic_fallback",
+          "renderer_used": "remotion",
+          "word_count": 92
+        }
+      ],
+      "error": null,
+      "passed": false
+    }
+  ],
+  "approved_reference_unchanged": true,
+  "production_restored": true
+}
