@@ -188,6 +188,29 @@
         "timeline_v3": {
           "type": "boolean",
           "default": false
+        },
+        "framing_windows": {
+          "type": "array",
+          "maxItems": 24,
+          "default": [],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "start",
+              "end"
+            ],
+            "properties": {
+              "start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "end": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
         }
       }
     },

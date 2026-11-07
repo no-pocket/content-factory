@@ -80,19 +80,23 @@ O backend GPU exige `compose.kepler.yaml`. Alterações de ambiente do Compose e
 
 ## Perfil de fidelidade e revisão compacta
 
-`framing_preset` em novos jobs aceita `legacy` (padrão), `face`, `gameplay`, `web`,
-`tweet` e `document`. `framing_roi` é opcional, com `x`, `y`, `width`, `height` entre
-0 e 1, dentro da fonte. O formulário aceita o objeto JSON; entradas inválidas são
-recusadas na submissão. Presets de documento preservam a fonte inteira sobre fundo,
-com título/legendas fora da área de prova. Rosto usa foco da ROI e recorre a fit
-quando crop ou legendas perderiam a região importante. Timelines sem framing
-preservam o render anterior. A seleção manual é um snapshot por job; não altera
-renders existentes. Sem detecção visual/OCR automática.
+O padrão `legacy` mantém o vertical aprovado. Para `web`, `tweet` ou `document`,
+novos jobs exigem `framing_windows`: intervalos em segundos da **fonte**, por exemplo
+`[{"start":12.5,"end":18}]`. O formulário aceita `12.5-18; 40-47.2`.
+Só durante esses intervalos a página fica inteira (ou na ROI manual), sobre fundo
+desfocado da própria fonte, com legenda próxima. Fora deles volta o vertical.
+Em montagens v3 os intervalos são convertidos para o relógio de cada trecho.
+Não há detecção visual/OCR automática: o editor informa e confere os intervalos.
 
-Presets explícitos protegem a região de prova contra punch zoom e B-roll que a
-cobririam; a animação karaoke, tipografia, cores e fidelidade continuam no Remotion.
-Este opt-in exige conferir legibilidade da fonte: fit preserva conteúdo, mas não
-cria detalhe que não existe na imagem original.
+`framing_roi` opcional usa `x`, `y`, `width`, `height` normalizados dentro da fonte.
+`face` e `gameplay` continuam disponíveis como foco manual. Timelines antigas e
+snapshots existentes mantêm sua geometria; a composição compacta nova é
+versionada como `proof_compact_v2`, sem sobrescrever renders anteriores.
+
+Somente efeitos punch zoom/B-roll que cobririam os intervalos protegidos são
+suprimidos. Karaoke, tipografia e cores permanecem no Remotion. Preservar a
+página não garante leitura de letras pequenas: confira o mestre e a prévia antes
+de aprovar; ROI manual pode ser necessária.
 
 Novos formulários começam com Qwen/GPU K4200, Remotion e `render_quality=high`; CPU e perfil standard continuam selecionáveis. A API conserva suas escolhas explícitas e os snapshots dos jobs existentes. Jobs antigos sem `render_quality` são processados como standard.
 

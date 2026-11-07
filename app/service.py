@@ -42,6 +42,10 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
     if payload.get('rights_confirmed') is not True:
         raise PermissionError('Rights confirmation required')
     settings = normalize_job_settings(payload.get('settings'))
+    if settings['framing_preset'] in {'web','tweet','document'} and not settings['framing_windows']:
+        raise ValueError('Informe os intervalos da fonte em que a página/tweet aparece; fora deles o vídeo mantém o vertical aprovado')
+    if settings['framing_windows'] and settings['framing_preset'] not in {'web','tweet','document'}:
+        raise ValueError('Intervalos de evidência exigem preset de página, tweet ou documento')
     assembly = payload.get('assembly_plan')
     if assembly is not None:
         if not settings['timeline_v3']:
@@ -358,7 +362,7 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
         if request['decision'] in {'APPROVED', 'APPROVED_WITH_ADJUSTMENTS'} and not verify_reviewable(job, index):
             raise Conflict('Artifact must pass QC before approval')
         previous = get_editorial_view(job)['candidates'][index]['current_event']
-        versions = job.get('editorial_versions') or {'brief_id': 'UNKNOWN', 'brief_sha256': 'UNKNOWN', 'component_snapshot_id': 'UNKNOWN'}
+        versions = clip.get('editorial_versions') or job.get('editorial_versions') or {'brief_id': 'UNKNOWN', 'brief_sha256': 'UNKNOWN', 'component_snapshot_id': 'UNKNOWN'}
         event = validate_feedback_event({
             'schema_version': '2.0', 'event_type': 'REVIEW_SUBMITTED', 'event_id': str(uuid.uuid4()),
             'request_id': request['request_id'], 'job_id': jid, 'candidate_id': candidate_id,

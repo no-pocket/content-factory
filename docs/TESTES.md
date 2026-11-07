@@ -68,3 +68,25 @@ Além da saúde, uma geração curta deve retornar `done_reason=stop`, `prompt_t
 5. Versão visível na UI, dados persistentes preservados e diff revisado.
 
 Veja [Plano de aceitação](TEST_PLAN.md) para conferência manual de direitos, B-roll, legendas e aprovação.
+
+## Imagem candidata e métricas editoriais
+
+A imagem usa `requirements.lock`, `npm ci`/`package-lock.json`, bases por digest,
+Node por checksum e Debian snapshot fixo. Não atualizar locks como efeito de build.
+O congelamento atual é Linux amd64; outra arquitetura exige validação própria.
+`CONTENT_FACTORY_GIT_HEAD` e `CONTENT_FACTORY_SOURCE_SHA256` são metadados de build;
+os hashes dos módulos efetivamente montados ficam no snapshot de execução.
+Nenhum serviço ativo é reconstruído ou reiniciado por esses testes.
+
+As métricas em `stage_metrics` registram duração, job/candidato/revisão, configuração,
+snapshot e motor solicitado/resolvido. Cache e etapas integradas são explicitados;
+falhas registram tipo e motivo do fallback, sem transcrição ou credenciais.
+
+O ensaio `research/benchmark_finishing.py --help` executa uma fonte sintética,
+QC dos dois formatos, áudio final/cauda e SSIM, com três repetições por braço.
+Use um diretório novo fora do Git, montagem de código somente leitura, rede
+bloqueada e imagem candidata isolada. O relatório resumido observado está em
+`research/editorial_finishing_benchmark_2026-11-07.json`.
+O ganho médio de 2,70% ficou dentro da variação observada. O acabamento integrado
+permanece exclusivamente experimental na biblioteca/benchmark; o worker conserva
+pós-encode. Não há promoção automática ou alegação de ganho editorial.

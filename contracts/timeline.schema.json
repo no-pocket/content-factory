@@ -232,6 +232,12 @@
               "maximum": 1
             }
           }
+        },
+        "layout_version": {
+          "enum": [
+            "fit_v1",
+            "proof_compact_v2"
+          ]
         }
       }
     },
@@ -247,6 +253,99 @@
         "content_box"
       ],
       "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+    },
+    "framing_schedule": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end",
+          "framing"
+        ],
+        "properties": {
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "framing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "preset",
+              "roi"
+            ],
+            "properties": {
+              "preset": {
+                "enum": [
+                  "face",
+                  "gameplay",
+                  "web",
+                  "tweet",
+                  "document"
+                ]
+              },
+              "roi": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "width",
+                  "height"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "layout_version": {
+                "enum": [
+                  "fit_v1",
+                  "proof_compact_v2"
+                ]
+              }
+            }
+          },
+          "framing_resolved": {
+            "type": "object",
+            "required": [
+              "mode",
+              "roi",
+              "source_size",
+              "caption_safe_area",
+              "title_safe_area",
+              "projected_roi",
+              "content_box"
+            ],
+            "description": "Backend-derived geometry checked by validate_framing against source dimensions; never supplied by a model."
+          }
+        }
+      }
     }
   }
 }

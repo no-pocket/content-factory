@@ -36,6 +36,7 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         return {}, "heuristic"
     url = local_model_url(llm_backend)
     if url is None:
+        if on_event:on_event('fallback',{'reason':'Unsupported local model endpoint','backend_requested':llm_backend,'backend_resolved':'heuristic'})
         return {}, "heuristic_fallback"
     brief = {"duration": clip.get('assembly', {}).get('duration', round(clip["end"] - clip["start"], 2)), "transcript": clip.get("text", ""), "licensed_assets": [
         {"asset_id": asset_id, "description": meta.get("description", ""), "duration": meta.get("duration", 0)} for asset_id, meta in list(assets.items())[:15]

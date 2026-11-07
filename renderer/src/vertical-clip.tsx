@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Audio, Freeze, interpolate, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import { OffthreadVideo } from 'remotion';
 
 type Word = { start: number; end: number; text: string; segment_id?: string; output_segment_end?: number };
@@ -11,10 +11,12 @@ type Framing = { mode: 'contain' | 'cover'; caption_safe_area: Region; title_saf
 export type Timeline = {
   schema_version: string; duration: number; width: number; height: number; fps: number;
   framing_resolved?: Framing;
+  framing_schedule?: { start: number; end: number; framing_resolved?: Framing }[];
   segments?: { output_start: number; duration: number; frame_count: number; framing_resolved?: Framing }[];
+  finishing?: { tail_seconds: number; fade_seconds: number };
   layers: { video: { path: string }; audio: { from: string }; captions: Word[]; text: Banner[]; effects: FX[]; broll: Broll[] };
 };
-export type ClipProps = { jobId: string; clipNo: string; timeline: Timeline };
+export type ClipProps = { jobId: string; clipNo: string; timeline: Timeline; composeFinishing?: boolean };
 
 const white = '#fbfbfc';
 const yellow = '#f5dc45';
@@ -33,23 +35,29 @@ const groupWords = (words: Word[]): Word[][] => {
   return groups;
 };
 
-export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline }) => {
-  const frame = useCurrentFrame();
+export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline, composeFinishing = false }) => {
+  const outputFrame = useCurrentFrame();
+  const sourceFrames = timeline.schema_version === '3.0'
+    ? (timeline.segments ?? []).reduce((total, segment) => total + segment.frame_count, 0)
+    : Math.ceil(timeline.duration * timeline.fps);
+  const frame = composeFinishing ? Math.min(outputFrame, sourceFrames - 1) : outputFrame;
   const time = frame / 30;
   const root = `jobs/${jobId}/${clipNo}/`;
   const groups = groupWords(timeline.layers.captions);
   const active = groups.find((g, index) => g[0].start <= time && time < Math.min(
     g[g.length - 1].end + 0.10, groups[index + 1]?.[0].start ?? Infinity, g[0].output_segment_end ?? Infinity));
-  const effect = timeline.layers.effects.find((e) => e.type === 'punch_zoom' && e.at <= time && time < e.at + e.duration);
+  const effect = timeline.layers.effects.find((e) => e.type === 'punch_zoom' && e.at <= time && time < e.at + e.duration &&
+    !(timeline.framing_schedule ?? []).some(w => Math.max(e.at, w.start) < Math.min(e.at + e.duration, w.end)));
   const scene = timeline.segments?.find(s => s.output_start <= time && time < s.output_start+s.duration);
-  const framing = scene?.framing_resolved ?? timeline.framing_resolved;
+  const window = timeline.framing_schedule?.find(w => w.start <= time && time < w.end);
+  const framing = window?.framing_resolved ?? scene?.framing_resolved ?? timeline.framing_resolved;
   const zoom = effect && !framing ? interpolate(time - effect.at, [0, 0.12, effect.duration], [1, 1.13, 1.06], { extrapolateRight: 'clamp' }) : 1;
   const safe = framing?.caption_safe_area;
 
-  return (
+  const visual = (
     <AbsoluteFill style={{ backgroundColor: '#050608', overflow: 'hidden', fontFamily: 'DejaVu Sans, Arial, sans-serif' }}>
       <AbsoluteFill style={{ transform: `scale(${zoom})` }}>
-        <OffthreadVideo src={staticFile(`${root}base.mp4`)} style={{ width: '100%', height: '100%', objectFit: framing?.mode ?? 'cover' }} />
+        <OffthreadVideo src={staticFile(`${root}base.mp4`)} muted={composeFinishing} style={{ width: '100%', height: '100%', objectFit: framing?.mode ?? 'cover' }} />
       </AbsoluteFill>
       {timeline.layers.broll.map((b, i) => (
         <Sequence key={`b${i}`} from={Math.round(b.at * 30)} durationInFrames={Math.max(1, Math.round(b.duration * 30))}>
@@ -83,6 +91,14 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline }) =
       )}
     </AbsoluteFill>
   );
+  if (!composeFinishing || !timeline.finishing) return visual;
+  const {tail_seconds, fade_seconds} = timeline.finishing;
+  const opacity = interpolate(outputFrame, [sourceFrames + (tail_seconds - fade_seconds) * timeline.fps,
+    sourceFrames + tail_seconds * timeline.fps], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  return <AbsoluteFill style={{backgroundColor: '#000'}}>
+    <Sequence durationInFrames={sourceFrames}><Audio src={staticFile(`${root}base.mp4`)} /></Sequence>
+    <AbsoluteFill style={{opacity}}><Freeze frame={frame}>{visual}</Freeze></AbsoluteFill>
+  </AbsoluteFill>;
 };
 
 const PopBanner: React.FC<{ text: string; compact: boolean; safe?: Region }> = ({ text, compact, safe }) => {

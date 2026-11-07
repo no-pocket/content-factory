@@ -102,7 +102,7 @@ def get_duration(source: Path) -> float:
     return float(cp.stdout.strip())
 
 
-def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True, crf: int = 24, framing: dict | None = None) -> None:
+def render(source: Path, start: float, end: float, segments: list[dict], target: Path, *, width: int = 720, height: int = 1280, burn_subtitles: bool = True, crf: int = 24, framing: dict | None = None, framing_schedule: list | None = None) -> None:
     """Center-crop landscape to 9:16. Produces a preview, not automatic face tracking."""
     if start < 0 or end <= start or end - start > 60.01:
         raise ValueError("Interval must be between 0 and 60 seconds")
@@ -114,10 +114,18 @@ def render(source: Path, start: float, end: float, segments: list[dict], target:
         from .framing import video_filter
         vf = video_filter(framing, width, height)+',setsar=1'
     # Use the local SRT filename relative to CWD to avoid FFmpeg filter path escaping.
-    if burn_subtitles and subtitle.stat().st_size > 0:
-        vf += ",subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'"
-    args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(start), "-i", str(source), "-t", str(end-start), "-vf", vf,
-            "-map", "0:v:0", "-map", "0:a?", "-c:v", "libx264", "-preset", "veryfast", "-crf", str(crf), "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", str(target)]
+    caption_filter = ("subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'") if burn_subtitles and subtitle.stat().st_size>0 else None
+    video_args=['-vf',vf+(','+caption_filter if caption_filter else ''),'-map','0:v:0']
+    if framing_schedule:
+        from .framing import validate_framing_schedule, framing_graph
+        size=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(source)]))['streams'][0]
+        schedule=validate_framing_schedule(framing_schedule,end-start,(size['width'],size['height']))
+        graph=framing_graph('0:v:0','scheduled',framing=framing,schedule=schedule,width=width,height=height)
+        if caption_filter:
+            graph+=';[scheduled]'+caption_filter+'[subtitled]'
+        video_args=['-filter_complex',graph,'-map','[subtitled]' if caption_filter else '[scheduled]']
+    args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(start), "-i", str(source), "-t", str(end-start), *video_args,
+            "-map", "0:a?", "-c:v", "libx264", "-preset", "veryfast", "-crf", str(crf), "-pix_fmt", "yuv420p", "-r", "30", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", str(target)]
     subprocess.run(args, check=True, cwd=str(target.parent), capture_output=True, text=True)
 
 

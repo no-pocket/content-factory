@@ -12,6 +12,7 @@ from .store import OUTPUT, save
 from .service import invalidate_approvals
 from .timeline import build_timeline, candidate_duration
 from .artifacts import register_render, render_target
+from .telemetry import measure_stage, job_metric_context
 
 REVIEWABLE = {'VALID', 'WARNING'}
 
@@ -33,7 +34,10 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             clip['state'] = 'FAILED'
         # Recheck artifacts after interruptions; state alone does not prove integrity.
         if clip.get('state') in REVIEWABLE:
-            current = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+            with measure_stage(clip.setdefault('stage_metrics',[]),'QC',job_metric_context(job,index,clip.get('render_revision')),
+                               requested='resume_full_decode',resolved='ffmpeg_ffprobe') as metric:
+                current = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                metric['qc_state']=current['state']
             if current['state'] in REVIEWABLE:
                 clip['qc'] = current
                 continue
@@ -53,6 +57,10 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             attempt = {'number': clip['attempts'], 'started_at': time.time(), 'state': 'RENDERING'}
             clip.setdefault('attempt_history', []).append(attempt)
             clip['state'] = 'RENDERING'
+            metric_start=len(clip.setdefault('stage_metrics',[]))
+            metric_context=job_metric_context(job,index,render_revision)
+            clip['editorial_versions']={**job.get('editorial_versions',{'brief_id':'UNKNOWN','brief_sha256':'UNKNOWN'}),
+                                       'component_snapshot_id':metric_context['component_snapshot_id']}
             job['status'] = 'RENDERING'
             save(job)
             try:
@@ -69,10 +77,15 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                     def event(name, details):
                         job['editing_activity'] = {'state': name, 'updated_at': time.time(), **details}
                         save(job)
-                    hints, director_used = direct_edit(clip, assets, on_event=event,
-                                                       mode=settings['director_mode'],
-                                                       model=settings['llm_model'],
-                                                       llm_backend=settings['llm_backend'])
+                    with measure_stage(clip['stage_metrics'],'DIRECTOR',metric_context,
+                                       requested={'mode':settings['director_mode'],'model':settings['llm_model'],'backend':settings['llm_backend']}) as metric:
+                        hints, director_used = direct_edit(clip, assets, on_event=event,
+                                                           mode=settings['director_mode'],
+                                                           model=settings['llm_model'],
+                                                           llm_backend=settings['llm_backend'])
+                        metric['resolved']=director_used
+                        if 'fallback' in director_used:
+                            metric['fallback_reason']=job.get('editing_activity',{}).get('reason','UNKNOWN')
                     if clip.get('editorial_context'):
                         clip['story_assessment'] = assess_story(clip['editorial_context'], {}, hints.get('story'))
                         if clip['story_assessment']['closure'] == 'INCOMPLETE':
@@ -80,11 +93,18 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                     clip['timeline'] = build_timeline(clip, segments, edit=hints, assets=assets)
                     clip['director_used'] = director_used
                     save(job)
+                else:
+                    with measure_stage(clip['stage_metrics'],'DIRECTOR',metric_context,requested=settings['director_mode'],
+                                       resolved=clip.get('director_used','UNKNOWN')) as metric:
+                        metric['state']='CACHED'
                 job['status'] = 'RENDERING'
                 save(job)
                 renderer = render_edited(source, job['id'], index + 1, clip, segments,
-                                         clip['timeline'], assets, target, engine=settings['render_engine'], quality=settings['render_quality'])
-                qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                                         clip['timeline'], assets, target, engine=settings['render_engine'], quality=settings['render_quality'],
+                                         metrics=clip['stage_metrics'],metric_context=metric_context)
+                with measure_stage(clip['stage_metrics'],'QC',metric_context,requested='mp4_webm_full_decode',resolved='ffmpeg_ffprobe') as metric:
+                    qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                    metric['qc_state']=qc['state']
                 clip.update(qc=qc, state=qc['state'], renderer_used=renderer,
                             file=str(target), timeline_file=str(target.with_suffix('.timeline.json')),
                             word_count=len(clip['timeline']['layers']['captions']))
@@ -95,6 +115,8 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             attempt['finished_at'] = time.time()
             if job.get('editorial_protocol') == 2:
                 register_render(job, index, revision=render_revision)
+                for metric in clip['stage_metrics'][metric_start:]:
+                    metric.update(candidate_version=clip['candidate_version'],render_revision=clip['render_revision'])
             save(job)
             # One attempt per dispatch. A human can retry this candidate within the saved limit.
             break

@@ -96,28 +96,39 @@ def apply_finishing(target: Path, timeline: dict, *, quality: str = 'standard') 
         pending.unlink(missing_ok=True)
 
 
-def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard') -> str:
+def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard', metrics: list | None = None, metric_context: dict | None = None, finishing_mode: str = 'post_encode') -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
+    if finishing_mode not in ('post_encode','remotion'):
+        raise ValueError('Invalid finishing mode')
+    from .telemetry import measure_stage
+    metrics = metrics if metrics is not None else []
+    metric_context = metric_context or {'job_id':job_id,'render_revision':clip.get('render_revision','UNKNOWN'),
+                                       'configuration_sha256':'UNKNOWN','component_snapshot_id':'UNKNOWN'}
     framing_options = {}
-    if timeline.get('framing'):
-        from .framing import validate_framing
+    if timeline.get('framing') or timeline.get('framing_schedule'):
+        from .framing import validate_framing, validate_framing_schedule
         size = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0',
                          '-show_entries', 'stream=width,height', '-of', 'json', str(source)]))['streams'][0]
-        timeline['framing_resolved'] = validate_framing(timeline['framing'], (size['width'],size['height']), (720,1280))
-        framing_options = {'framing': timeline['framing_resolved']}
+        if timeline.get('framing'):
+            timeline['framing_resolved'] = validate_framing(timeline['framing'], (size['width'],size['height']), (720,1280))
+            framing_options['framing'] = timeline['framing_resolved']
+        if timeline.get('framing_schedule'):
+            timeline['framing_schedule'] = validate_framing_schedule(timeline['framing_schedule'], timeline['duration'], (size['width'],size['height']))
+            framing_options['framing_schedule'] = timeline['framing_schedule']
     output_dir = PUBLIC / job_id / str(ordinal)
     output_dir.mkdir(parents=True, exist_ok=True)
     # Existing renderer is reliable and handles source media variations.
     multisegment = timeline['schema_version'] == '3.0'
-    if multisegment:
-        from .assembly import render_assembly
-        fields = ('schema_version','fps','duration','source_duration','segments','reorder_approval')
-        plan = render_assembly(source, {key: timeline[key] for key in fields if key in timeline},
-                               output_dir / 'base.mp4', quality=quality, **framing_options)
-        timeline['segments'] = plan['segments']
-    else:
-        render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
+    with measure_stage(metrics,'BASE',metric_context,requested='ffmpeg',resolved='ffmpeg'):
+        if multisegment:
+            from .assembly import render_assembly
+            fields = ('schema_version','fps','duration','source_duration','segments','reorder_approval')
+            plan = render_assembly(source, {key: timeline[key] for key in fields if key in timeline},
+                                   output_dir / 'base.mp4', quality=quality, **framing_options)
+            timeline['segments'] = plan['segments']
+        else:
+            render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
         if multisegment and any(s.get('framing', {}).get('preset') in {'web','tweet','document'} and
@@ -149,6 +160,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
     write_timeline(output_dir / "timeline.json", timeline)
     target.parent.mkdir(parents=True, exist_ok=True)
     engine = (engine if engine is not None else os.getenv("RENDER_ENGINE", "remotion")).lower()
+    compose_finishing = finishing_mode=='remotion' and engine=='remotion' and bool(timeline.get('finishing'))
     def subtitled_output():
         if multisegment:
             from .core import write_srt
@@ -163,24 +175,40 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
         else:
             render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
     if engine == "ffmpeg":
-        subtitled_output()
-        apply_finishing(target, timeline, quality=quality)
-        make_web_preview(target, quality=quality)
+        with measure_stage(metrics,'REMOTION',metric_context,requested='ffmpeg',resolved='ffmpeg_subtitled') as metric:
+            metric['state']='SKIPPED'
+        with measure_stage(metrics,'SUBTITLES',metric_context,requested='ffmpeg',resolved='ffmpeg_subtitled'):
+            subtitled_output()
+        with measure_stage(metrics,'FINISHING',metric_context,requested='post_encode',resolved='post_encode'):
+            apply_finishing(target, timeline, quality=quality)
+        with measure_stage(metrics,'PREVIEW',metric_context,requested='webm',resolved='vp8_opus'):
+            make_web_preview(target, quality=quality)
         return "ffmpeg_subtitled"
-    props = {"jobId": job_id, "clipNo": str(ordinal), "timeline": timeline}
+    props = {"jobId": job_id, "clipNo": str(ordinal), "timeline": timeline, 'composeFinishing':compose_finishing}
     props_path = output_dir / "props.json"
     props_path.write_text(json.dumps(props, ensure_ascii=False), encoding="utf-8")
     # The CLI uses absolute paths for props/output; only internally generated paths.
     try:
-        subprocess.run(["./node_modules/.bin/remotion", "render", "src/index.tsx", "VerticalClip", str(target.resolve()),
-                        "--props=" + str(props_path.resolve()), "--codec=h264", "--log=error", *(["--crf=18"] if quality == "high" else [])], cwd=RENDERER,
-                       check=True, capture_output=True, text=True, timeout=int(os.getenv("RENDER_TIMEOUT", "900")))
+        with measure_stage(metrics,'REMOTION',metric_context,requested='remotion',resolved='remotion') as render_metric:
+            subprocess.run(["./node_modules/.bin/remotion", "render", "src/index.tsx", "VerticalClip", str(target.resolve()),
+                            "--props=" + str(props_path.resolve()), "--codec=h264", "--log=error", *(["--crf=18"] if quality == "high" else [])], cwd=RENDERER,
+                           check=True, capture_output=True, text=True, timeout=int(os.getenv("RENDER_TIMEOUT", "900")))
         renderer_used = "remotion"
     except (subprocess.SubprocessError, OSError) as exc:
         if quality == "high" or os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
+            render_metric.update(resolved='NONE',fallback_reason='disabled_for_high_fidelity' if quality=='high' else 'fallback_disabled')
             raise
-        subtitled_output()
+        compose_finishing=False
+        render_metric.update(resolved='ffmpeg_subtitled',fallback_reason=type(exc).__name__)
+        with measure_stage(metrics,'SUBTITLES',metric_context,requested='remotion',resolved='ffmpeg_subtitled',fallback_reason=type(exc).__name__):
+            subtitled_output()
         renderer_used = f"ffmpeg_subtitled_fallback: {str(exc)[:150]}"
-    apply_finishing(target, timeline, quality=quality)
-    make_web_preview(target, quality=quality)
+    with measure_stage(metrics,'FINISHING',metric_context,requested=finishing_mode,
+                       resolved='remotion_composition' if compose_finishing else 'post_encode') as metric:
+        if compose_finishing:
+            metric.update(state='INTEGRATED',included_in_stage='REMOTION')
+        else:
+            apply_finishing(target, timeline, quality=quality)
+    with measure_stage(metrics,'PREVIEW',metric_context,requested='webm',resolved='vp8_opus'):
+        make_web_preview(target, quality=quality)
     return renderer_used

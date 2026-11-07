@@ -5,6 +5,7 @@ import logging
 import os
 import time
 import threading
+import uuid
 from pathlib import Path
 from faster_whisper import WhisperModel
 from .core import get_duration, propose_clips
@@ -18,6 +19,7 @@ from .store import INPUT
 from .store import rconn, load, save, all_jobs, JOBS
 from .queueing import PENDING, PROCESSING, TERMINAL, recover_inflight, reconcile_pending, close_interrupted_run
 from .job_settings import normalize_job_settings
+from .telemetry import measure_stage, job_metric_context
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("worker")
@@ -71,7 +73,9 @@ def process(jid: str) -> None:
         job['qc_settings'] = normalize_qc(job.get('qc_settings'))
         job['run_started_at'] = time.time()
         close_interrupted_run(job)
-        job.setdefault('processing_runs', []).append({'started_at': job['run_started_at'], 'state': 'RUNNING'})
+        job.setdefault('processing_runs', []).append({'run_id':str(uuid.uuid4()),'started_at': job['run_started_at'], 'state': 'RUNNING'})
+        from .provenance import component_snapshot
+        job['processing_runs'][-1]['component_snapshot']=component_snapshot(settings)
         save(job)
         if job.get("source_type") == "youtube" and not job.get("source"):
             if not job.get("platform_permission") or not job.get("license_note"):
@@ -91,61 +95,74 @@ def process(jid: str) -> None:
             with source.open('rb') as handle:
                 job['source_fingerprint'] = hashlib.file_digest(handle, 'sha256').hexdigest()
         duration = get_duration(source)
+        from .framing import normalize_source_windows
+        normalize_source_windows(settings['framing_windows'],duration)
         transcript_path = JOBS / f"{jid}.transcript.json"
-        if transcript_path.is_file():
-            transcript = json.loads(transcript_path.read_text(encoding='utf-8'))
-            segments = transcript['segments']
-        else:
-            device = os.getenv("WHISPER_DEVICE", "cpu")
-            compute_type = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
-            model_name = settings['whisper_model']
-            job['model'] = model_name
-            log.info("Transcribing %s using %s/%s/%s", jid, model_name, device, compute_type)
-            model = WhisperModel(model_name, device=device, compute_type=compute_type)
-            generator, info = model.transcribe(
-                str(source), vad_filter=True, beam_size=settings['whisper_beam_size'],
-                word_timestamps=True, initial_prompt=os.getenv("WHISPER_INITIAL_PROMPT", "GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida."),
-            )
-            segments = [{
-                "start": round(s.start, 3), "end": round(s.end, 3), "text": s.text.strip(),
-                "words": [{"start": round(w.start, 3), "end": round(w.end, 3), "text": w.word.strip()}
-                          for w in (s.words or []) if w.start is not None and w.end is not None]
-            } for s in generator]
-            transcript = {"language": info.language, "segments": segments}
-            pending = transcript_path.with_suffix(".tmp")
-            pending.write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
-            os.replace(pending, transcript_path)
-        if job.get('candidates'):
-            clips = job['candidates']
-        elif job.get('assembly_plan'):
-            if not settings['timeline_v3']:
-                raise ValueError('Assembly requires saved timeline_v3 opt-in')
-            from .assembly import validate_assembly, build_assembly_context
-            plan = validate_assembly(job['assembly_plan'], duration)
-            context = build_assembly_context(plan, segments)
-            clips = [{'start':context['source_range']['start'],'end':context['source_range']['end'],
-                      'text':context['text'],'assembly':plan,'editorial_context':context,
-                      'editorial_policy':job.get('editorial_policy',{'brief':None}),
-                      'score':0,'reason':'Montagem solicitada pelo editor; requer revisão humana'}]
-            job['ranker_used'] = 'human_assembly'
-        else:
-            mode = settings['ranker_mode']
-            if mode == "ollama":
-                record_ai_event(job, 'queued', {'transcript_segments': len(segments)})
-                clips = select_highlights(segments, duration, count=settings['clip_count'], settings=settings,
-                                          policy=job.get('editorial_policy'),
-                                          on_event=lambda event, details: record_ai_event(job, event, details))
-                log.info("Ranker=ollama transcript discovery, clips=%s", len(clips))
+        metrics=job.setdefault('stage_metrics',[])
+        with measure_stage(metrics,'ASR',job_metric_context(job),requested={'model':settings['whisper_model'],'beam_size':settings['whisper_beam_size']}) as stage:
+            if transcript_path.is_file():
+                transcript = json.loads(transcript_path.read_text(encoding='utf-8'))
+                segments = transcript['segments']
+                stage['state']='CACHED'
+                stage['resolved']=job.get('transcript_model','UNKNOWN')
             else:
-                job['ranker_used'] = 'heuristic'
-                job['ai_activity'] = {'state': 'disabled', 'updated_at': time.time()}
-                clips = propose_clips(segments, duration, count=max(16, settings['clip_count']),
-                                      target=settings['target_seconds'], min_seconds=settings['min_seconds'],
-                                      max_seconds=settings['max_seconds'])
-                from .editorial_story import annotate_candidates
-                from .ranker import _select
-                clips = _select(annotate_candidates(clips, segments, job.get('editorial_policy'),
-                                                    max_seconds=settings['max_seconds']), settings['clip_count'])
+                device = os.getenv("WHISPER_DEVICE", "cpu")
+                compute_type = os.getenv("WHISPER_COMPUTE_TYPE", "int8")
+                model_name = settings['whisper_model']
+                job['model'] = model_name
+                log.info("Transcribing %s using %s/%s/%s", jid, model_name, device, compute_type)
+                model = WhisperModel(model_name, device=device, compute_type=compute_type)
+                generator, info = model.transcribe(
+                    str(source), vad_filter=True, beam_size=settings['whisper_beam_size'],
+                    word_timestamps=True, initial_prompt=os.getenv("WHISPER_INITIAL_PROMPT", "GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida."),
+                )
+                segments = [{
+                    "start": round(s.start, 3), "end": round(s.end, 3), "text": s.text.strip(),
+                    "words": [{"start": round(w.start, 3), "end": round(w.end, 3), "text": w.word.strip()}
+                              for w in (s.words or []) if w.start is not None and w.end is not None]
+                } for s in generator]
+                transcript = {"language": info.language, "segments": segments}
+                job['transcript_model']={'name':model_name,'device':device,'compute_type':compute_type,'beam_size':settings['whisper_beam_size']}
+                stage['resolved']=job['transcript_model']
+                pending = transcript_path.with_suffix(".tmp")
+                pending.write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
+                os.replace(pending, transcript_path)
+        with measure_stage(metrics,'RANKER',job_metric_context(job),requested={'mode':settings['ranker_mode'],'model':settings['llm_model'],'backend':settings['llm_backend']}) as stage:
+            if job.get('candidates'):
+                clips = job['candidates']
+                stage['state']='CACHED'
+            elif job.get('assembly_plan'):
+                if not settings['timeline_v3']:
+                    raise ValueError('Assembly requires saved timeline_v3 opt-in')
+                from .assembly import validate_assembly, build_assembly_context
+                plan = validate_assembly(job['assembly_plan'], duration)
+                context = build_assembly_context(plan, segments)
+                clips = [{'start':context['source_range']['start'],'end':context['source_range']['end'],
+                          'text':context['text'],'assembly':plan,'editorial_context':context,
+                          'editorial_policy':job.get('editorial_policy',{'brief':None}),
+                          'score':0,'reason':'Montagem solicitada pelo editor; requer revisão humana'}]
+                job['ranker_used'] = 'human_assembly'
+            else:
+                mode = settings['ranker_mode']
+                if mode == "ollama":
+                    record_ai_event(job, 'queued', {'transcript_segments': len(segments)})
+                    clips = select_highlights(segments, duration, count=settings['clip_count'], settings=settings,
+                                              policy=job.get('editorial_policy'),
+                                              on_event=lambda event, details: record_ai_event(job, event, details))
+                    log.info("Ranker=ollama transcript discovery, clips=%s", len(clips))
+                else:
+                    job['ranker_used'] = 'heuristic'
+                    job['ai_activity'] = {'state': 'disabled', 'updated_at': time.time()}
+                    clips = propose_clips(segments, duration, count=max(16, settings['clip_count']),
+                                          target=settings['target_seconds'], min_seconds=settings['min_seconds'],
+                                          max_seconds=settings['max_seconds'])
+                    from .editorial_story import annotate_candidates
+                    from .ranker import _select
+                    clips = _select(annotate_candidates(clips, segments, job.get('editorial_policy'),
+                                                        max_seconds=settings['max_seconds']), settings['clip_count'])
+            stage['resolved']=job.get('ranker_used','UNKNOWN')
+            if 'fallback' in stage['resolved']:
+                stage['fallback_reason']=job.get('ai_activity',{}).get('reason','UNKNOWN')
         if not clips:
             raise ValueError("No usable speech windows found; try a longer video with speech")
         job.update({"language": transcript['language'], "duration": duration, "status": "RENDERING", "candidates": clips})
@@ -162,7 +179,10 @@ def process(jid: str) -> None:
             if job.get('editorial_versions'):
                 job['editorial_versions']['component_snapshot_id'] = snapshot['snapshot_id']
         for index, clip in enumerate(clips):
-            if settings['framing_preset'] != 'legacy' and 'timeline' not in clip:
+            if settings['framing_windows'] and 'timeline' not in clip:
+                from .framing import build_framing_schedule
+                clip['framing_schedule']=build_framing_schedule(clip,settings)
+            elif settings['framing_preset'] != 'legacy' and 'timeline' not in clip:
                 clip.setdefault('framing', {'preset': settings['framing_preset'], 'roi': settings['framing_roi']})
             if 'editorial_context' not in clip:
                 clip['editorial_context'] = build_candidate_context(job, index, transcript)

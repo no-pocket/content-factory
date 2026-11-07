@@ -131,7 +131,7 @@ def build_assembly_context(plan: dict, segments: list[dict]) -> dict:
             'coverage':{'complete_candidate':True,'prefix_truncated':False,'discontinuous':True}}
 
 
-def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 'standard', framing: dict | None = None) -> dict:
+def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 'standard', framing: dict | None = None, framing_schedule: list | None = None) -> dict:
     """Concatenate decoded source intervals, keeping A/V on the same frame clock."""
     plan = validate_assembly(plan, plan['source_duration'])  # no subprocess for invalid plans
     probe = json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(source)]))
@@ -141,7 +141,8 @@ def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 's
     audio = any(s['codec_type']=='audio' for s in probe['streams'])
     video = next(s for s in probe['streams'] if s['codec_type']=='video')
     filters, labels = [], []
-    from .framing import validate_framing, video_filter
+    from .framing import validate_framing, video_filter, validate_framing_schedule, framing_graph
+    schedule = validate_framing_schedule(framing_schedule or [], plan['duration'], (video['width'],video['height']))
     for index, segment in enumerate(plan['segments']):
         scene = segment.get('framing')
         resolved = validate_framing(scene,(video['width'],video['height']),(720,1280)) if scene else framing
@@ -149,7 +150,15 @@ def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 's
             segment['framing_resolved'] = resolved
         vf = video_filter(resolved,720,1280) if resolved else 'scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280'
         start, end, duration = segment['source_in'], segment['source_out'], segment['duration']
-        filters.append(f'[0:v:0]trim=start={start}:end={end},setpts=PTS-STARTPTS,fps=30,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={segment["frame_count"]},{vf},setsar=1[v{index}]')
+        local = [{**window, 'start':max(window['start'],segment['output_start'])-segment['output_start'],
+                  'end':min(window['end'],segment['output_start']+duration)-segment['output_start']}
+                 for window in schedule if max(window['start'],segment['output_start']) < min(window['end'],segment['output_start']+duration)]
+        timing = f'[0:v:0]trim=start={start}:end={end},setpts=PTS-STARTPTS,fps=30,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={segment["frame_count"]}'
+        if local or (resolved and resolved.get('layout_version')=='proof_compact_v2'):
+            filters.append(timing+f'[trimmed{index}]')
+            filters.append(framing_graph(f'trimmed{index}',f'v{index}',framing=resolved,schedule=local))
+        else:
+            filters.append(timing+f',{vf},setsar=1[v{index}]')
         labels.append(f'[v{index}]')
         if audio:
             filters.append(f'[0:a:0]atrim=start={start}:end={end},asetpts=PTS-STARTPTS,aresample=48000,apad,atrim=duration={duration}[a{index}]')

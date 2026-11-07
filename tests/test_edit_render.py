@@ -89,6 +89,26 @@ def test_web_framing_preserves_both_source_edges(tmp_path):
         assert raw[channel] > 180 and raw[1] < 80
 
 
+def test_proof_window_adapts_pixels_without_changing_audio_clock(tmp_path):
+    from app.core import render, get_duration
+    from app.framing import validate_framing_schedule
+    source=tmp_path/'page-window.mp4'
+    subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i',
+        'color=white:size=640x360:rate=30:duration=2,drawbox=x=0:y=0:w=30:h=360:color=red:t=fill,drawbox=x=610:y=0:w=30:h=360:color=blue:t=fill',
+        '-f','lavfi','-i','sine=frequency=440:duration=2','-c:v','libx264','-c:a','aac','-shortest',str(source)],check=True)
+    schedule=validate_framing_schedule([{'start':.5,'end':1.5,'framing':{'preset':'web','layout_version':'proof_compact_v2'}}],2,(640,360))
+    target=tmp_path/'windowed.mp4'
+    render(source,0,2,[],target,burn_subtitles=False,framing_schedule=schedule)
+    for moment,protected in ((.25,False),(1,True),(1.75,False)):
+        raw=subprocess.check_output(['ffmpeg','-v','error','-ss',str(moment),'-i',str(target),'-frames:v','1',
+            '-vf','crop=2:2:10:600,scale=1:1','-f','rawvideo','-pix_fmt','rgb24','-'])
+        if protected:assert raw[0]>180 and raw[1]<80
+        else:assert min(raw)>180
+    assert abs(get_duration(target)-2)<=1/30
+    streams=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-of','json',str(target)]))['streams']
+    assert sum(s['codec_type']=='audio' for s in streams)==1
+
+
 def test_finishing_preserves_spoken_audio_then_adds_fading_tail(tmp_path):
     from app.core import get_duration
     from app.edit_render import apply_finishing

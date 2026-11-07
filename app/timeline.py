@@ -56,7 +56,7 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
     else:
         start = as_float(clip["start"])
         end = as_float(clip["end"])
-    duration = round(end - start, 3)
+    duration = end-start if assembly else round(end - start, 3)
     if not (0 < duration <= (120 if assembly else MAX_CLIP_SECONDS)):
         raise ValueError("Clip duration must be within 0..60 seconds")
     if not assembly:
@@ -122,6 +122,11 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         timeline['framing'] = validate_scene(clip['framing'])
         if timeline['framing']['preset'] in {'web', 'tweet', 'document'}:
             timeline['layers']['broll'] = []
+    if clip.get('framing_schedule'):
+        from .framing import validate_framing_schedule
+        timeline['framing_schedule']=validate_framing_schedule(clip['framing_schedule'],duration)
+        timeline['layers']['broll']=[piece for piece in timeline['layers']['broll'] if not any(
+            max(piece['at'],window['start'])<min(piece['at']+piece['duration'],window['end']) for window in timeline['framing_schedule'])]
     if assembly:
         timeline.pop('source_range')
         timeline.update(schema_version='3.0', segments=assembly['segments'],
@@ -142,6 +147,9 @@ def candidate_duration(clip: dict) -> float:
 
 
 def validate_timeline(timeline: dict) -> None:
+    if 'framing_schedule' in timeline:
+        from .framing import validate_framing_schedule
+        validate_framing_schedule(timeline['framing_schedule'],timeline['duration'])
     if 'framing' in timeline:
         from .framing import validate_scene, validate_framing
         validate_scene(timeline['framing'])

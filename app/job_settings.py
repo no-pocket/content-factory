@@ -6,6 +6,7 @@ DEFAULTS = {
     'timeline_v3': False,
     'framing_preset': 'legacy',
     'framing_roi': None,
+    'framing_windows': [],
     'clip_count': 3,
     'target_seconds': 40,
     'min_seconds': 15,
@@ -51,7 +52,10 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
         raise ValueError('timeline_v3 must be boolean')
     if settings['timeline_v3'] and settings['editorial_protocol'] != 2:
         raise ValueError('timeline_v3 requires editorial_protocol=2')
-    from .framing import PRESETS, validate_scene
+    from .framing import PRESETS, validate_scene, normalize_source_windows
+    settings['framing_windows']=normalize_source_windows(settings['framing_windows'])
+    if settings['framing_windows'] and settings['framing_preset']=='legacy':
+        settings['framing_preset']='web'
     if settings['framing_preset'] not in ('legacy', *PRESETS):
         raise ValueError('Unsupported framing_preset')
     roi = settings['framing_roi']

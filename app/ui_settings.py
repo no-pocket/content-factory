@@ -28,8 +28,8 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
         if key == 'framing_preset':
             result[key] = st.selectbox('Conteúdo visual', ['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'],
                                        index=['legacy', 'face', 'gameplay', 'web', 'tweet', 'document'].index(initial[key]),
-                                       format_func={'legacy':'Enquadramento original', 'face':'Rosto', 'gameplay':'Gameplay',
-                                                    'web':'Página web', 'tweet':'Publicação / tweet', 'document':'Documento'}.__getitem__,
+                                       format_func={'legacy':'Vertical aprovado', 'face':'Rosto', 'gameplay':'Gameplay',
+                                                    'web':'Página web nos intervalos', 'tweet':'Tweet nos intervalos', 'document':'Documento nos intervalos'}.__getitem__,
                                        key=key_prefix+key)
             continue
         if key == 'framing_roi':
@@ -37,6 +37,12 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
                 value=json.dumps(initial[key]) if initial[key] else '',
                 placeholder='{"x":0,"y":0,"width":1,"height":1}', max_chars=1000, key=key_prefix+key)
             result[key] = result[key] or None
+            continue
+        if key == 'framing_windows':
+            value='; '.join(f"{w['start']}-{w['end']}" for w in initial[key])
+            result[key]=st.text_input('Intervalos de página/tweet (segundos da fonte)',value=value,
+                placeholder='12.5-18; 40-47.2',max_chars=2000,
+                help='A adaptação aparece apenas nestes intervalos. O restante mantém o vertical aprovado.',key=key_prefix+key) or []
             continue
         if key in {'whisper_model', 'ranker_mode', 'llm_backend', 'llm_model', 'director_mode', 'render_engine', 'render_quality'}:
             labels_and_options = {

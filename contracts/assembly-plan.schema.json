@@ -107,6 +107,12 @@
                     "maximum": 1
                   }
                 }
+              },
+              "layout_version": {
+                "enum": [
+                  "fit_v1",
+                  "proof_compact_v2"
+                ]
               }
             }
           },

@@ -13,7 +13,7 @@ def component_snapshot(settings: dict) -> dict:
     from .artifacts import digest
     def git(*args):
         try:
-            return subprocess.check_output(['git', *args], cwd=ROOT, stderr=subprocess.DEVNULL, timeout=5)
+            return subprocess.check_output(['git', '--no-optional-locks', '-c', 'safe.directory='+str(ROOT), *args], cwd=ROOT, stderr=subprocess.DEVNULL, timeout=5)
         except (OSError, subprocess.SubprocessError):
             return None
     head = git('rev-parse', 'HEAD')
@@ -39,10 +39,18 @@ def component_snapshot(settings: dict) -> dict:
             packages[name] = version(name)
         except PackageNotFoundError:
             packages[name] = 'UNKNOWN'
-    snapshot = {'schema_version': '1.0', 'git_head': head.decode().strip() if head else 'UNKNOWN',
+    import os
+    file_hashes={}
+    for name in ('app/core.py','app/edit_render.py','app/candidates.py','app/worker.py','app/telemetry.py',
+                 'app/job_settings.py','app/provenance.py','app/timeline.py','app/assembly.py','app/framing.py','renderer/src/vertical-clip.tsx',
+                 'renderer/src/index.tsx','requirements.lock','renderer/package-lock.json'):
+        path=ROOT/name
+        file_hashes[name]=hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else 'UNKNOWN'
+    snapshot = {'schema_version': '1.0', 'git_head': head.decode().strip() if head else os.getenv('CONTENT_FACTORY_GIT_HEAD','UNKNOWN'),
                 'dirty_patch_sha256': patch_hash, 'prompts': prompts, 'dependencies': packages,
+                'component_file_hashes':file_hashes,'build_source_sha256':os.getenv('CONTENT_FACTORY_SOURCE_SHA256','UNKNOWN'),
                 'model_requested': settings['llm_model'], 'model_resolved': 'UNKNOWN',
                 'backend_requested': settings['llm_backend'], 'context_window': 4096 if settings['llm_backend'] == 'kepler_gpu' else 8192,
-                'renderer_requested': settings['render_engine'], 'timeline_schema': '2.0',
+                'renderer_requested': settings['render_engine'], 'timeline_schema': '3.0' if settings.get('timeline_v3') else '2.0',
                 'ranker_rules': 'full-context-v1', 'retrieval': None, 'dataset': None}
     return {**snapshot, 'snapshot_id': digest(snapshot)}

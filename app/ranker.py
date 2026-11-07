@@ -248,7 +248,10 @@ def rerank_with_ollama(candidates: list[dict], *, count: int = 3, on_event: Call
         ordered.extend(c for c in sorted(candidates, key=lambda c: -c['score']) if c not in ordered)
         ordered.sort(key=lambda c: c.get('editorial_penalty', 0))
         chosen = _select(ordered, count)
-        emit('completed', selected_count=len(chosen), model=model)
+        resolved=result.get('model')
+        emit('completed', selected_count=len(chosen), model=model, model_requested=model,
+             model_resolved=resolved if isinstance(resolved,str) and len(resolved)<=200 else 'UNKNOWN',
+             resolved_model_provenance='provider_response')
         return chosen
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         log.warning('Local ranker unavailable; heuristic fallback: %s', exc)
