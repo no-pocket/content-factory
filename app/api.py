@@ -76,6 +76,16 @@ class Handler(BaseHTTPRequestHandler):
         if hermes:
             from .hermes_api import dispatch
             return dispatch(self, path[2:])
+        if path == ['v2', 'sources']:
+            from .source_registry import list_sources, upsert_source
+            if self.command == 'GET':
+                return self._json(200, {'sources': list_sources()})
+            if self.command == 'POST':
+                from .hermes_api import _body
+                body = _body(self)
+                if 'source' not in body or set(body) - {'source', 'expected_revision'}:
+                    raise ValueError('Provide source and optional expected_revision')
+                return self._json(200, upsert_source(body['source'], expected_revision=body.get('expected_revision')))
         if path[:2] == ['v2', 'jobs']:
             if len(path) == 3 and self.command == 'GET':
                 job = store.load(path[2])

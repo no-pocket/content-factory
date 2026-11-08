@@ -34,7 +34,7 @@ def normalize_youtube_url(url: str) -> str:
     return f"https://www.youtube.com/watch?v={video_id}"
 
 
-def download_youtube(url: str, destination: Path) -> tuple[Path, dict]:
+def download_youtube(url: str, destination: Path, *, source_snapshot: dict | None = None, settings: dict | None = None) -> tuple[Path, dict]:
     """Download only when platform authorization is expressly enabled.
 
     This function does not use cookies, private videos, login or anti-bot workarounds.
@@ -46,6 +46,23 @@ def download_youtube(url: str, destination: Path) -> tuple[Path, dict]:
     from yt_dlp import YoutubeDL
     destination.mkdir(parents=True, exist_ok=True)
     vid = canonical.split("v=")[-1]
+    def verify_authorized_metadata(info):
+        if source_snapshot is not None:
+            from .source_ingestion import verify_source_metadata
+            from .source_registry import get_source
+            # Keep the original policy snapshot; revocation also stops future downloads.
+            current = get_source(source_snapshot['channel_id'])
+            verify_source_metadata(info, vid, current, settings or {})
+            verify_source_metadata(info, vid, source_snapshot, settings or {})
+
+    def media_filter(info, *, incomplete=False):
+        if source_snapshot is not None and not incomplete:
+            verify_authorized_metadata(info)
+        return (
+            "Vídeo maior que o limite permitido" if info.get("duration") and float(info["duration"]) > MAX_DURATION_SECONDS
+            else "Live streams não são aceitos" if info.get("is_live") or info.get("live_status") == "is_live"
+            else "Arquivo excede limite" if (info.get("filesize") or info.get("filesize_approx") or 0) > MAX_FILE_BYTES
+            else None)
     template = str(destination / f"{vid}.%(ext)s")
     options = {
         "quiet": True,
@@ -60,21 +77,18 @@ def download_youtube(url: str, destination: Path) -> tuple[Path, dict]:
         "merge_output_format": "mp4",
         "outtmpl": template,
         "max_filesize": MAX_FILE_BYTES,
-        "match_filter": lambda info, *, incomplete=False: (
-            "Vídeo maior que o limite permitido" if info.get("duration") and float(info["duration"]) > MAX_DURATION_SECONDS
-            else "Live streams não são aceitos" if info.get("is_live") or info.get("live_status") == "is_live"
-            else "Arquivo excede limite" if (info.get("filesize") or info.get("filesize_approx") or 0) > MAX_FILE_BYTES
-            else None
-        ),
+        "match_filter": media_filter,
     }
     with YoutubeDL(options) as ydl:
         metadata = ydl.extract_info(canonical, download=False)
+        verify_authorized_metadata(metadata)
         if metadata.get("duration") and float(metadata["duration"]) > MAX_DURATION_SECONDS:
             raise ValueError("Vídeo excede o limite de duração")
         if metadata.get("is_live") or metadata.get("live_status") == "is_live":
             raise ValueError("Lives em andamento não são suportadas")
         ydl.params["skip_download"] = False
         data = ydl.extract_info(canonical, download=True)
+        verify_authorized_metadata(data)
         actual = list(destination.glob(f"{vid}.*"))
         videos = [x for x in actual if x.is_file() and x.suffix.lower() in {".mp4", ".mkv", ".webm", ".mov"}]
         if len(videos) != 1:
@@ -83,4 +97,8 @@ def download_youtube(url: str, destination: Path) -> tuple[Path, dict]:
         if filepath.stat().st_size > MAX_FILE_BYTES:
             filepath.unlink(missing_ok=True)
             raise ValueError("Arquivo excedeu limite de tamanho")
-        return filepath, {"title": data.get("title") or vid, "video_id": vid, "channel": data.get("channel") or data.get("uploader") or "", "source_url": canonical, "duration": data.get("duration")}
+        result = {"title": data.get("title") or vid, "video_id": vid, "channel": data.get("channel") or data.get("uploader") or "", "source_url": canonical, "duration": data.get("duration"), "channel_id":data.get('channel_id'), 'language':data.get('language')}
+        if source_snapshot is not None:
+            from .source_ingestion import verify_source_metadata
+            result.update(verify_source_metadata(data,vid,source_snapshot,settings or {}))
+        return filepath, result

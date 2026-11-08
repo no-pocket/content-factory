@@ -27,6 +27,9 @@ if st.session_state.get("review_feedback"):
 st.caption("v4: vídeo autorizado → Whisper por palavra → Qwen Editor → timeline → FFmpeg/Remotion → revisão humana. Sem postagem automática.")
 st.warning("Uso privado: a interface deve ficar acessível apenas via localhost, SSH tunnel ou VPN. Não exponha a porta 8501 publicamente.")
 st.caption('Perfil inicial de novos jobs: Qwen na GPU K4200 + Remotion + alta fidelidade. CPU e outros ajustes continuam disponíveis no formulário.')
+from app.source_registry_ui import render_source_registry
+render_source_registry(st)
+
 with st.expander("Adicionar um vídeo autorizado", expanded=True):
     # Outside st.form so changing the input source causes an immediate Streamlit rerun.
     source_type = st.radio("Origem", ["Upload local", "URL do YouTube"], horizontal=True, key="source_type")

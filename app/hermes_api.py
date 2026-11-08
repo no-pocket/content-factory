@@ -42,8 +42,44 @@ def _intent(body, fields):
     return body[fields]
 
 
+def _source_summary(source):
+    fields = ('channel_id', 'name', 'status', 'rights_confirmed', 'platform_permission',
+              'allowed_languages', 'allowed_video_kinds', 'allowed_model_scopes', 'revision')
+    return {**{key: source[key] for key in fields if key in source},
+            'authorization_confirmed': bool(source.get('authorization_reference') and
+                source.get('rights_confirmed') is True and source.get('platform_permission') is True)}
+
+
+def _external_allowed(job):
+    snapshot = job.get('source_snapshot')
+    if snapshot is None:
+        return True  # Legacy jobs retain their existing explicit editorial access.
+    if not isinstance(snapshot, dict) or 'external' not in snapshot.get('allowed_model_scopes', []):
+        return False
+    from .source_registry import get_source
+    try:
+        current = get_source(job.get('source_id') or snapshot.get('channel_id'))
+    except (KeyError, ValueError, TypeError):
+        return False
+    return (current.get('status') == 'active' and current.get('rights_confirmed') is True
+            and current.get('platform_permission') is True and bool(current.get('authorization_reference'))
+            and 'external' in current.get('allowed_model_scopes', []))
+
+
+def _require_external(job):
+    if not _external_allowed(job):
+        raise PermissionError('Source authorization does not permit external access; use the private application')
+
+
+def _require_group_external(group):
+    for job in group['jobs']:
+        _require_external(store.load(job['id']))
+    return group
+
+
 def _candidate(jid, cid):
     job = store.load(jid)
+    _require_external(job)
     row = next((r for r in service.get_editorial_view(job)['candidates'] if r['candidate_id'] == cid), None)
     if row is None:
         raise ValueError('Unknown candidate')
@@ -66,14 +102,43 @@ def _candidate(jid, cid):
 
 def dispatch(handler, path):
     method = handler.command
+    if path == ['sources'] and method == 'GET':
+        from .source_registry import list_sources
+        return handler._json(200, {'sources': [_source_summary(source) for source in list_sources()]})
+    if len(path) == 2 and path[0] == 'sources' and method == 'GET':
+        from .source_registry import get_source
+        return handler._json(200, _source_summary(get_source(path[1])))
+    if path == ['ingest'] and method == 'POST':
+        from .source_ingestion import ingest_youtube
+        body = _body(handler)
+        request = dict(_intent(body, 'ingest'))
+        if set(request) - {'source_url', 'source_id', 'settings'}:
+            raise ValueError('Only source_url, source_id and settings may be supplied')
+        settings = request.get('settings', {})
+        if not isinstance(settings, dict) or settings.get('editorial_protocol', 2) != 2:
+            raise ValueError('Hermes ingestion requires editorial_protocol=2')
+        defaults = {'duration_mode': 'flexible', 'min_seconds': 8, 'target_seconds': 40, 'max_seconds': 180}
+        # Explicit classic uses its existing normalized limits; never inherit the flexible ceiling.
+        request['settings'] = {**(defaults if settings.get('duration_mode', 'flexible') == 'flexible' else {}),
+                               **settings, 'editorial_protocol': 2}
+        request.update(owner_message=body['owner_message'], actor_id=_actor())
+        result = ingest_youtube(request)
+        return handler._json(200 if result['duplicate'] else 201,
+                             {'job': {key: result['job'].get(key) for key in ('id', 'status', 'created_at', 'updated_at')},
+                              'duplicate': result['duplicate']})
+    if len(path) == 2 and path[0] == 'jobs' and method == 'GET':
+        job = store.load(path[1])
+        return handler._json(200, {key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')})
     if path == ['groups'] and method == 'GET':
         from .source_review import list_groups
-        return handler._json(200, {'groups': list_groups()})
+        return handler._json(200, {'groups': [g for g in list_groups()
+            if all(_external_allowed(store.load(j['id'])) for j in g['jobs'])]})
     if len(path) in (2, 3) and path[0] == 'groups':
         from .source_review import get_group, select_finals
         if len(path) == 2 and method == 'GET':
-            return handler._json(200, get_group(path[1]))
+            return handler._json(200, _require_group_external(get_group(path[1])))
         if len(path) == 3 and path[2] == 'selection' and method == 'POST':
+            _require_group_external(get_group(path[1]))
             body = _body(handler)
             request = dict(_intent(body, 'selection'))
             if any(k in request for k in ('actor_id', 'channel')):
@@ -83,6 +148,7 @@ def dispatch(handler, path):
             return handler._json(200, select_finals(path[1], request))
     if len(path) in (4, 5) and path[0] == 'jobs' and path[2] == 'candidates':
         jid, cid = path[1], path[3]
+        _require_external(store.load(jid))
         if len(path) == 4 and method == 'GET':
             return handler._json(200, _candidate(jid, cid)[2])
         if len(path) == 5 and path[4] == 'notes' and method == 'POST':

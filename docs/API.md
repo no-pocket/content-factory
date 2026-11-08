@@ -194,3 +194,48 @@ preservando leitor, eventos e arquivos; não converta ajustes em aprovação lim
 ## Ponte privada Hermes
 
 A superfície /v2/hermes usa credencial própria e operações editoriais limitadas. Veja [contratos, perfil e instalação](../integrations/hermes/OPERACAO.md). Token Hermes não autoriza rotas gerais; configurar tokens iguais bloqueia ambas as superfícies. Comentário sem decisão é distinto de review e seleção final.
+
+## Canais autorizados e ingestão pelo Hermes
+
+A aplicação privada oferece **Fontes autorizadas — canais cadastrados** para o
+proprietário registrar ID canônico, nome, referência de autorização, confirmações,
+idiomas, tipos e uso local/externo. O padrão é `pending`: não inicia processamento.
+Ativar exige referência e ambas as confirmações. O cadastro é uma declaração
+registrada, não uma verificação externa de licença. Revisões evitam atualização
+concorrente silenciosa; preserve `data/sources.json` junto aos jobs.
+
+Rotas autenticadas novas:
+
+- `GET /v2/hermes/sources` e `/v2/hermes/sources/{channel_id}`: cadastro e políticas.
+- `POST /v2/hermes/ingest`: `{owner_message,ingest:{source_url,source_id?,settings?}}`.
+  A fala explícita é obrigatória e o ator vem da configuração da ponte. O protocolo
+  editorial é 2; uma tentativa explícita de usar 1 é rejeitada. Retorna `{job,duplicate}`,
+  HTTP 201 quando criado e 200 quando já existente. O recibo do job contém apenas
+  ID, situação e datas, inclusive em duplicatas já processadas. Importação não aprova nem publica.
+- `GET /v2/hermes/jobs/{uuid}`: somente ID, situação e datas, sem conteúdo editorial.
+- `GET /v2/sources` e `POST /v2/sources` com `{source,expected_revision?}`:
+  administração exige a credencial geral, distinta do token Hermes.
+
+`groups` continua sendo comparação por vídeo já processado, não uma lista de canais.
+Jobs novos com `source_snapshot.allowed_model_scopes` sem `external` não podem
+expor transcrição, comentários, candidatos ou mídia ao Hermes. Grupos contendo
+qualquer job restrito são omitidos da listagem e negados no acesso direto; a
+aplicação privada continua disponível. Jobs antigos sem snapshot mantêm o fluxo.
+
+O serviço API encaminha `ENABLE_YOUTUBE_DOWNLOAD` (padrão false),
+`YOUTUBE_MAX_DURATION` (7200) e `YOUTUBE_MAX_BYTES` (1500000000) do ambiente Compose.
+Não é necessário refazer imagens. O worker deve ser reiniciado somente ocioso para carregar as validações novas;
+ativação operacional da nova configuração requer recriar somente API, após revisar
+Compose, confirmar jobs/volumes e executar testes. Nenhuma rotina periódica é criada.
+
+A política atual do cadastro também é verificada a cada acesso externo: revogar
+o uso externo ou desativar a fonte bloqueia novos acessos, mesmo com um snapshot
+anterior permissivo. Ingestão por URL com processamento externo é rejeitada
+explicitamente: o worker exige plano externo pré-validado nesse caminho, ainda
+não produzido automaticamente por esta integração. A permissão external permite
+a revisão pelo Hermes, sem prometer direção externa automática.
+
+Novos imports Hermes usam protocolo editorial 2 e duração flexível 8/40/180 segundos
+(mínimo/referência/máximo), salvo ajustes explícitos válidos. `duration_mode=classic`
+continua disponível. Backend/modelo seguem os padrões normalizados existentes;
+nenhum ajuste de job já persistido é reescrito.

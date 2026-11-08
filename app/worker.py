@@ -70,6 +70,11 @@ def process(jid: str) -> None:
         raw_settings = dict(job.get('settings') or {})
         raw_settings.setdefault('render_quality', 'standard')  # preserve pre-profile job intent
         settings = normalize_job_settings(raw_settings)
+        if job.get('source_snapshot'):
+            from .source_ingestion import require_active_source
+            from .source_registry import get_source
+            require_active_source(job['source_snapshot'])
+            require_active_source(get_source(job['source_snapshot']['channel_id']))
         # Persisted settings are an immutable job intent, including old snapshots.
         if 'settings' not in job:
             job['settings'] = dict(settings)
@@ -88,7 +93,9 @@ def process(jid: str) -> None:
             job["status"] = "DOWNLOADING"
             save(job)
             url = normalize_youtube_url(job["source_url"])
-            source, metadata = download_youtube(url, INPUT / jid)
+            provenance = ({'source_snapshot':job['source_snapshot'],'settings':settings}
+                          if job.get('source_snapshot') else {})
+            source, metadata = download_youtube(url, INPUT / jid, **provenance)
             job.update({"source": str(source), "youtube_metadata": metadata, "original_name": metadata["title"]})
             save(job)
         job["status"] = "TRANSCRIBING"

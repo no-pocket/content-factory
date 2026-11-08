@@ -35,7 +35,7 @@ def enqueue(job: dict, queue=None) -> dict:
     return job
 
 
-def create_job(payload: dict, *, upload=None, filename: str | None = None, queue=None) -> dict:
+def create_job(payload: dict, *, upload=None, filename: str | None = None, queue=None, source_provenance=None) -> dict:
     for key in ('creator', 'license_note'):
         if not isinstance(payload.get(key), str) or not payload[key].strip() or len(payload[key]) > 4000:
             raise ValueError(f'{key} required, max 4000 characters')
@@ -83,7 +83,8 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
             raise
         name = Path(filename).name
     job = store.new_job(path, name, payload['creator'].strip(), payload['license_note'].strip(),
-                        source_url=source_url, platform_permission=bool(source_url), settings=settings)
+                        source_url=source_url, platform_permission=bool(source_url), settings=settings,
+                        source_provenance=source_provenance)
     job.update(qc_settings=qc, source_fingerprint=fingerprint, pipeline_version='quality-v2')
     if assembly is not None:
         job['assembly_plan'] = assembly

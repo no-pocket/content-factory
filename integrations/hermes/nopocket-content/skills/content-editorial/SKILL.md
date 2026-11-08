@@ -31,3 +31,17 @@ Para vídeo no chat, use `media --job UUID --candidate UUID --artifact-id sha256
 Duração flexível escolhe a menor janela que preserve contexto, prova e conclusão dentro dos limites salvos no job; não corte uma conclusão só para atingir40/60s e não encha o vídeo para atingir uma meta. Explique quando o limite exigir outra proposta. Fechamento cadastrado é opcional e conta no total. Jobs antigos não mudam por conversa ou alteração de ambiente.
 
 Conectores sociais estão em dry-run. Preparar rascunho, selecionar final, aprovar render e publicar são ações distintas. Não invente upload, OAuth conectado, edição automática ou treino de ML. Comentários/estrelas alimentam histórico; treinamento e promoção continuam explícitos/offline.
+
+## Canais autorizados e importação
+
+`sources` lista os canais e políticas cadastrados. `groups` lista rodadas de comparação editorial por vídeo; não é cadastro de canais. Para cadastrar ou ativar um canal, use **Fontes autorizadas — canais cadastrados** na aplicação privada, ou a API administrativa com credencial separada. O token do Hermes não pode ativar fontes, inventar referência de autorização nem alterar políticas. Cadastro pending ou disabled não autoriza ingestão.
+
+Quando o proprietário pedir explicitamente importar um vídeo, grave arquivo JSON UTF-8 com `{owner_message,ingest:{source_url,source_id?,settings?}}` e execute `ingest --payload-file PATH`. Copie a fala literal em owner_message. Não envie actor_id, permissões ou model_scope: identidade vem da ponte e permissões vêm do cadastro. O backend confirma o canal canônico pelos metadados antes de enfileirar, aplica idioma/tipo/modelos permitidos, deduplica o vídeo e salva proveniência e ajustes. Não contorne uma rejeição trocando para upload ou outro canal. Uma referência ausente deve ser fornecida pelo proprietário, nunca presumida pelo agente.
+
+Confira `job.id`, `job.status` e `duplicate` na resposta. `duplicate=true` aponta o job já existente; não significa uma nova produção. `status --job UUID` consulta apenas andamento, sem expor transcrição. Só informe conclusão após observar o estado. Ingestão não aprova nem publica, não inicia monitoramento e não envia vídeo ao Telegram.
+
+Fonte limitada a local não permite levar transcrições, candidatos, comentários e mídia ao Hermes/modelo externo. Esses grupos ficam ausentes da listagem e o acesso direto é negado; use a aplicação privada. Jobs antigos sem política salva preservam o comportamento existente. Não habilite tarefa periódica sem solicitação específica.
+
+Processamento externo automático a partir da URL ainda não é suportado: exige plano externo pré-validado no worker e a ingestão rejeita essa configuração. A permissão external no cadastro permite revisão pelo Hermes; não cria um plano ou candidatos de um modelo externo. Revogação no cadastro bloqueia acessos futuros mesmo com snapshot anterior permissivo.
+
+Novos imports usam duração flexível com limites 8/40/180 segundos e protocolo editorial 2. Ajustes explícitos válidos podem selecionar classic; jobs existentes preservam o snapshot. Backend/modelo seguem a configuração normalizada existente, sem troca automática para outro modelo.

@@ -22,7 +22,7 @@ def rconn():
     return redis.Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379/0"), decode_responses=True)
 
 
-def new_job(path: Path | None, filename: str, creator: str, license_note: str, *, source_url: str | None = None, platform_permission: bool = False, settings: dict | None = None) -> dict:
+def new_job(path: Path | None, filename: str, creator: str, license_note: str, *, source_url: str | None = None, platform_permission: bool = False, settings: dict | None = None, source_provenance: dict | None = None) -> dict:
     jid = str(uuid.uuid4())
     record = {"schema_version": "1.0", "id": jid, "source": str(path) if path else None, "source_type": "youtube" if source_url else "upload",
               "source_url": source_url, "platform_permission": platform_permission, "original_name": filename,
@@ -42,6 +42,8 @@ def new_job(path: Path | None, filename: str, creator: str, license_note: str, *
     record['editorial_versions'] = {'brief_id': record['editorial_policy']['brief_id'],
                                     'brief_sha256': record['editorial_policy']['brief_sha256'],
                                     'component_snapshot_id': record['component_snapshot']['snapshot_id']}
+    if source_provenance is not None:
+        record.update(source_provenance)
     save(record)
     return record
 

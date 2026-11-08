@@ -16,12 +16,31 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ValueError('Redirect refused; configure the private API directly')
 
 
+def settings():
+    # Gateway terminal tools need not inherit custom keys from a routed profile.
+    # Read only this installed skill's profile, never cwd or global HERMES_HOME.
+    keys=('CONTENT_FACTORY_HERMES_URL','CONTENT_FACTORY_HERMES_TOKEN','CONTENT_FACTORY_MEDIA_CACHE')
+    values={}
+    profile_env=Path(__file__).resolve().parents[3]/'.env'
+    if profile_env.is_file():
+        for line in profile_env.read_text(encoding='utf-8-sig').splitlines():
+            key,sep,value=line.strip().partition('=')
+            if sep and key in keys:
+                value=value.strip()
+                if len(value)>=2 and value[0]==value[-1] and value[0] in ('"',"'"):
+                    value=value[1:-1]
+                values[key]=value
+    values.update({key:os.environ[key] for key in keys if key in os.environ})
+    return values
+
+
 def config():
-    url=os.getenv('CONTENT_FACTORY_HERMES_URL','http://127.0.0.1:18510').rstrip('/')
+    values=settings()
+    url=values.get('CONTENT_FACTORY_HERMES_URL','http://127.0.0.1:18510').rstrip('/')
     parsed=urllib.parse.urlsplit(url)
     if parsed.scheme not in ('http','https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/'):
         raise ValueError('Invalid private API base URL')
-    token=os.getenv('CONTENT_FACTORY_HERMES_TOKEN','')
+    token=values.get('CONTENT_FACTORY_HERMES_TOKEN','')
     if len(token)<24:raise ValueError('Private Hermes credential not configured')
     return url,token
 
@@ -32,6 +51,9 @@ def identifier(value):
 
 
 def route(args):
+    if args.command=='sources':return '/sources'
+    if args.command=='ingest':return '/ingest'
+    if args.command=='status':return '/jobs/'+identifier(args.job)
     if args.command=='groups':return '/groups'
     if args.command in ('group','select'):
         if not args.group.startswith('source:') or len(args.group)!=71 or any(c not in '0123456789abcdef' for c in args.group[7:]):raise ValueError('Invalid source group')
@@ -48,7 +70,7 @@ def route(args):
 def run(args):
     url,token=config();path=route(args)
     payload=None
-    if args.command in ('review','select','note'):
+    if args.command in ('review','select','note','ingest'):
         source=Path(args.payload_file)
         if source.stat().st_size>65536:raise ValueError('Action payload too large')
         raw=json.loads(source.read_text(encoding='utf-8-sig'))
@@ -72,7 +94,7 @@ def run(args):
             return json.loads(raw)
         size=int(response.headers.get('Content-Length','0'))
         if not 0<size<=50_000_000 or response.headers.get_content_type()!='video/mp4':raise ValueError('Invalid media response')
-        cache=Path(os.getenv('CONTENT_FACTORY_MEDIA_CACHE',str(Path.home()/'.cache'/'nopocket-content'))).resolve()
+        cache=Path(settings().get('CONTENT_FACTORY_MEDIA_CACHE',str(Path.home()/'.cache'/'nopocket-content'))).resolve()
         cache.mkdir(parents=True,exist_ok=True,mode=0o700)
         fd,target=tempfile.mkstemp(prefix='candidate-',suffix='.mp4',dir=cache)
         try:
@@ -97,6 +119,9 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='command',required=True)
     sub.add_parser('groups')
+    sub.add_parser('sources')
+    p=sub.add_parser('ingest');p.add_argument('--payload-file',required=True)
+    p=sub.add_parser('status');p.add_argument('--job',required=True)
     for name in ('group','select'):
         p=sub.add_parser(name);p.add_argument('--group',required=True)
         if name=='select':p.add_argument('--payload-file',required=True)
