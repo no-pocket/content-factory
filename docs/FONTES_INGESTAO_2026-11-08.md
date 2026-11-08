@@ -38,3 +38,35 @@ contínuo fica para etapa própria depois de validar uma importação autorizada
 Browser agent-browser isolado: dois cadastros pendentes consecutivos, recusa de ativação sem referência/confirmações, edição e ativação exclusivamente sintética persistiram; ambas áreas editoriais renderizaram sem erro. Nenhum acesso YouTube ou job real no ensaio.
 
 Implantação observada: API recriada e worker reiniciado com fila0/0, UI preservada. Gameplayrj cadastrado pending/rev1 sem comprovação ou confirmações inventadas. Cliente remoto sources e agente Hermes real retornaram o canal correto e pendência (exit0). Browser de produção conferiu fonte e comentários existentes. Os39JSONs de jobs ficaram idênticos e12eventosv2 preservados. Nenhum job/download desse vídeo foi iniciado.
+
+## Aceitação real após confirmação do proprietário
+
+Machado confirmou em08/11/2026 a permissão para editar/reutilizar Gameplayrj e processar
+pelo Hermes. A fonte está active/rev2; a declaração e o escopo ficam no registro privado.
+O vídeo g8Q1UxPJulc criou somente o job af0c5e4a-1419-4683-b23a-2e683915ad1f; repetir a
+URL curta retornou duplicate=true e o mesmo job, sem nova entrada.
+
+A execução revelou timestamps numpy do Whisper que eram válidos no JSON mas falhavam
+na validação nativa em memória. Correção converte e valida na fronteira ASR sem relaxar
+os contratos;47 testes focados passaram. Retomada manteve áudio/transcrição/histórico.
+Também corrigidos orçamento de saída flexível (1 proposta compacta/reserva700) e
+amostragem de janelas para cobrir o final da fonte;45 testes focados passaram.
+
+Resultado observado: NEEDS_REVIEW, um candidato de0,68–43,18s, Remotion720×1280,
+direção kepler_gpu/Qwen2.5 3B; MP442,867s e WebM42,888s decodificados completamente e
+reproduzidos até ended no navegador. QCWARNING por silêncio28,6337–29,6587s, intervalo
+idêntico confirmado no áudio original. Seleção usou cobertura heurística: as propostas
+semânticas do Qwen ainda foram rejeitadas por limite/evidência, com diagnóstico salvo.
+Melhorar aderência do modelo ao contrato de propostas continua em aberto; não atribuir
+essa seleção à IA nem confundir QC com qualidade editorial.
+
+Prévia entregue uma única vez ao [tópico Telegram](https://t.me/c/4410866638/1704),
+16.667.790bytes com SHA conferido e aceite BotAPI. Candidato PENDING/revisão editorial0;
+nenhuma avaliação artificial. Publicação e monitoramento periódico seguem separados.
+
+Revisão em lote entregue: formulários por candidato em fragmentos, sem enviar campos
+antes da decisão. Navegador comprovou zero quadros com comentário ao digitar/avaliar,
+rascunho de outro candidato preservado e salvamento completo; troca de render bloqueia
+ações até recarga do vídeo.39 testes focados + teste de migração passaram; CI do código
+bbcab6f passou nos dois workflows. A interface e API voltaram a responder após reinício
+pontual dos serviços com falha de acesso local; dados persistidos foram preservados.
