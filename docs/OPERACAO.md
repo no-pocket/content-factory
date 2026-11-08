@@ -118,3 +118,7 @@ Invoke-RestMethod http://127.0.0.1:11436/api/ps
 | Vídeo não reproduz | Confira se existe a prévia WebM e decodifique-a com FFmpeg. Veja [Testes e validação](TESTES.md). O MP4 para download permanece separado. |
 
 Para reiniciar uma mudança de código montada pelo override, use `docker compose -f compose.yaml -f compose.kepler.yaml up -d --no-build --force-recreate worker ui kepler-bridge`. Faça isso com a fila vazia ou depois que o job atual terminar.
+
+### Enviar a avaliação completa
+
+Cada candidato tem um formulário: comentário, motivos, estrelas e grau ficam no navegador até Aprovar, Aprovar com ajustes ou Recusar. Alterar campos não envia o feedback nem recarrega a página. O envio atualiza somente a revisão daquele candidato, mantém os outros rascunhos e mostra confirmação no próprio formulário. Mudança de render bloqueia ações até recarregar o vídeo inteiro. Os bytes e a revisão continuam verificados pelo backend ao salvar.

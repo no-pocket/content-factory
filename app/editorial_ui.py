@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+import streamlit
 
 LABELS = {'PENDING': 'Pendente', 'APPROVED': 'Aprovado',
           'APPROVED_WITH_ADJUSTMENTS': 'Aprovado com ajustes', 'REJECTED': 'Recusado',
@@ -62,12 +63,36 @@ def filter_candidates(rows: list[dict], filters: dict) -> list[dict]:
     return [row for row in rows if matches(row)]
 
 
+def _rerun_review(st):
+    from streamlit.errors import StreamlitAPIException
+    try:
+        st.rerun(scope='fragment')
+    except StreamlitAPIException as exc:
+        if 'fragment' not in str(exc):
+            raise
+        st.rerun()
+
+
+@streamlit.fragment
 def render_v2_review(st, job: dict, index: int, row: dict) -> None:
+    from . import store, service
+    job = store.load(job['id'])
+    current_row = service.get_editorial_view(job)['candidates'][index]
+    # The player belongs to the outer app. A fragment may refresh feedback, but
+    # must never bind a different render to the video the owner is still viewing.
+    artifact_changed = current_row['artifact_id'] != row['artifact_id']
+    row = {**row, 'artifact_intact': False} if artifact_changed else current_row
     from .editorial_contracts import REASONS
     from .service import review_candidate_v2, Conflict
     cid = row['candidate_id']
     # Versioned draft keys prevent accidental reuse of a comment on another render.
     prefix = f"v2_{job['id']}_{cid}_{row['artifact_id']}_"
+    if st.session_state.get(prefix+'saved_confirmation'):
+        st.success(st.session_state.pop(prefix+'saved_confirmation'))
+    if artifact_changed:
+        st.warning('O vídeo mudou desde que esta página foi aberta. Recarregue a página e confira o novo vídeo antes de avaliar. O rascunho continua associado ao render anterior.')
+        if st.button('Recarregar página e conferir o novo vídeo', key=prefix+'reload_video'):
+            st.rerun()
     revision_key = prefix+'displayed_revision'
     from .artifacts import digest
     candidate_state=digest({'history':row.get('history',[]),'current':row.get('current_event')})
@@ -89,10 +114,10 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
                      help='Confirma que você quer revisar a versão atual mantendo seus campos. Confira a decisão salva e o histórico antes de enviar.'):
             st.session_state[revision_key]=job.get('editorial_revision',0)
             st.session_state[candidate_key]=candidate_state
-            st.rerun()
+            _rerun_review(st)
         if st.button('Recarregar avaliação atual e descartar este rascunho',key=prefix+'reload'):
             clear_draft()
-            st.rerun()
+            _rerun_review(st)
     old = row.get('current_event') or {}
     notes = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid]
     if notes:
@@ -103,33 +128,34 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
     st.caption(f"Candidato {index+1} · versão {row['candidate_version']} · render {row['render_revision']}")
     decision = row['normalized_decision']
     st.info('Decisão salva: ' + LABELS.get(decision, LABELS['UNCONFIRMED_LEGACY']))
-    comment = st.text_area('Comentário / motivo', value=old.get('comment_raw', ''),
-                           max_chars=4000, key=prefix+'comment')
-    with st.expander('Motivos, notas e ajustes (opcional)'):
-        reasons = st.multiselect('Motivos', REASONS, default=[r['code'] for r in old.get('reasons', [])], key=prefix+'reasons',
-            help='Selecione as observações confirmadas: irrelevância, autopromoção, gancho fraco, falta de contexto, promessa incompleta, final abrupto, falta de demonstração, enquadramento ruim, conteúdo cortado, erro de legenda, conteúdo bom que exige retrabalho ou falha técnica. São rótulos do dataset; não substituem a decisão.')
-        severity = st.selectbox('Severidade dos motivos selecionados', [None, 'MINOR', 'MAJOR', 'CRITICAL'],
-                                 format_func=lambda value: value or 'Não informada', key=prefix+'severity',
-                                 help='MINOR: impacto menor; MAJOR: problema importante; CRITICAL: problema crítico. Aplica-se aos motivos selecionados e ao novo pedido de edição. Pedidos já salvos preservam sua severidade; ajustes MAJOR ou CRITICAL abertos impedem aprovação sem ajustes.')
-        dimensions = {key: render_dimension_rating(st, key, old.get('dimensions', {}).get(key), prefix)
-                      for key in DIMENSION_LABELS}
-        grade = render_content_grade(st, old.get('content_grade'), prefix)
-        domain = st.selectbox('Domínio da recusa', ['UNSPECIFIED', 'EDITORIAL', 'TECHNICAL', 'ADMINISTRATIVE', 'MIXED'], key=prefix+'domain',
-            help='Informe a origem da recusa: editorial (conteúdo), técnica (arquivo/render), administrativa (operação ou direitos), mista ou não especificada. Só é registrado ao recusar.')
-        adjustment = st.text_area('Pedido de edição', max_chars=4000, key=prefix+'adjustment')
-        edit_type = st.selectbox('Tipo de ajuste', ['BOUNDARY_END', 'BOUNDARY_START', 'FRAMING', 'CAPTIONS', 'TITLE', 'EDITING', 'OTHER'], key=prefix+'edit_type',
-            help='BOUNDARY_END/START: mudar fim/início; FRAMING: enquadramento; CAPTIONS: legendas; TITLE: título; EDITING: edição; OTHER: outro. Descreva o resultado esperado no pedido; salvar o pedido não executa a edição.')
-        existing_edits = old.get('edit_requests',[])
-        open_edits = {e['edit_id']: e for e in existing_edits if e['status']=='OPEN'}
-        resolved = st.multiselect('Pedidos resolvidos nesta revisão',list(open_edits),
-            format_func=lambda ident: open_edits[ident]['type']+': '+open_edits[ident]['comment'],key=prefix+'resolved',
-            help='Marque apenas pedidos abertos que você conferiu como atendidos neste render. A resolução é registrada ao salvar a avaliação; não altera o vídeo automaticamente.')
-    ready = row['artifact_intact'] and row['technical_state'] in {'VALID', 'WARNING'}
-    clean, adjust, reject = st.columns(3)
-    clean_clicked = clean.button('Aprovar', key=prefix+'approve', disabled=not ready)
-    adjust_clicked = adjust.button('Aprovar com ajustes', key=prefix+'adjust', disabled=not ready)
-    reject_clicked = reject.button('Recusar', key=prefix+'reject')
-    action = 'APPROVED' if clean_clicked else 'APPROVED_WITH_ADJUSTMENTS' if adjust_clicked else 'REJECTED' if reject_clicked else None
+    with st.form(prefix+'review_form'):
+        comment = st.text_area('Comentário / motivo', value=old.get('comment_raw', ''),
+                               max_chars=4000, key=prefix+'comment')
+        with st.expander('Motivos, notas e ajustes (opcional)'):
+            reasons = st.multiselect('Motivos', REASONS, default=[r['code'] for r in old.get('reasons', [])], key=prefix+'reasons',
+                help='Selecione as observações confirmadas: irrelevância, autopromoção, gancho fraco, falta de contexto, promessa incompleta, final abrupto, falta de demonstração, enquadramento ruim, conteúdo cortado, erro de legenda, conteúdo bom que exige retrabalho ou falha técnica. São rótulos do dataset; não substituem a decisão.')
+            severity = st.selectbox('Severidade dos motivos selecionados', [None, 'MINOR', 'MAJOR', 'CRITICAL'],
+                                     format_func=lambda value: value or 'Não informada', key=prefix+'severity',
+                                     help='MINOR: impacto menor; MAJOR: problema importante; CRITICAL: problema crítico. Aplica-se aos motivos selecionados e ao novo pedido de edição. Pedidos já salvos preservam sua severidade; ajustes MAJOR ou CRITICAL abertos impedem aprovação sem ajustes.')
+            dimensions = {key: render_dimension_rating(st, key, old.get('dimensions', {}).get(key), prefix)
+                          for key in DIMENSION_LABELS}
+            grade = render_content_grade(st, old.get('content_grade'), prefix)
+            domain = st.selectbox('Domínio da recusa', ['UNSPECIFIED', 'EDITORIAL', 'TECHNICAL', 'ADMINISTRATIVE', 'MIXED'], key=prefix+'domain',
+                help='Informe a origem da recusa: editorial (conteúdo), técnica (arquivo/render), administrativa (operação ou direitos), mista ou não especificada. Só é registrado ao recusar.')
+            adjustment = st.text_area('Pedido de edição', max_chars=4000, key=prefix+'adjustment')
+            edit_type = st.selectbox('Tipo de ajuste', ['BOUNDARY_END', 'BOUNDARY_START', 'FRAMING', 'CAPTIONS', 'TITLE', 'EDITING', 'OTHER'], key=prefix+'edit_type',
+                help='BOUNDARY_END/START: mudar fim/início; FRAMING: enquadramento; CAPTIONS: legendas; TITLE: título; EDITING: edição; OTHER: outro. Descreva o resultado esperado no pedido; salvar o pedido não executa a edição.')
+            existing_edits = old.get('edit_requests',[])
+            open_edits = {e['edit_id']: e for e in existing_edits if e['status']=='OPEN'}
+            resolved = st.multiselect('Pedidos resolvidos nesta revisão',list(open_edits),
+                format_func=lambda ident: open_edits[ident]['type']+': '+open_edits[ident]['comment'],key=prefix+'resolved',
+                help='Marque apenas pedidos abertos que você conferiu como atendidos neste render. A resolução é registrada ao salvar a avaliação; não altera o vídeo automaticamente.')
+        ready = row['artifact_intact'] and row['technical_state'] in {'VALID', 'WARNING'}
+        clean, adjust, reject = st.columns(3)
+        clean_clicked = clean.form_submit_button('Aprovar', disabled=not ready)
+        adjust_clicked = adjust.form_submit_button('Aprovar com ajustes', disabled=not ready)
+        reject_clicked = reject.form_submit_button('Recusar', disabled=artifact_changed)
+        action = 'APPROVED' if clean_clicked else 'APPROVED_WITH_ADJUSTMENTS' if adjust_clicked else 'REJECTED' if reject_clicked else None
     if action:
         edits = [{**edit,'status':'RESOLVED' if edit['edit_id'] in resolved else edit['status']} for edit in existing_edits]
         if adjustment.strip():
@@ -144,7 +170,8 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
             review_candidate_v2(job['id'], cid, request)
             st.session_state['review_feedback'] = 'Avaliação salva para este render. '+LABELS[action]+'.'
             clear_draft()
-            st.rerun()
+            st.session_state[prefix+'saved_confirmation'] = 'Avaliação salva para este render. '+LABELS[action]+'.'
+            _rerun_review(st)
         except Conflict:
             st.error('A revisão ou o render mudou. Recarregue o job e confira o vídeo. Seu comentário permanece no rascunho deste render.')
         except (ValueError, RuntimeError) as exc:

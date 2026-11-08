@@ -82,7 +82,7 @@ def test_two_ui_sessions_keep_original_revision_and_preserve_stale_draft(v2job):
     assert len(store.load(v2job['id'])['feedback_events'])==2
 
 
-def test_reviewing_one_candidate_does_not_stale_other_candidate_draft(v2job):
+def test_reviewing_one_candidate_does_not_stale_other_candidate_review(v2job):
     from app import store
     from app.artifacts import register_render
     from streamlit.testing.v1 import AppTest
@@ -97,9 +97,19 @@ for i,row in enumerate(service.get_editorial_view(job)['candidates']):
     render_v2_review(st,job,i,row)
 '''
     page=AppTest.from_string(code,default_timeout=20).run()
-    page.text_area[2].set_value('Second candidate draft')
+    form_ids = [field.proto.form_id for field in page.text_area if field.label == 'Comentário / motivo']
+    assert len(form_ids) == 2 and len(set(form_ids)) == 2 and all(form_ids)
+    # AppTest reruns the whole script, unlike the browser's fragment-only form
+    # submission. The browser retains candidate 2's unsent client form buffer;
+    # supply that buffer at its submission here, without refreshing its stored
+    # candidate-state guard. Browser preservation is verified separately in
+    # research/pytest_temp_editorial/review-batch-20261108/QA.md.
+    second_prefix = f"v2_{v2job['id']}_{v2job['candidates'][1]['candidate_id']}_{v2job['candidates'][1]['artifact_id']}_"
+    original_state = page.session_state[second_prefix+'displayed_candidate_state']
     next(b for b in page.button if b.label=='Aprovar').click().run()
     assert not page.exception
+    assert page.session_state[second_prefix+'displayed_candidate_state'] == original_state
+    page.text_area[2].set_value('Second candidate draft')
     [b for b in page.button if b.label=='Recusar'][1].click().run()
     assert not page.exception and not page.error
     events=store.load(v2job['id'])['feedback_events']
@@ -144,3 +154,86 @@ def test_adding_minor_edit_preserves_existing_major_and_blocks_clean_approval(v2
     assert not view.error and not view.exception
     latest=store.load(v2job['id'])['feedback_events'][-1]
     assert latest['decision']=='APPROVED' and latest['edit_requests'][0]['status']=='RESOLVED'
+
+
+def test_review_fields_share_form_and_submit_full_feedback(v2job):
+    from app import store
+    page = ui_test_session(v2job)
+    comment = page.text_area[0]
+    form_id = comment.proto.form_id
+    assert form_id
+    # Every editable review field must wait for the same explicit decision.
+    for kind in ('text_area', 'selectbox', 'select_slider', 'multiselect', 'feedback'):
+        for widget in page.get(kind):
+            assert widget.proto.form_id == form_id
+    assert len(page.get('feedback')) == 10
+    assert len(page.button) == 3
+    assert all(button.proto.form_id == form_id and button.proto.is_form_submitter for button in page.button)
+    comment.set_value('SYNTHETIC full feedback submitted together')
+    page.select_slider[0].set_value(2)
+    page.get('feedback')[0].set_value(4)
+    assert not store.load(v2job['id']).get('feedback_events')
+    next(button for button in page.button if button.label == 'Recusar').click().run()
+    assert not page.exception and not page.error
+    event = store.load(v2job['id'])['feedback_events'][-1]
+    assert event['comment_raw'] == 'SYNTHETIC full feedback submitted together'
+    assert event['content_grade'] == 2
+    assert event['dimensions']['relevance'] == 5
+    assert any('Avaliação salva' in message.value for message in page.success)
+
+
+def test_fragment_does_not_bind_new_render_to_old_player(v2job):
+    from pathlib import Path
+    from app import store
+    from app.artifacts import register_render
+    from streamlit.testing.v1 import AppTest
+    original_row = service.get_editorial_view(v2job)['candidates'][0]
+    # Keep the caller's media/row snapshot fixed, as during a browser fragment
+    # rerun. AppTest normally refreshes the whole script and would hide this bug.
+    code = f'''from app.editorial_ui import render_v2_review
+import streamlit as st
+render_v2_review(st, {v2job!r}, 0, {original_row!r})
+'''
+    page = AppTest.from_string(code, default_timeout=20).run()
+    original_comment_key = page.text_area[0].key
+    Path(v2job['candidates'][0]['file']).write_bytes(b'SYNTHETIC replacement render')
+    register_render(v2job, 0)
+    store.save(v2job)
+    # The browser may still submit the previously enabled button before it
+    # learns that the worker replaced the render.
+    next(button for button in page.button if button.label == 'Aprovar').click().run()
+    assert not page.exception
+    assert not page.error
+    assert page.text_area[0].key == original_comment_key
+    assert any('vídeo' in warning.value.lower() for warning in page.warning)
+    assert all(button.disabled for button in page.button if button.label in ('Aprovar', 'Aprovar com ajustes', 'Recusar'))
+    assert any(button.label == 'Recarregar página e conferir o novo vídeo' for button in page.button)
+    assert not store.load(v2job['id']).get('feedback_events')
+
+
+def test_existing_non_form_server_draft_survives_form_migration(v2job):
+    from streamlit.testing.v1 import AppTest
+    code = f'''from app import store, service
+from app.editorial_ui import render_v2_review, render_dimension_rating, render_content_grade
+import streamlit as st
+job = store.load({v2job['id']!r})
+row = service.get_editorial_view(job)['candidates'][0]
+prefix = f"v2_{{job['id']}}_{{row['candidate_id']}}_{{row['artifact_id']}}_"
+if st.session_state.get('migrate_review_form'):
+    render_v2_review(st, job, 0, row)
+else:
+    st.text_area('Comentário / motivo', value='', max_chars=4000, key=prefix+'comment')
+    render_dimension_rating(st, 'relevance', None, prefix)
+    render_content_grade(st, None, prefix)
+'''
+    page = AppTest.from_string(code, default_timeout=20).run()
+    page.text_area[0].set_value('SYNTHETIC server draft before form deployment').run()
+    page.get('feedback')[0].set_value(4).run()
+    page.select_slider[0].set_value(2).run()
+    assert page.text_area[0].value == 'SYNTHETIC server draft before form deployment'
+    page.session_state['migrate_review_form'] = True
+    page.run()
+    assert not page.exception
+    assert page.text_area[0].value == 'SYNTHETIC server draft before form deployment'
+    assert page.get('feedback')[0].value == 4
+    assert page.select_slider[0].value == 2

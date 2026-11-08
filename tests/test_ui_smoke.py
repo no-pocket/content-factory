@@ -52,10 +52,11 @@ def test_v2_adjustment_and_rejection_persist_without_ratings(v2job, monkeypatch)
     assert not test.exception
     test.radio(key='editorial_workspace').set_value('Job individual').run()
     comment = next(t for t in test.text_area if t.label == 'Comentário / motivo')
-    comment.set_value('SYNTHETIC: bom, mas melhorar o final').run()
+    comment.set_value('SYNTHETIC: bom, mas melhorar o final')
     next(b for b in test.button if b.label == 'Aprovar com ajustes').click().run()
     assert not test.exception
     job = store.load(v2job['id'])
+    assert not test.error, [e.value for e in test.error]
     assert job['feedback_events'][-1]['decision'] == 'APPROVED_WITH_ADJUSTMENTS'
     assert all(value is None for value in job['feedback_events'][-1]['dimensions'].values())
     assert job['approved'] == []
