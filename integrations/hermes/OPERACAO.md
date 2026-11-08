@@ -3,10 +3,19 @@
 Pacote do perfil: `nopocket-content/SOUL.md` e `nopocket-content/skills/content-editorial/`.
 A skill usa Python padrão, sem instalar bibliotecas ou modelos.
 
-Estado desta execução: pacote preparado e testado localmente. Instalação remota e
-vinculação a tópico NÃO confirmadas: SSH recusou conexão e MCP retornou Transport closed.
-Não foi criado um segundo consumidor Telegram nem alterado qualquer perfil remoto.
+Instalado e validado por SSH em 08/11/2026. Perfil em
+`/srv/nopocket/data/hermes/profiles/nopocket-content`, tópico
+[nopocket-content](https://t.me/c/4410866638/1687), roteado pelo gateway existente.
+Personalidade e skill próprias; modelo/provedor existente, sem duplicar OAuth.
+O gateway confirmou o perfil servido e Telegram conectado após reload sem turnos ativos.
 
+Ponte privada: tarefa Windows `Content Factory Hermes Private API`, iniciada no login
+do Machado, mantém SSH reverso para loopback do Pi18510→workstation8510. Credencial
+Hermes distinta e ator autorizado configurados somente em ambientes secretos.
+Reconexão configurada; reboot/logout não foram testados fisicamente.
+Cliente remoto consultou19 fontes e baixou MP4 com SHA conferido. Teste real do agente,
+somente leitura, terminou com exit0 e identificou Qwen/DeepSeek/Hermes na fonte correta.
+Não foram criadas avaliações, notas ou seleções artificiais.
 ## Instalação com o host disponível
 
 1. Pelo SSH existente, ler `hermes --version`, `hermes profile --help`, diretório
@@ -65,3 +74,5 @@ Documentação oficial consultada em07/11/2026: [perfis](https://hermes-agent.no
 [Telegram/tópicos](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram),
 [skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).
 Os detalhes da instalação efetiva têm precedência sobre exemplos atuais do upstream.
+
+Entrega real confirmada: uma prévia de5.244.486bytes enviada ao tópico1687, mensagem1688, aceite BotAPI com tamanho igual. A legenda informa REJECTED/QCWARNING existentes e não registra aprovação/seleção. Recibos privados em operations/nopocket-content-install-report-20261108.json e nopocket-content-telegram-delivery-20261108.json no Pi.

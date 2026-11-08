@@ -20,17 +20,18 @@ Credencial própria, ator Telegram configurado, artefatos exatos, idempotência 
 comentários sem decisão evitam transformar conversa em aprovação. Comentários
 sem decisão ficam visíveis no job e não viram notas/labels de ML.
 
-**Instalação remota pendente:** SSH para nopocket-pi/localIPv4 recusou conexão;
-IPv6 expirou; MCP retornou Transport closed. Nenhum perfil/tópico remoto foi
-alterado nem segundo consumidor Telegram criado. O pacote preparado não equivale
-a perfil instalado ou vídeo entregue no chat. A ponte permanece desativada sem
-credenciais/configuração verificadas. Publicação social continua em dry-run.
-
+**Instalado em08/11/2026:** SSH restabelecido, perfil e skill instalados no Pi,
+[tópico nopocket-content](https://t.me/c/4410866638/1687) criado e roteado no gateway
+existente. API privada conectada por SSH reverso em loopback, com credencial própria.
+Teste real do perfil consultou a aplicação e identificou os três motores (exit0).
+Publicação social continua em dry-run; nenhuma avaliação artificial foi criada.
 Validação:427 testes passaram em126,23s na imagem existente, código somente leitura,
 rede bloqueada e dados temporários isolados. Revisões independentes não encontraram
 Important em aberto após correções. Browser agent-browser no app completo confirmou
 modelos legíveis, comentários entre jobs, seleções2→1→0 após recarregar, reprodução
 de prévia e duração máxima120 aceita no controle flexível de180, sem criar job real.
-Instalação, roteamento Hermes e entrega Telegram ainda precisam de verificação real.
+Instalação e roteamento foram verificados no gateway ativo; a validação de uma conversa humana completa permanece para o uso do proprietário.
 
 Migração de sessões: teste RED→GREEN confirmou que sessões com job já selecionado mantêm a área individual e o rascunho ao receber a nova interface. Sessões novas abrem comparação por fonte.
+
+Entrega Telegram confirmada em08/11: [prévia no tópico](https://t.me/c/4410866638/1688),5.244.486bytes aceitos pela BotAPI. A prévia preserva a recusa/aviso técnico já existentes; o envio não é aprovação nem publicação social.
