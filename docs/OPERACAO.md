@@ -1,6 +1,6 @@
 # Operação diária
 
-O Content Factory recebe um vídeo autorizado, produz candidatos de cortes e aguarda revisão humana. A interface fica em <http://localhost:8501/> e mostra a versão no topo. Este guia usa PowerShell na raiz do repositório.
+O Content Factory recebe um vídeo autorizado, produz candidatos de cortes e aguarda revisão humana. A interface fica em <http://localhost:8501/> e mostra a versão no topo. Este guia usa PowerShell na raiz do repositório. A atualização da [fila de revisão e Telegram](REVISAO_FILA_2026-11-08.md) descreve a entrada em pendentes, salvamento em formulário e avanço ao concluir o job.
 
 ## Iniciar nesta workstation
 
@@ -64,8 +64,12 @@ Estados normais: `QUEUED → DOWNLOADING` (só URL) `→ TRANSCRIBING → DIRECT
 
 ### Integrações em dry-run
 
-Telegram e Hermes permanecem em **dry-run por escolha do proprietário** nesta
-execução. Não houve envio de vídeo/transcrição nem mensagem a conversa externa.
+O ensaio inicial descrito abaixo manteve Telegram e Hermes em **dry-run**. Depois,
+o proprietário autorizou a integração real do perfil nopocket-content: veja
+[integração Hermes](HERMES_EDITORIAL_2026-11-07.md),
+[ingestão autorizada](FONTES_INGESTAO_2026-11-08.md) e
+[vínculos de entrega e feedback](REVISAO_FILA_2026-11-08.md).
+Os conectores de publicação social continuam em dry-run.
 
 O crítico opcional (`app.editorial_critic`) só retorna recomendações com evidência
 temporal/literal. Não altera timeline ou decisão humana. O MCP Hermes disponível
