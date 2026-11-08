@@ -136,6 +136,9 @@ def render(source: Path, start: float, end: float, segments: list[dict], target:
     if framing:
         from .framing import video_filter
         vf = video_filter(framing, width, height)+',setsar=1'
+    # Select CFR frames on the source clock; output -r alone can duplicate
+    # early frames after non-frame-aligned seeks and delay video vs audio.
+    vf += ',fps=30'
     # Use the local SRT filename relative to CWD to avoid FFmpeg filter path escaping.
     caption_filter = ("subtitles=" + subtitle.name + ":force_style='FontName=DejaVu Sans,FontSize=15,Outline=2,Shadow=1,Alignment=2,MarginV=55'") if burn_subtitles and subtitle.stat().st_size>0 else None
     video_args=['-vf',vf+(','+caption_filter if caption_filter else ''),'-map','0:v:0']
@@ -143,7 +146,8 @@ def render(source: Path, start: float, end: float, segments: list[dict], target:
         from .framing import validate_framing_schedule, framing_graph
         size=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(source)]))['streams'][0]
         schedule=validate_framing_schedule(framing_schedule,end-start,(size['width'],size['height']))
-        graph=framing_graph('0:v:0','scheduled',framing=framing,schedule=schedule,width=width,height=height)
+        graph=framing_graph('0:v:0','scheduled_raw',framing=framing,schedule=schedule,width=width,height=height)
+        graph += ';[scheduled_raw]fps=30[scheduled]'
         if caption_filter:
             graph+=';[scheduled]'+caption_filter+'[subtitled]'
         video_args=['-filter_complex',graph,'-map','[subtitled]' if caption_filter else '[scheduled]']

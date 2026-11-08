@@ -62,3 +62,102 @@ def test_annotation_preserves_word_times_and_penalizes_promotion():
     assert annotated[1]['editorial_penalty'] > annotated[0]['editorial_penalty']
     assert annotated[1]['editorial_context']['segments'][0]['words'][0]['source_end'] == 1
     assert clips[0]['text'] == 'old'
+
+def test_annotation_completes_sentence_across_whisper_segment_boundary():
+    from app.editorial_story import annotate_candidates
+    segments = [
+        {'start': 0, 'end': 30, 'text': 'A free gift with any purchase from the',
+         'words': [{'start': 29, 'end': 30, 'word': 'the'}]},
+        {'start': 30, 'end': 38, 'text': 'Rockstar store, which is incredible. This is next.',
+         'words': [{'start': 30, 'end': 31, 'word': 'Rockstar'},
+                   {'start': 31, 'end': 32, 'word': 'store,'},
+                   {'start': 32, 'end': 33, 'word': 'which'},
+                   {'start': 33, 'end': 34, 'word': 'is'},
+                   {'start': 34, 'end': 35, 'word': 'incredible.'},
+                   {'start': 36, 'end': 38, 'word': 'This is next.'}]}]
+    clip = annotate_candidates([{'start': 0, 'end': 30}], segments)[0]
+    assert clip['end'] == pytest.approx(35.15)
+    assert clip['story_assessment']['boundary_adjusted']
+    assert clip['story_assessment']['closure'] != 'COMPLETE'
+
+
+def test_annotation_preserves_last_word_and_available_speech_tail():
+    from app.editorial_story import annotate_candidates
+    segments = [{'start': 0, 'end': 20.08, 'text': 'The conclusion.',
+                 'words': [{'start': 19, 'end': 20.08, 'word': 'conclusion.'}]},
+                {'start': 22, 'end': 25, 'text': 'Next topic.'}]
+    clip = annotate_candidates([{'start': 0, 'end': 20}], segments)[0]
+    assert clip['end'] == pytest.approx(20.23)
+    assert clip['baseline_window']['end'] == 20
+
+
+def test_unresolved_boundary_is_explicit_and_does_not_extend_beyond_budget():
+    from app.editorial_story import annotate_candidates
+    segments = [{'start': 0, 'end': 30, 'text': 'A purchase from the'},
+                {'start': 30, 'end': 70, 'text': 'store.'}]
+    clip = annotate_candidates([{'start': 0, 'end': 30}], segments, max_seconds=35)[0]
+    assert clip['end'] == 30
+    assert clip['story_assessment']['closure'] == 'INCOMPLETE'
+    assert clip['story_assessment']['boundary_reason'] == 'no_complete_sentence_within_observed_budget'
+
+
+def test_candidate_text_excludes_following_words_from_overlapping_segment():
+    from app.editorial_context import build_candidate_context
+    segments = [{'start': 0, 'end': 10, 'text': 'Finished. Unseen promise.',
+                 'words': [{'start': 0, 'end': 4, 'word': 'Finished.'},
+                           {'start': 6, 'end': 10, 'word': 'Unseen promise.'}]}]
+    ctx = build_candidate_context({'candidates': [{'start': 0, 'end': 4.15}]}, 0, {'segments': segments})
+    assert ctx['text'] == 'Finished.'
+
+
+def test_model_cannot_claim_complete_using_early_quote_in_long_final_segment():
+    from app.editorial_story import assess_story
+    result = assess_story(context('The map is huge. A purchase from the'), {},
+                          {'closure': 'COMPLETE', 'evidence': [{'segment_id': 0, 'quote': 'The map is huge.'}]})
+    assert result['closure'] != 'COMPLETE'
+    assert result['fallback_reason'] == 'invalid_model_evidence'
+
+
+def test_model_complete_does_not_override_source_word_truncation():
+    from app.editorial_story import assess_story
+    ctx = context('A conclusion.')
+    ctx['segments'][0]['words'] = [{'source_start': 29, 'source_end': 30.2, 'text': 'conclusion.'}]
+    result = assess_story(ctx, {}, {'closure': 'COMPLETE',
+                                  'evidence': [{'segment_id': 0, 'quote': 'A conclusion.'}]})
+    assert result['closure'] != 'COMPLETE'
+    assert result['fallback_reason'] == 'invalid_model_evidence'
+
+
+def test_revision_planner_rebuilds_captions_without_mutating_reviewed_candidate():
+    import copy
+    from app.editorial_story import prepare_source_end_revision
+    job = {'settings': {'max_seconds': 60}, 'feedback_events': [{'event_id': 'human-review'}],
+           'candidates': [{'start': 0, 'end': 20, 'candidate_id': 'original',
+                           'artifact_id': 'sha256:old', 'render_revision': 1}]}
+    original = copy.deepcopy(job)
+    transcript = {'segments': [{'start': 0, 'end': 20.08, 'text': 'Conclusion.',
+                               'words': [{'start': 19, 'end': 20.08, 'word': 'Conclusion.'}]},
+                              {'start': 22, 'end': 25, 'text': 'Next.'}]}
+    plan = prepare_source_end_revision(job, 0, transcript)
+    assert job == original
+    assert plan['parent_artifact_id'] == 'sha256:old'
+    assert plan['clip']['end'] == pytest.approx(20.23)
+    assert plan['clip']['timeline']['layers']['captions'][-1]['end'] == 20.08
+    assert plan['clip']['timeline']['source_range']['end'] == pytest.approx(20.23)
+    assert 'artifact_id' not in plan['clip']
+    assert 'feedback_events' not in plan['clip']
+
+
+def test_revision_planner_preserves_human_title_and_origin_unless_overridden():
+    from app.editorial_story import prepare_source_end_revision
+    job = {'settings': {'max_seconds': 60}, 'candidates': [
+        {'start': 0, 'end': 20, 'timeline': {'layers': {'text': [
+            {'text': 'Título humano aprovado', 'origin': 'human'}]}}}]}
+    transcript = {'segments': [{'start': 0, 'end': 20, 'text': 'Conclusion.'},
+                              {'start': 22, 'end': 25, 'text': 'Next.'}]}
+    kept = prepare_source_end_revision(job, 0, transcript)['clip']['timeline']['layers']['text'][0]
+    assert kept['text'] == 'Título humano aprovado'
+    assert kept['origin'] == 'human'
+    changed = prepare_source_end_revision(job, 0, transcript, editorial_title='Novo título')['clip']['timeline']['layers']['text'][0]
+    assert changed['text'] == 'Novo título'
+    assert changed['origin'] == 'human'

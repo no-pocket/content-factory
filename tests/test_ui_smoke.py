@@ -36,6 +36,7 @@ def test_selected_job_survives_status_change(monkeypatch):
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
     test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
     test.radio(key='editorial_workspace').set_value('Job individual').run()
+    test.selectbox(key='job_filter').set_value('Todos').run()
     test.selectbox(key='selected_job').set_value('a').run()
     jobs[0]['status'] = 'FAILED'
     test.run()
@@ -60,7 +61,8 @@ def test_v2_adjustment_and_rejection_persist_without_ratings(v2job, monkeypatch)
     assert job['feedback_events'][-1]['decision'] == 'APPROVED_WITH_ADJUSTMENTS'
     assert all(value is None for value in job['feedback_events'][-1]['dimensions'].values())
     assert job['approved'] == []
-    next(t for t in test.text_area if t.label == 'Comentário / motivo').set_value('SYNTHETIC: recusa editorial').run()
+    test.selectbox(key='job_filter').set_value('Revisados').run()
+    next(t for t in test.text_area if t.label == 'Comentário / motivo').set_value('SYNTHETIC: recusa editorial')
     next(b for b in test.button if b.label == 'Recusar').click().run()
     assert not test.exception
     assert store.load(v2job['id'])['feedback_events'][-1]['decision'] == 'REJECTED'

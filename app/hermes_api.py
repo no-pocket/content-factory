@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import subprocess
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from . import service, store
@@ -95,13 +96,30 @@ def _candidate(jid, cid):
         director=clip.get('director_used'), renderer=clip.get('renderer_used'))
     public['artifact_intact'] = bool(row['artifact_id'] and row['artifact_id'] == 'sha256:' + digest(manifest))
     public['master_sha256'] = (manifest['files'].get('mp4') or {}).get('sha256')
+    from .media_delivery import get_delivery_metadata
+    public['delivery_media'] = None
+    public['delivery_media_error'] = None
+    try:
+        public['delivery_media'] = get_delivery_metadata(Path(clip['file']))
+    except (ValueError, OSError, subprocess.SubprocessError, KeyError) as exc:
+        public['delivery_media_error'] = type(exc).__name__
     public['notes'] = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid and n['artifact_id'] == row['artifact_id']]
+    public['historical_notes'] = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid and n['artifact_id'] != row['artifact_id']]
+    from .telegram_deliveries import list_deliveries
+    public['deliveries'] = list_deliveries(jid, cid)
     public['application_url'] = os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/?' + urlencode({'job': jid})
     return job, row, public
 
 
 def dispatch(handler, path):
     method = handler.command
+    if len(path) == 3 and path[0] == 'deliveries' and method == 'GET':
+        from .telegram_deliveries import lookup
+        item = lookup(path[1], int(path[2]))
+        if item is None:
+            return handler._json(404, {'error': {'code': 'not_found', 'message': 'Unknown delivery'}})
+        _require_external(store.load(item['job_id']))
+        return handler._json(200, item)
     if path == ['sources'] and method == 'GET':
         from .source_registry import list_sources
         return handler._json(200, {'sources': [_source_summary(source) for source in list_sources()]})
@@ -151,6 +169,12 @@ def dispatch(handler, path):
         _require_external(store.load(jid))
         if len(path) == 4 and method == 'GET':
             return handler._json(200, _candidate(jid, cid)[2])
+        if len(path) == 5 and path[4] == 'deliveries' and method == 'POST':
+            from .telegram_deliveries import register
+            body = _body(handler)
+            if set(body) != {'delivery'}:
+                raise ValueError('Delivery acknowledgement required')
+            return handler._json(200, register(jid, cid, body['delivery']))
         if len(path) == 5 and path[4] == 'notes' and method == 'POST':
             from .editorial_notes import add_note
             body = _body(handler)
@@ -160,6 +184,8 @@ def dispatch(handler, path):
             body = _body(handler)
             request = dict(_intent(body, 'review'))
             request['comment_raw'] = body['owner_message']
+            if request.get('decision') == 'REJECTED':
+                request.setdefault('rejection_domain', 'UNSPECIFIED')
             return handler._json(200, service.review_candidate_v2(jid, cid, request,
                 channel='telegram', actor_id=_actor()))
         if len(path) == 5 and path[4] == 'media' and method == 'GET':

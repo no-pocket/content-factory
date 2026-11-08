@@ -56,8 +56,29 @@ A API geral conserva sua credencial própria e contratos existentes.
   identidade/QC atuais, até50MB; cliente valida SHA e não segue redirecionamento.
 - POST `.../notes`: `{owner_message,note:{request_id,expected_artifact_id}}`.
   Comentário literal sem decisão/rating/seleção. Visível na UI e preservado por render.
+  `source_message:{chat_id,thread_id,message_id,sent_at}` é opcional; preserva IDs e
+  horário original ISO8601 com fuso, distinto do horário de gravação. Um artefato
+  histórico conhecido pode receber nota sem alterar o render atual. A leitura
+  separa `notes` atuais de `historical_notes`.
 - POST `.../reviews`: `{owner_message,review:<contrato v2 existente>}`. Guarda
   comentário literal e atribui ator Telegram configurado; não inventa notas.
+  Recusa sem classificação usa `rejection_domain: UNSPECIFIED`. Nova decisão
+  explícita pode substituir avaliação anterior do mesmo artefato; o histórico
+  anterior permanece. Uma avaliação existente nunca deduplica mensagem nova.
+- POST `.../deliveries`: `{delivery:{artifact_id,master_sha256,chat_id,thread_id,
+  message_id}}`, somente após aceite real do gateway. A identidade e SHA do
+  mestre devem corresponder ao render registrado. O vínculo é persistido em
+  `data/telegram-deliveries/`; o mesmo chat/mensagem não pode ser reassociado.
+  Campo opcional `sent_media:{width,height,duration,supports_streaming}` registra
+  somente os metadados confirmados pelo aceite Telegram: dimensões inteiras
+  1..8192, duração inteira 1..86400 segundos e streaming booleano. Sem evidência
+  do aceite, mantenha `sent_media:null`; não derive esse campo do ffprobe. Assim,
+  divergências entre geometria do arquivo e do aceite permanecem diagnosticáveis.
+- GET `deliveries/<chat_id>/<message_id>` resolve o vídeo realmente entregue.
+  A leitura do candidato inclui `deliveries` e `delivery_media` com largura,
+  altura, duração e suporte a streaming medidos no MP4. Quando os metadados não
+  forem verificáveis, use o link privado e diagnostique `delivery_media_error`;
+  não invente largura/altura nem confunda SHA idêntico com prova de sincronia.
 - POST `groups/<id>/selection`: `{owner_message,selection:{request_id,
   expected_revision,selected:[identidades completas]}}`. Zero/um/vários finais;
   render/rodada alterados exigem nova conferência. Não aprova nem publica.

@@ -167,10 +167,18 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
                    'reasons': [{'code': code, 'severity': severity, 'confirmed_by': 'human'} for code in reasons],
                    'edit_requests': edits}
         try:
+            from .review_queue import review_progress, completion_identity
+            was_complete = review_progress(job)['complete']
             review_candidate_v2(job['id'], cid, request)
             st.session_state['review_feedback'] = 'Avaliação salva para este render. '+LABELS[action]+'.'
             clear_draft()
             st.session_state[prefix+'saved_confirmation'] = 'Avaliação salva para este render. '+LABELS[action]+'.'
+            if st.session_state.get('review_queue_enabled') and not was_complete:
+                saved_job = store.load(job['id'])
+                if review_progress(saved_job)['complete']:
+                    st.session_state['review_queue_transition'] = {
+                        'job_id': job['id'], 'identity': completion_identity(saved_job)}
+                    st.rerun()
             _rerun_review(st)
         except Conflict:
             st.error('A revisão ou o render mudou. Recarregue o job e confira o vídeo. Seu comentário permanece no rascunho deste render.')

@@ -70,3 +70,8 @@ def test_media_download_checks_candidate_checksum_before_returning_attachment(tm
 def test_ingestion_routes(command, expected):
     args = SimpleNamespace(command=command, job='00000000-0000-0000-0000-000000000001')
     assert client.route(args) == expected
+
+def test_delivery_routes_require_exact_message_identity():
+    assert client.route(SimpleNamespace(command='delivery',chat_id='-100123',message_id=1704))=='/deliveries/-100123/1704'
+    with pytest.raises(ValueError):
+        client.route(SimpleNamespace(command='delivery',chat_id='../123',message_id=1704))

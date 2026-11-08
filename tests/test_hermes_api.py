@@ -105,3 +105,120 @@ def test_hermes_note_records_literal_feedback_without_deciding(v2job,hermes_serv
     Path(c['file']).write_bytes(b'changed source')
     body['note']['request_id']=str(uuid.uuid4())
     assert hermes_server(route,body)[0]==409
+
+def test_hermes_new_rejection_supersedes_approval_without_inventing_scores(v2job, hermes_server):
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/reviews"
+    assert hermes_server(route, {'owner_message':'bom','review':review_request(j)})[0]==200
+    rejection=review_request(store.load(j['id']), decision='REJECTED')
+    status,reply=hermes_server(route, {'owner_message':'áudio desincronizado, recusado','review':rejection})
+    assert status==200
+    assert reply['event']['rejection_domain']=='UNSPECIFIED'
+    assert reply['event']['decision']=='REJECTED'
+    assert len(store.load(j['id'])['feedback_events'])==2
+
+def test_hermes_note_after_review_preserves_new_messages_and_provenance(v2job,hermes_server):
+    import uuid
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}"
+    assert hermes_server(route+'/reviews', {'owner_message':'bom','review':review_request(j)})[0]==200
+    source={'chat_id':'-100123','thread_id':'1687','message_id':1705,'sent_at':'2026-11-08T15:30:05+00:00'}
+    body={'owner_message':'novo comentário literal','note':{'request_id':str(uuid.uuid4()),'expected_artifact_id':c['artifact_id'],'source_message':source}}
+    status,reply=hermes_server(route+'/notes',body)
+    assert status==200
+    assert reply['note']['source_message']==source
+    assert hermes_server(route+'/notes',body)[1]==reply
+    body['note']['request_id']=str(uuid.uuid4());body['note']['source_message']={**source,'message_id':1706}
+    assert hermes_server(route+'/notes',body)[0]==200
+    saved=store.load(j['id'])
+    assert len(saved['editorial_notes'])==2
+    assert len(saved['feedback_events'])==1
+
+def test_hermes_note_keeps_delivered_old_artifact_explicit(v2job,hermes_server):
+    import uuid
+    from app.artifacts import register_render
+    j=v2job;c=j['candidates'][0];old=c['artifact_id']
+    register_render(j,0);store.save(j)
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}"
+    body={'owner_message':'o render anterior está ruim','note':{'request_id':str(uuid.uuid4()),'expected_artifact_id':old}}
+    status,reply=hermes_server(route+'/notes',body)
+    assert status==200
+    assert reply['note']['artifact_id']==old
+    assert reply['note']['render_revision']==1
+    status,current=hermes_server(route)
+    assert current['notes']==[]
+    assert current['historical_notes']==[reply['note']]
+
+def test_hermes_delivery_binding_survives_review_and_resolves_message(v2job,hermes_server,monkeypatch,tmp_path):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}"
+    binding={'artifact_id':c['artifact_id'],'chat_id':'-100123','thread_id':'1687','message_id':1704,
+             'master_sha256':c['artifact_manifest']['files']['mp4']['sha256']}
+    status,reply=hermes_server(route+'/deliveries',{'delivery':binding})
+    assert status==200
+    assert hermes_server(route+'/deliveries',{'delivery':binding})[1]==reply
+    assert hermes_server('/v2/hermes/deliveries/-100123/1704')[1]['candidate_id']==c['candidate_id']
+    assert hermes_server(route)[1]['deliveries']==[reply]
+
+def test_delivery_binding_cannot_be_reassigned(v2job,hermes_server,monkeypatch,tmp_path):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/deliveries"
+    binding={'artifact_id':c['artifact_id'],'chat_id':'-100124','thread_id':'1687','message_id':1704,
+             'master_sha256':c['artifact_manifest']['files']['mp4']['sha256']}
+    assert hermes_server(route,{'delivery':{**binding,'master_sha256':'0'*64}})[0]==409
+    assert hermes_server(route,{'delivery':binding})[0]==200
+    assert hermes_server(route,{'delivery':{**binding,'thread_id':'1688'}})[0]==409
+
+@pytest.mark.parametrize('field,value',[('master_sha256',None),('master_sha256','bad'),('artifact_id',None),('artifact_id','sha256:bad')])
+def test_delivery_rejects_malformed_identity(v2job,hermes_server,monkeypatch,tmp_path,field,value):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    binding={'artifact_id':c['artifact_id'],'master_sha256':c['artifact_manifest']['files']['mp4']['sha256'],
+             'chat_id':'-100123','thread_id':'1687','message_id':1704}
+    status,_=hermes_server(f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/deliveries",{'delivery':{**binding,field:value}})
+    assert status==422
+
+
+def test_delivery_rejects_missing_master_and_tampered_manifest(v2job,hermes_server,monkeypatch,tmp_path):
+    from pathlib import Path
+    from app.artifacts import register_render
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/deliveries"
+    Path(c['file']).unlink();register_render(j,0);store.save(j)
+    binding={'artifact_id':c['artifact_id'],'master_sha256':None,'chat_id':'-100123','thread_id':'1687','message_id':1704}
+    assert hermes_server(route,{'delivery':binding})[0] in (409,422)
+    c['artifact_manifest']['files']['mp4']={'sha256':'a'*64,'path':'missing.mp4'};store.save(j)
+    assert hermes_server(route,{'delivery':{**binding,'master_sha256':'a'*64}})[0]==409
+
+def test_delivery_ack_media_optional_and_unknown_is_explicit(v2job,hermes_server,monkeypatch,tmp_path):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/deliveries"
+    binding={'artifact_id':c['artifact_id'],'master_sha256':c['artifact_manifest']['files']['mp4']['sha256'],
+             'chat_id':'-100125','thread_id':'1687','message_id':1704}
+    status,reply=hermes_server(route,{'delivery':binding})
+    assert status==200 and reply['sent_media'] is None
+    # Receipt geometry is what Telegram acknowledged, even when it was wrong.
+    media={'width':1280,'height':720,'duration':43,'supports_streaming':True}
+    status,reply=hermes_server(route,{'delivery':{**binding,'message_id':1705,'sent_media':media}})
+    assert status==200 and reply['sent_media']==media
+    assert hermes_server(route,{'delivery':{**binding,'sent_media':media}})[0]==409
+
+
+@pytest.mark.parametrize('media',[
+    {},{'width':720,'height':1280,'duration':43,'supports_streaming':'true'},
+    {'width':True,'height':1280,'duration':43,'supports_streaming':True},
+    {'width':720,'height':0,'duration':43,'supports_streaming':True},
+    {'width':720,'height':1280,'duration':-1,'supports_streaming':True},
+    {'width':720,'height':1280,'duration':float('nan'),'supports_streaming':True},
+])
+def test_delivery_rejects_invalid_ack_media(v2job,hermes_server,monkeypatch,tmp_path,media):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    j=v2job;c=j['candidates'][0]
+    binding={'artifact_id':c['artifact_id'],'master_sha256':c['artifact_manifest']['files']['mp4']['sha256'],
+             'chat_id':'-100125','thread_id':'1687','message_id':1704,'sent_media':media}
+    status,_=hermes_server(f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/deliveries",{'delivery':binding})
+    assert status==422

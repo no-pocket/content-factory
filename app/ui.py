@@ -109,10 +109,10 @@ with st.expander("🩺 Doctor / AI Health Check", expanded=True):
 from app.source_review_ui import render_source_review
 # Existing open review sessions predate the workspace selector. Keep rendering
 # their job and widgets so Streamlit does not clean up unsaved review drafts.
-individual_default = bool(st.query_params.get('job') or
-                          ('selected_job' in st.session_state and not st.query_params.get('group')))
+individual_default = not bool(st.query_params.get('group'))
 workspace = st.radio('Área editorial', ['Comparar fontes e escolher finais', 'Job individual'],
                      index=1 if individual_default else 0, horizontal=True, key='editorial_workspace')
+st.session_state['review_queue_enabled'] = workspace == 'Job individual'
 if workspace == 'Comparar fontes e escolher finais':
     render_source_review(st)
     st.stop()
@@ -121,23 +121,43 @@ jobs = all_jobs()
 if not jobs:
     st.info("Nenhum job. Envie um vídeo autorizado para testar.")
 else:
+    from app.review_queue import review_progress, needs_review, apply_completion
+    if apply_completion(st.session_state, jobs):
+        if st.session_state.get('selected_job'):
+            st.query_params['job'] = st.session_state['selected_job']
+        elif 'job' in st.query_params:
+            del st.query_params['job']
+    if st.session_state.get('review_queue_confirmation'):
+        st.success(st.session_state.pop('review_queue_confirmation'))
+    projections = {j['id']: get_editorial_view(j) for j in jobs}
+    pending = [j for j in jobs if needs_review(j, projections[j['id']])]
+    completed = [j for j in jobs if review_progress(j, projections[j['id']])['complete']]
+    grouped = {'Para revisar': pending, 'Todos': jobs, 'Revisados': completed,
+               'Em processamento': [j for j in jobs if j['status'] not in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED'}]}
+    requested_job = st.query_params.get('job') or st.session_state.get('selected_job')
+    if st.session_state.get('job_filter') in {'Aprovados', 'Recusados'}:
+        st.session_state['job_filter'] = 'Revisados'
+    if 'job_filter' not in st.session_state:
+        st.session_state['job_filter'] = 'Todos' if requested_job and requested_job not in {j['id'] for j in pending} else 'Para revisar'
+    view = st.selectbox('Exibir jobs', list(grouped), key='job_filter')
+    jobs = grouped[view]
     candidate_filter = st.selectbox('Filtrar candidatos', [None, 'PENDING', 'APPROVED', 'APPROVED_WITH_ADJUSTMENTS', 'REJECTED', 'UNCONFIRMED_LEGACY'],
                                      format_func=lambda value: REVIEW_LABELS.get(value, 'Todos'), key='candidate_filter')
     if candidate_filter:
-        jobs = [j for j in jobs if filter_candidates(get_editorial_view(j)['candidates'], {'decision': candidate_filter})]
+        jobs = [j for j in jobs if filter_candidates(projections[j['id']]['candidates'], {'decision': candidate_filter})]
     if not jobs:
-        st.info('Nenhum candidato corresponde ao filtro.')
+        if view == 'Para revisar' and not candidate_filter:
+            st.success('Parabéns! Nenhum job disponível está pendente de revisão. Use Revisados ou Todos para consultar avaliações anteriores.')
+        else:
+            st.info('Nenhum job corresponde aos filtros.')
         st.stop()
-    grouped = {'Para revisar':[j for j in jobs if j['status'] not in {'APPROVED','REJECTED'}],
-               'Aprovados':[j for j in jobs if j['status']=='APPROVED'],
-               'Recusados':[j for j in jobs if j['status']=='REJECTED']}
-    view = st.selectbox('Exibir jobs', ['Todos'] + [k for k,v in grouped.items() if v], key='job_filter')
-    jobs = grouped.get(view, jobs)
     def job_label(value):
         status = 'Revisão individual' if value['status'] in {'APPROVED', 'REJECTED', 'NEEDS_REVIEW'} else value['status']
         return f"{value['original_name']} · {value['creator']} · {status} · {value['id'][:8]}"
     options = {j['id']: job_label(j) for j in reversed(jobs)}
     requested_job = st.query_params.get('job')
+    if st.session_state.get('selected_job') not in options:
+        st.session_state['selected_job'] = requested_job if requested_job in options else next(iter(options))
     choice = st.selectbox("Selecione um job", list(options), index=list(options).index(requested_job) if requested_job in options else 0,
                           format_func=options.__getitem__, key='selected_job')
     job = load(choice)

@@ -30,7 +30,12 @@ def build_candidate_context(job: dict, index: int, transcript: dict, *, before_s
             groups['before'].append(item)
         elif a >= end and a < end+after_seconds:
             groups['after'].append(item)
-    text = ' '.join(s['text'] for s in groups['segments']).strip()
+    # A Whisper segment may straddle a word-selected cut. Keep its full source
+    # record for auditing, but never describe unheard following words as clip text.
+    text = ' '.join(
+        ' '.join(w['text'] for w in s['words'] if w['source_start'] >= start and w['source_end'] <= end)
+        if s['words'] and (s['source_start'] < start or s['source_end'] > end) else s['text']
+        for s in groups['segments']).strip()
     return {'schema_version': '1.0', 'source_range': {'start': start, 'end': end}, **groups,
             'text': text, 'transcript_sha256': digest(transcript),
             'source_sha256': job.get('source_fingerprint', 'UNKNOWN'),
