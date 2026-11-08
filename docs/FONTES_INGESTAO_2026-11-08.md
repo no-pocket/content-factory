@@ -36,3 +36,5 @@ orphan de fila, a evidência privada nos resumos e o segundo cadastro no formul�
 Não há monitoramento periódico ativado nem publicação social automática. Monitoramento
 contínuo fica para etapa própria depois de validar uma importação autorizada.
 Browser agent-browser isolado: dois cadastros pendentes consecutivos, recusa de ativação sem referência/confirmações, edição e ativação exclusivamente sintética persistiram; ambas áreas editoriais renderizaram sem erro. Nenhum acesso YouTube ou job real no ensaio.
+
+Implantação observada: API recriada e worker reiniciado com fila0/0, UI preservada. Gameplayrj cadastrado pending/rev1 sem comprovação ou confirmações inventadas. Cliente remoto sources e agente Hermes real retornaram o canal correto e pendência (exit0). Browser de produção conferiu fonte e comentários existentes. Os39JSONs de jobs ficaram idênticos e12eventosv2 preservados. Nenhum job/download desse vídeo foi iniciado.
