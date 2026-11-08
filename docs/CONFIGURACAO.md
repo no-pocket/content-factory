@@ -17,10 +17,17 @@ segmento, sem o antigo teto de 50 segmentos. O orçamento conservador de bytes
 continua ativo (4096 no Kepler, 8192 no Ollama, com reserva para a resposta).
 Janelas grandes demais são divididas com sobreposição e diagnóstico explícito;
 se a história completa não couber, os trechos menores não comprovam sua conclusão.
-Há no máximo `proposal_max_chunks` consultas e oito vezes esse número de checagens
-locais de orçamento. Amostragem e janelas restantes por limite de custo são
+Há no máximo `proposal_max_chunks` consultas. A pré-validação local usa o maior
+entre 32 e oito vezes esse número de checagens de orçamento; janelas que cabem
+são amostradas ao longo da fonte antes das consultas, para evitar concentrar o
+limite nas divisões do início do vídeo. Amostragem e janelas restantes por custo são
 registradas; cobertura integral não é prometida para fontes longas ou densas.
 O modo clássico preserva blocos de 50 segmentos com avanço de 45.
+
+Cada consulta flexível pede no máximo uma história, com três citações literais
+curtas (até oito palavras cada), e reserva 700 tokens para a resposta dentro do
+mesmo contexto. O clássico conserva a reserva de 350 tokens. Respostas cortadas
+pelo limite continuam rejeitadas, sem completar JSON ou aceitar evidência parcial.
 
 Propostas do modelo no modo flexível exigem citações literais da fonte para gancho,
 desenvolvimento e conclusão, em ordem. Evidência inválida é rejeitada e diagnosticada;

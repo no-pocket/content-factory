@@ -83,6 +83,33 @@ def test_flexible_model_requires_anchored_development_and_conclusion(monkeypatch
     assert propose_from_transcript(segments, 90, **kwargs) == []
 
 
+def test_flexible_one_story_has_generation_capacity_and_classic_budget_stays(monkeypatch):
+    import io
+    from app.ranker import propose_from_transcript
+    segments=story(90)
+    evidence=[{'segment_id':i,'quote':s['text']} for i,s in enumerate(segments)]
+    item={'start_segment':0,'end_segment':2,'story':{'closure':'COMPLETE','evidence':evidence,
+          'parts':{'hook':0,'setup':1,'payoff':2}}}
+    calls=[]; events=[]
+    def response(request,**kwargs):
+        request_body=json.loads(request.data); calls.append(request_body)
+        if request_body['options']['num_predict'] < 700:
+            return io.BytesIO(json.dumps({'response':'{"clips":[','done_reason':'length'}).encode())
+        return io.BytesIO(json.dumps({'response':json.dumps({'clips':[item]}),'done_reason':'stop'}).encode())
+    monkeypatch.setattr('app.ranker.urllib.request.urlopen',response)
+    result=propose_from_transcript(segments,90,duration_mode='flexible',min_seconds=8,max_seconds=180,
+        backend='kepler_gpu',on_event=lambda event,details:events.append((event,details)))
+    assert len(result) == 1
+    assert 'no máximo 1' in calls[0]['prompt']
+    assert '8 palavras' in calls[0]['prompt']
+    budget=next(details['context_budget'] for event,details in events if event=='analyzing')
+    assert budget['generation_reserve'] == calls[0]['options']['num_predict'] == 700
+    assert budget['prompt_upper_bound']+budget['generation_reserve'] <=4096
+    calls.clear()
+    propose_from_transcript(segments,90,duration_mode='classic',min_seconds=15,max_seconds=60)
+    assert calls[0]['options']['num_predict'] == 350
+
+
 def test_flexible_job_enforces_saved_max_before_renderer(monkeypatch, tmp_path):
     from app import candidates
     from tests.test_candidates import setup, job
@@ -214,9 +241,10 @@ def test_flexible_oversized_windows_split_without_truncating_source_or_call_budg
     propose_from_transcript(segments,120,duration_mode='flexible',min_seconds=8,
         max_seconds=180,max_chunks=2,backend='kepler_gpu',on_event=lambda event,details:events.append((event,details)))
     assert 0 < len(calls) <= 2
+    assert calls[-1][-1][1] >= 90  # Fit/sampling must reach the later source, not just its prefix.
     assert any(event=='proposal_window_split' for event,_ in events)
     assert any(event=='proposal_windows_deferred' for event,_ in events)
-    assert all(details['context_budget']['prompt_upper_bound']+350<=4096
+    assert all(details['context_budget']['prompt_upper_bound']+details['context_budget']['generation_reserve']<=4096
                for event,details in events if event=='analyzing')
 
 
