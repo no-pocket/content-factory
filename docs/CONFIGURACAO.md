@@ -118,5 +118,17 @@ de encerramento deve ter entre 2 e 120 segundos; nenhum asset e baixado nem voz
 sintetizada. A selecao integra o snapshot do job. O master recebe o video
 apos a fala e o acabamento; a previa e o QC abrangem a duracao completa. As
 legendas da fonte conservam seus tempos e nao se estendem ao encerramento.
-O hash do asset e salvo no render; alteracoes de bytes impedem sua reutilizacao
-no mesmo candidato. Jobs e candidatos existentes nao sao regenerados.
+O hash, duracao, arquivo relativo e metadados de direitos do asset sao congelados
+na criacao do job. Cada candidato e retry verifica essa identidade; alteracoes
+impedem renderizacao. Jobs com encerramento ativo sem esse snapshot sao
+recusados explicitamente: crie um novo job, sem atualizar o antigo silenciosamente. Jobs e candidatos existentes nao sao regenerados.
+
+
+Titulos gerados usam verificacao conservadora: o conteudo deve aparecer na mesma
+clausula, na mesma ordem, sem pular outra acao ou objeto. Apenas flexoes
+documentadas e palavras gramaticais sao flexibilizadas. Descritores de um sujeito
+repetido podem conservar seu identificador da frase imediatamente anterior
+(ex.: mapa de GTA 6; o mapa revela Vice City). Negacao e incerteza da fonte nao
+podem ser descartadas. Falhas geram diagnostico `unsupported_title_relation`
+ou `unsupported_title_polarity`; uma parafrase correta pode ser recusada. Isso
+nao substitui revisao editorial nem demonstra equivalencia semantica geral.

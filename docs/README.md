@@ -1,6 +1,6 @@
 # Documentação do Content Factory
 
-Estado atual do código: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
+Atualização: [revisão editorial e conectores locais](REVISAO_CONECTORES_2026-11-07.md). Histórico: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
 
 Versão de referência: **4.1.0**. Esta página é o ponto de entrada para operar, testar e modificar a aplicação nesta workstation.
 
@@ -10,6 +10,7 @@ Versão de referência: **4.1.0**. Esta página é o ponto de entrada para opera
 | Entender cada etapa, os arquivos produzidos e os fallbacks | [Processo de produção](PROCESSO.md) |
 | Ajustar parâmetros por job ou configuração da instalação | [Configuração](CONFIGURACAO.md) |
 | Entender serviços, dados, contratos e limites de confiança | [Arquitetura](ARCHITECTURE.md) |
+| Preparar rascunhos de Instagram/Facebook, YouTube e TikTok | [Publicação em dry-run](PUBLICACAO.md) |
 | Configurar ou diagnosticar a Quadro K4200 | [GPU K4200](GPU_K4200.md) |
 | Rodar testes e confirmar que três candidatos são reproduzíveis | [Testes e validação](TESTES.md) |
 | Conferir a aceitação de uma versão | [Plano de aceitação](TEST_PLAN.md) |

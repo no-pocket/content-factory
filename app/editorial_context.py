@@ -83,21 +83,57 @@ def validate_title(title: str, evidence: dict) -> dict:
         reason = 'invalid_title_text'
     elif tokens == source[:len(tokens)]:
         reason = 'transcript_echo'
-    elif not _grounded_title(tokens, source):
-        reason = 'unsupported_title_claim'
+    elif _claim_modifiers(tokens) != _claim_modifiers(source):
+        reason = 'unsupported_title_polarity'
+    elif not _grounded_title(tokens, evidence.get('text', '')):
+        reason = 'unsupported_title_relation'
     return {'valid': reason is None, 'reason': reason, 'normalized': normalized}
 
 
-def _grounded_title(tokens: list[str], source: list[str]) -> bool:
-    # Conservative, explainable paraphrases. Unknown claims still fail closed;
-    # this lexical guard is not a semantic proof or a human editorial verdict.
-    function_words = set('como por porque para quando onde qual quais que uma uns umas seu sua seus suas esse essa isso este esta the how why what to of a an and in on with'.split())
+def _grounded_title(tokens: list[str], source_text: str) -> bool:
+    # Fail closed: match one contiguous, ordered content phrase in one clause.
+    # Only grammatical scaffolding and the documented inflections are removed;
+    # another verb/object cannot be skipped to assemble a new relationship.
+    function_words = set('como por porque para quando onde qual quais que uma uns umas seu sua seus suas esse essa isso este esta the how why what to of a an and in on with voce deve consiste'.split())
     aliases = {'vendendo':'vender', 'venda':'vender', 'ganhando':'ganhar',
                'ganho':'ganhar', 'comprando':'comprar', 'compra':'comprar',
                'selling':'sell', 'buying':'buy', 'earning':'earn'}
     def canonical(t):
         t = aliases.get(t, t)
         return t[:-1] if len(t) > 4 and t.endswith('s') else t
-    known = {canonical(t) for t in source}
-    substantive = [t for t in tokens if t not in function_words and (len(t)>3 or t.isdigit())]
-    return bool(substantive) and all(canonical(t) in known for t in substantive)
+    def content(words):
+        return [canonical(t) for t in words if t not in function_words and (len(t)>3 or t.isdigit())]
+    wanted = content(tokens)
+    if not wanted:
+        return False
+    # Explicit repeated-subject descriptor carryover: "mapa de GTA 6. O mapa
+    # revela Vice City" may retain the same map's identifier. No verbs, objects
+    # or general previous-sentence word bags are carried into the next clause.
+    descriptors = {}
+    clauses = re.split(r'[.!?;:,]+|\b(?:e|and|mas|but|enquanto|although)\b', source_text, flags=re.IGNORECASE)
+    for clause in clauses:
+        normalized = ' '.join(_tokens(clause))
+        first = re.match(r'^(?:(?:o|a|the) )?(\w+)\b', normalized)
+        if first and first.group(1) in descriptors:
+            subject = first.group(1)
+            normalized = normalized[:first.start(1)] + descriptors[subject] + normalized[first.end(1):]
+        available = content(normalized.split())
+        if any(available[i:i+len(wanted)] == wanted for i in range(len(available)-len(wanted)+1)):
+            return True
+        # A descriptor is limited to noun + de/of + capitalized identifier and
+        # optional number. It must be repeated as the next clause's subject.
+        descriptors = {}
+        for match in re.finditer(r'\b(\w+)\s+(?:de|of)\s+([A-Z][A-Za-z0-9_]*(?:\s+\d+)?)\b', clause):
+            descriptors[_tokens(match.group(1))[0]] = ' '.join(_tokens(match.group(0)))
+    return False
+
+
+def _claim_modifiers(tokens: list[str]) -> tuple[bool, bool]:
+    # Deliberately conservative across the whole selected passage: no attempt
+    # to infer negation scope, sarcasm or semantic entailment from word overlap.
+    words = set(tokens)
+    negative = bool(words & {'nao', 'nunca', 'jamais', 'nem', 'not', 'never', 'cannot', 'without'})
+    uncertain = bool(words & {'talvez', 'possivelmente', 'provavelmente', 'pode', 'possa',
+        'poderia', 'supostamente', 'rumor', 'rumores', 'hipotese', 'incerto', 'incerta',
+        'may', 'might', 'could', 'possibly', 'probably', 'uncertain', 'allegedly', 'rumour', 'rumor'})
+    return negative, uncertain

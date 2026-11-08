@@ -24,7 +24,7 @@ def test_pipeline_benchmark_covers_actual_three_tasks_and_validated_text(monkeyp
             elif 'CANDIDATOS:' in prompt:
                 result = {'ranked': [{'index': n, 'reason': 'Synthetic fixture'} for n in range(3)]}
             else:
-                result = {'hook': 'English speech Synthetic', 'effects': [], 'broll': []}
+                result = {'hook': 'English speech', 'effects': [], 'broll': []}
             body = {'response': json.dumps(result), 'done_reason': 'stop', 'prompt_eval_count': 100, 'eval_count': 50}
         return io.BytesIO(json.dumps(body).encode())
     monkeypatch.setattr(evaluation.urllib.request, 'urlopen', reply)
@@ -34,4 +34,4 @@ def test_pipeline_benchmark_covers_actual_three_tasks_and_validated_text(monkeyp
     for result in report['runs']:
         assert {c['task'] for c in result['calls']} == {'proposal', 'rerank', 'director'}
         assert len(result['reranked']) == 3
-        assert result['validated_text_layers'][0]['text'] == 'English speech Synthetic'
+        assert result['validated_text_layers'][0]['text'] == 'English speech'

@@ -64,6 +64,8 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             job['status'] = 'RENDERING'
             save(job)
             try:
+                from .outro import validate_job_outro
+                outro_snapshot = validate_job_outro({**job, 'settings':settings}, assets)
                 if settings['director_mode'] == 'external' and 'timeline' not in clip:
                     raise ValueError('External model timeline missing; heuristic direction is forbidden')
                 if clip.get('editorial_context'):
@@ -109,7 +111,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 renderer = render_edited(source, job['id'], index + 1, clip, segments,
                                          clip['timeline'], assets, target, engine=settings['render_engine'], quality=settings['render_quality'],
                                          metrics=clip['stage_metrics'],metric_context=metric_context,
-                                         outro_asset_id=settings['outro_asset_id'])
+                                         outro_asset_id=settings['outro_asset_id'], outro_snapshot=outro_snapshot)
                 with measure_stage(clip['stage_metrics'],'QC',metric_context,requested='mp4_webm_full_decode',resolved='ffmpeg_ffprobe') as metric:
                     qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
                     metric['qc_state']=qc['state']

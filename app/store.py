@@ -30,6 +30,10 @@ def new_job(path: Path | None, filename: str, creator: str, license_note: str, *
               "approved": [], "created_at": time.time(), "settings_version": 1,
               "qc_settings": normalize_qc(), "decision_history": [],
               "settings": normalize_job_settings(settings), "model": os.getenv("WHISPER_MODEL", "base")}
+    if record['settings']['outro_asset_id'] is not None:
+        from .outro import snapshot_outro
+        from .edit_render import read_assets
+        record['outro_snapshot'] = snapshot_outro(record['settings']['outro_asset_id'], read_assets())
     record['editorial_protocol'] = record['settings']['editorial_protocol']
     from .editorial_policy import resolve_policy
     from .provenance import component_snapshot

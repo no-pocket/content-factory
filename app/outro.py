@@ -53,3 +53,35 @@ def append_outro(target: Path, asset_id: str, assets: dict, *, quality='standard
                 'output_duration':get_duration(target),'license_note':asset['license_note']}
     finally:
         pending.unlink(missing_ok=True)
+
+
+def snapshot_outro(asset_id: str, assets: dict) -> dict:
+    from .timeline import ASSET_ID
+    from .edit_render import ASSETS_ROOT
+    from .core import get_duration
+    if not isinstance(asset_id, str) or not ASSET_ID.fullmatch(asset_id) or asset_id not in assets:
+        raise ValueError('Outro must be a registered licensed asset')
+    asset = assets[asset_id]
+    path = Path(asset['path']).resolve()
+    if not path.is_relative_to(ASSETS_ROOT.resolve()) or not path.is_file() or not asset.get('license_note'):
+        raise ValueError('Invalid licensed outro path')
+    with path.open('rb') as stream:
+        sha = hashlib.file_digest(stream, 'sha256').hexdigest()
+    duration = get_duration(path)
+    if not math.isfinite(duration) or not 2 <= duration <= 120:
+        raise ValueError('Outro must be between 2 and 120 seconds')
+    return {'asset_id':asset_id, 'sha256':sha, 'duration':duration,
+        'file':path.relative_to(ASSETS_ROOT.resolve()).as_posix(),
+        'description':asset.get('description',''), 'license_note':asset['license_note']}
+
+
+def validate_job_outro(job: dict, assets: dict) -> dict | None:
+    ident = job.get('settings', {}).get('outro_asset_id')
+    if ident is None:
+        return None
+    frozen = job.get('outro_snapshot')
+    if not isinstance(frozen, dict) or frozen.get('asset_id') != ident or not frozen.get('sha256'):
+        raise ValueError('Enabled outro requires its submission snapshot; create a new job')
+    if snapshot_outro(ident, assets) != frozen:
+        raise ValueError('Licensed outro identity changed since job submission')
+    return frozen

@@ -103,8 +103,10 @@ def render_publishing_panel(st, jobs: list[dict]) -> None:
                                 format_func=lambda i: f"{choices[i][0][:8]} · candidato {choices[i][1]+1}", key='publishing_candidate')
         jid, index, clip = choices[selected]
         provider = st.selectbox('Destino do rascunho', list(PROVIDERS), format_func=lambda p: PROVIDERS[p]['label'], key='publishing_provider')
-        title = st.text_input('Título de publicação', value=str(clip.get('title') or '')[:100], max_chars=100, key=f'publishing_title_{jid}_{index}')
-        description = st.text_area('Descrição / legenda', max_chars=2200, key=f'publishing_description_{jid}_{index}')
+        title_limit = 100 if provider == 'youtube' else 255
+        description_limit = 5000 if provider == 'youtube' else 2200
+        title = st.text_input('Título de publicação', value=str(clip.get('title') or '')[:title_limit], max_chars=title_limit, key=f'publishing_title_{provider}_{jid}_{index}')
+        description = st.text_area('Descrição / legenda', max_chars=description_limit, key=f'publishing_description_{provider}_{jid}_{index}')
         if st.button('Validar e salvar rascunho local', key='publishing_dry_run'):
             try:
                 result = queue_dry_run(jid, clip['candidate_id'], provider, title=title, description=description)
