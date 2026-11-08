@@ -70,3 +70,41 @@ def test_interrupted_time_preserved_as_lower_bound():
     assert run['seconds'] == 40
     assert run['state'] == 'INTERRUPTED'
     assert run['timing_complete'] is False
+
+
+def test_fresh_numpy_asr_matches_cached_context(monkeypatch, tmp_path):
+    import numpy as np
+    from types import SimpleNamespace
+    from app.editorial_context import build_candidate_context
+    source=tmp_path/'speech.mp4'; source.write_bytes(b'synthetic')
+    job={'id':'numpy-asr','status':'QUEUED','source':str(source),'audio_expected':True,
+         'settings':{'duration_mode':'flexible'},'candidates':[]}
+    word=SimpleNamespace(start=np.float64(.68),end=np.float64(1.12),word=' Fala')
+    segment=SimpleNamespace(start=np.float64(.68),end=np.float64(8.32),text=' Fala completa.',words=[word])
+    class Model:
+        def transcribe(self,*a,**k): return iter([segment]),SimpleNamespace(language='pt')
+    monkeypatch.setattr(worker,'WhisperModel',lambda *a,**k: Model())
+    monkeypatch.setattr(worker,'JOBS',tmp_path)
+    monkeypatch.setattr(worker,'load',lambda jid:job)
+    monkeypatch.setattr(worker,'save',lambda record:None)
+    monkeypatch.setattr(worker,'get_duration',lambda path:10)
+    def select(segments,*a,**k):
+        context_job={'candidates':[{'start':0,'end':9}]}
+        fresh={'language':'pt','segments':segments}
+        cached=json.loads((tmp_path/'numpy-asr.transcript.json').read_text())
+        assert type(segments[0]['start']) is float
+        assert type(segments[0]['words'][0]['end']) is float
+        assert build_candidate_context(context_job,0,fresh) == build_candidate_context(context_job,0,cached)
+        return [{'start':0,'end':9}]
+    monkeypatch.setattr(worker,'select_highlights',select)
+    monkeypatch.setattr(worker,'render_candidates',lambda record,*a,**k:record.update(status='NEEDS_REVIEW'))
+    worker.process(job['id'])
+    assert job['status'] == 'NEEDS_REVIEW'
+
+
+@pytest.mark.parametrize('start,end',[(float('nan'),2),(0,float('inf')),(-1,2),(2,1),(True,2)])
+def test_asr_boundary_rejects_invalid_segment_timing(start,end):
+    from types import SimpleNamespace
+    segment=SimpleNamespace(start=start,end=end,text='Invalid',words=[])
+    with pytest.raises(ValueError,match='ASR'):
+        worker.serialize_asr_segments([segment])

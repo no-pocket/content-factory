@@ -2,6 +2,8 @@ from __future__ import annotations
 import json
 import hashlib
 import logging
+import math
+from numbers import Real
 import os
 import time
 import threading
@@ -23,6 +25,29 @@ from .telemetry import measure_stage, job_metric_context
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("worker")
+
+
+def serialize_asr_segments(generator) -> list[dict]:
+    """Canonical native timestamps make fresh Whisper output match its JSON cache."""
+    def timing(start, end, *, word=False):
+        if any(isinstance(value, bool) or not isinstance(value, Real) for value in (start,end)):
+            raise ValueError('Invalid ASR timestamp type')
+        a,b = float(start),float(end)
+        if not all(math.isfinite(value) for value in (a,b)) or a < 0 or b < a or (not word and b == a):
+            raise ValueError('Invalid ASR timing bounds')
+        a,b = round(a,3),round(b,3)
+        if not word and a == b:
+            raise ValueError('Invalid ASR segment collapsed by timestamp precision')
+        return {'start':a,'end':b}
+    segments=[]
+    for segment in generator:
+        item={**timing(segment.start,segment.end),'text':segment.text.strip(),'words':[]}
+        for word in segment.words or []:
+            if word.start is None or word.end is None:
+                continue
+            item['words'].append({**timing(word.start,word.end,word=True),'text':word.word.strip()})
+        segments.append(item)
+    return segments
 
 
 def heartbeat_loop() -> None:
@@ -128,11 +153,7 @@ def process(jid: str) -> None:
                     str(source), vad_filter=True, beam_size=settings['whisper_beam_size'],
                     word_timestamps=True, initial_prompt=os.getenv("WHISPER_INITIAL_PROMPT", "GTA VI, Rockstar Games, Vice City, Lucia, Jason, Leonida."),
                 )
-                segments = [{
-                    "start": round(s.start, 3), "end": round(s.end, 3), "text": s.text.strip(),
-                    "words": [{"start": round(w.start, 3), "end": round(w.end, 3), "text": w.word.strip()}
-                              for w in (s.words or []) if w.start is not None and w.end is not None]
-                } for s in generator]
+                segments = serialize_asr_segments(generator)
                 transcript = {"language": info.language, "segments": segments}
                 job['transcript_model']={'name':model_name,'device':device,'compute_type':compute_type,'beam_size':settings['whisper_beam_size']}
                 stage['resolved']=job['transcript_model']
