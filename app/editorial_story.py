@@ -44,6 +44,14 @@ def safe_source_end(context: dict, *, max_seconds: float) -> dict:
         and terminal(u)), None)
     if endpoint is None:
         return {'source_end': end, 'reason': 'no_complete_sentence_within_observed_budget', 'resolved': False}
+    from .narrative import inspect
+    narrative, extension = inspect(context, max_seconds=max_seconds)
+    if narrative['blocking_obligations']:
+        if extension is None:
+            return {'source_end': end, 'reason': 'unresolved_narrative_obligation', 'resolved': False}
+        endpoint = next((u for u in units if u['source_end'] == extension), None)
+        if endpoint is None or not terminal(endpoint):
+            return {'source_end': end, 'reason': 'no_safe_payoff_boundary', 'resolved': False}
     speech_end = endpoint['source_end']
     observed_end = max(s['source_end'] for s in segments)
     following = [u['source_start'] for u in units if u['source_start'] >= speech_end and u is not endpoint]
@@ -82,9 +90,11 @@ def assess_story(context: dict, policy: dict, model_result: dict | None) -> dict
     sentences = [s for s in re.split(r'[.!?\n]+', folded) if s.strip()]
     promotions = sum(bool(PROMOTION.search(s)) for s in sentences)
     dominant = bool(sentences) and promotions > len(sentences)/2
-    incomplete = bool(DANGLING.search(folded))
+    from .narrative import inspect
+    narrative, narrative_extension = inspect(context, max_seconds=policy.get('max_seconds', 60))
+    incomplete = bool(DANGLING.search(folded)) or bool(narrative['blocking_obligations'])
     segments = _all_segments(context)
-    result = {'schema_version': '1.0', 'rule_version': 'story-v1',
+    result = {'schema_version': '1.0', 'rule_version': 'story-v2', 'narrative': narrative,
               'relevance': 'SELF_PROMOTION_DOMINANT' if dominant else 'UNCERTAIN',
               'closure': 'INCOMPLETE' if incomplete else 'UNCERTAIN',
               'quality_uncertain': True, 'content_grade': None, 'human_ratings': None,
@@ -114,6 +124,8 @@ def assess_story(context: dict, policy: dict, model_result: dict | None) -> dict
                     for e in anchored):
                 raise ValueError('Missing ending evidence')
             if model_result['closure'] == 'COMPLETE':
+                if narrative['open_obligations'] and not narrative['blocking_obligations']:
+                    raise ValueError('Question response requires semantic evidence')
                 validate_story_boundary({'source_start': context['source_range']['start'],
                                          'source_end': context['source_range']['end']}, context)
             result.update(closure='INCOMPLETE' if incomplete else model_result['closure'], evidence=anchored,
@@ -130,6 +142,15 @@ def assess_story(context: dict, policy: dict, model_result: dict | None) -> dict
     if result['closure'] == 'INCOMPLETE':
         start = context['source_range']['start']
         maximum = policy.get('max_seconds', 60)
+        if narrative['blocking_obligations']:
+            if narrative_extension is not None:
+                try:
+                    validate_story_boundary({'source_start': start, 'source_end': narrative_extension}, context)
+                    result.update(proposed_source_end=narrative_extension,
+                                  extension_reason='related_source_response_requires_review')
+                except ValueError:
+                    pass
+            return result
         for segment in context.get('after', []):
             if segment['source_end'] - start > maximum:
                 break

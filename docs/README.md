@@ -1,5 +1,7 @@
 # Documentação do Content Factory
 
+Em evolução: [identificação conservadora da conclusão narrativa](CONCLUSAO_NARRATIVA_2026-11-08.md).
+
 Atualização: [fila de revisão, finais e consistência Telegram](REVISAO_FILA_2026-11-08.md). [Fontes autorizadas e ingestão pelo Hermes](FONTES_INGESTAO_2026-11-08.md). [Comparação por fonte, duração flexível e pacote Hermes](HERMES_EDITORIAL_2026-11-07.md). [Revisão editorial e conectores locais](REVISAO_CONECTORES_2026-11-07.md). Histórico: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
 
 Versão de referência: **4.1.0**. Esta página é o ponto de entrada para operar, testar e modificar a aplicação nesta workstation.

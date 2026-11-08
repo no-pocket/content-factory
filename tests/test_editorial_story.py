@@ -161,3 +161,114 @@ def test_revision_planner_preserves_human_title_and_origin_unless_overridden():
     changed = prepare_source_end_revision(job, 0, transcript, editorial_title='Novo título')['clip']['timeline']['layers']['text'][0]
     assert changed['text'] == 'Novo título'
     assert changed['origin'] == 'human'
+
+@pytest.mark.parametrize('text', [
+    'Vou mostrar o mapa. Ele tem detalhes interessantes.',
+    'I will show the map. This game has many details.',
+    'Por que o mapa mudou?', 'Why did the map change?'])
+def test_unresolved_narrative_obligation_survives_sentence_end(text):
+    from app.editorial_story import assess_story
+    result = assess_story(context(text), {}, {'closure': 'COMPLETE', 'evidence': [{'segment_id': 0, 'quote': text}]})
+    assert result['closure'] == ('UNCERTAIN' if text.endswith('?') else 'INCOMPLETE')
+    assert result['narrative']['open_obligations']
+
+
+def test_payoff_must_match_promised_subject():
+    from app.editorial_story import assess_story
+    ctx = context('Vou mostrar o mapa.', [
+        {'segment_id': 1, 'source_start': 30, 'source_end': 35, 'text': 'Aqui está meu teclado.'},
+        {'segment_id': 2, 'source_start': 35, 'source_end': 40, 'text': 'Aqui está o mapa completo.'}])
+    result = assess_story(ctx, {'max_seconds': 60}, None)
+    assert result['proposed_source_end'] == 40
+
+
+def test_do_not_extend_through_new_topic_or_promotion():
+    from app.editorial_story import assess_story
+    for transition in ('Mudando de assunto.', 'Subscribe to my channel.'):
+        ctx = context('I will show the map.', [
+            {'segment_id': 1, 'source_start': 30, 'source_end': 35, 'text': transition},
+            {'segment_id': 2, 'source_start': 35, 'source_end': 40, 'text': 'Here is the map.'}])
+        assert assess_story(ctx, {'max_seconds': 60}, None)['proposed_source_end'] is None
+
+
+@pytest.mark.parametrize('text', ['Vou mostrar o mapa. Aqui está o mapa completo.',
+                                 'I will show the map. Here is the complete map.',
+                                 'Por que o mapa mudou? Porque o mapa ganhou uma ilha.',
+                                 'Why did the map change? Because the map gained an island.',
+                                 'This is the final map. Peace out.'])
+def test_observed_resolution_is_not_automatic_semantic_approval(text):
+    from app.editorial_story import assess_story
+    result = assess_story(context(text), {}, None)
+    assert result['closure'] == 'UNCERTAIN'
+    assert not result['narrative']['open_obligations']
+    assert result['human_ratings'] is None
+
+
+def test_annotation_extends_past_punctuated_promise_to_related_payoff():
+    from app.editorial_story import annotate_candidates
+    segments = [{'start': 0, 'end': 30, 'text': 'Vou mostrar o mapa.'},
+                {'start': 30, 'end': 35, 'text': 'Aqui está o mapa completo.'},
+                {'start': 36, 'end': 40, 'text': 'Outro assunto.'}]
+    clip = annotate_candidates([{'start': 0, 'end': 30}], segments)[0]
+    assert clip['end'] == pytest.approx(35.15)
+    assert clip['story_assessment']['closure'] == 'UNCERTAIN'
+
+
+def test_revision_planner_can_repair_punctuated_unresolved_promise():
+    from app.editorial_story import prepare_source_end_revision
+    job = {'settings': {'max_seconds': 60}, 'candidates': [{'start': 0, 'end': 30}]}
+    transcript = {'segments': [{'start': 0, 'end': 30, 'text': 'I will show the map.'},
+                               {'start': 30, 'end': 35, 'text': 'Here is the complete map.'}]}
+    result = prepare_source_end_revision(job, 0, transcript)
+    assert result['clip']['end'] == 35
+
+@pytest.mark.parametrize('text', ['Não vou mostrar o mapa.', 'I will not show the map.', 'Peace out. Right?'])
+def test_non_commitment_or_rhetorical_tag_does_not_create_hard_veto(text):
+    from app.editorial_story import assess_story
+    assert assess_story(context(text), {}, None)['closure'] == 'UNCERTAIN'
+
+
+def test_unrelated_because_answer_does_not_resolve_question():
+    from app.editorial_story import assess_story
+    result = assess_story(context('Why did the map change? Because my keyboard broke.'), {}, None)
+    assert result['closure'] == 'UNCERTAIN'
+    assert result['narrative']['open_obligations']
+
+@pytest.mark.parametrize('text', ["What's up guys?", 'Como é que tá ansiedade?',
+                                 'Como por exemplo, o jogo foi anunciado, né?', 'Why is it big, right?'])
+def test_greetings_and_question_tags_are_not_unanswered_content_questions(text):
+    from app.editorial_story import assess_story
+    assert not assess_story(context(text), {}, None)['narrative']['open_obligations']
+
+
+def test_narrative_observation_never_borrows_unheard_overlapping_sentence():
+    from app.editorial_context import build_candidate_context
+    from app.editorial_story import assess_story
+    transcript = {'segments': [{'start': 0, 'end': 10, 'text': 'The map. I will show the proof.',
+                               'words': [{'start': 0, 'end': 4, 'word': 'The map.'},
+                                         {'start': 6, 'end': 10, 'word': 'I will show the proof.'}]}]}
+    ctx = build_candidate_context({'candidates': [{'start': 0, 'end': 4.15}]}, 0, transcript)
+    result = assess_story(ctx, {}, None)
+    assert not result['narrative']['open_obligations']
+
+
+def test_question_with_possible_implicit_answer_stays_uncertain_without_hard_rejection():
+    from app.editorial_story import assess_story, safe_source_end
+    ctx = context('Por que a Lucía está nesta imagem? Isso aqui é Flashback de guerra do Jason.')
+    result = assess_story(ctx, {}, None)
+    assert result['closure'] == 'UNCERTAIN'
+    assert result['narrative']['open_obligations']
+    assert not result['narrative']['blocking_obligations']
+    model = {'closure': 'COMPLETE', 'evidence': [{'segment_id': 0, 'quote': ctx['text']}]}
+    assert assess_story(ctx, {}, model)['closure'] == 'UNCERTAIN'
+    assert safe_source_end(ctx, max_seconds=60)['resolved']
+
+@pytest.mark.parametrize('text', ['I will show the map. Here is not the map.',
+                                 'Vou mostrar o mapa. Aqui não está o mapa.',
+                                 'I will show the map. Here is definitely not the map.'])
+def test_explicit_negation_is_not_evidence_of_promised_payoff(text):
+    from app.editorial_story import assess_story
+    model = {'closure': 'COMPLETE', 'evidence': [{'segment_id': 0, 'quote': text}]}
+    result = assess_story(context(text), {}, model)
+    assert result['closure'] == 'INCOMPLETE'
+    assert result['narrative']['blocking_obligations']

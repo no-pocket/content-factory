@@ -58,8 +58,9 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         "source_context contém tabelas com colunas fields e grupos before/segments/after; use segment_id como evidência. "
         "Quando houver source_context, inclua story com closure COMPLETE/INCOMPLETE/UNCERTAIN, "
         "evidence [{segment_id,quote literal}] incluindo o final e parts {hook,setup,proof,payoff} por ID. "
-        "Pausa ou fade não provam conclusão; promessa precisa de demonstração. Não preencha avaliação humana. "
-        "Responda SOMENTE JSON com hook, effects e broll. Fonte: " + json.dumps(brief, ensure_ascii=False, separators=(',', ':'))
+        "Promessa/pergunta exige resposta relacionada no corte; cite payoff e final. Pausa/ponto/fade não concluem. "
+        "Sem prova: UNCERTAIN. Não avalie humanos. "
+        "SOMENTE JSON: hook,effects,broll e story se houver source_context. Fonte: " + json.dumps(brief, ensure_ascii=False, separators=(',', ':'))
     )
     options = {"temperature": 0, "num_predict": 450}
     if llm_backend == 'ollama':
