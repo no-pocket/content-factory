@@ -2,6 +2,37 @@
 
 ## Ajustes na interface
 
+Novos jobs podem escolher **Duração da história → Flexível (até 180 segundos)**.
+`settings.duration_mode="flexible"` permite uma janela configurável entre 8 e 180 s
+(padrões 8/40/180 para mínimo/referência/máximo). O alvo é orientação: procure a
+menor história relevante com desenvolvimento e conclusão, sem preencher tempo.
+O teto de três minutos limita custo de render e revisão nesta instalação local;
+não é uma regra de destino ou publicação. O modo clássico continua padrão, com
+15/40/60 s e os limites anteriores. Snapshots de jobs existentes não são reescritos.
+
+No modo flexível, as janelas de análise cobrem até duas vezes o máximo salvo,
+com sobreposição de uma janela máxima; a aceitação do candidato continua limitada
+ao máximo configurado. Uma tabela compacta preserva o texto integral de cada
+segmento, sem o antigo teto de 50 segmentos. O orçamento conservador de bytes
+continua ativo (4096 no Kepler, 8192 no Ollama, com reserva para a resposta).
+Janelas grandes demais são divididas com sobreposição e diagnóstico explícito;
+se a história completa não couber, os trechos menores não comprovam sua conclusão.
+Há no máximo `proposal_max_chunks` consultas e oito vezes esse número de checagens
+locais de orçamento. Amostragem e janelas restantes por limite de custo são
+registradas; cobertura integral não é prometida para fontes longas ou densas.
+O modo clássico preserva blocos de 50 segmentos com avanço de 45.
+
+Propostas do modelo no modo flexível exigem citações literais da fonte para gancho,
+desenvolvimento e conclusão, em ordem. Evidência inválida é rejeitada e diagnosticada;
+a heurística procura a primeira conclusão explícita após desenvolvimento, rejeita
+promoção e mantém a avaliação como incerta para revisão humana. Ela pode não propor
+uma história válida se a transcrição não contiver esses sinais. A timeline v2 marca
+o opt-in e valida até 180 s; a montagem v3 mantém seu teto independente de 120 s.
+O render valida os limites salvos. MP4 e prévia WebM são verificados com a duração
+real esperada da fala + cauda (0,35 s, máximo validado 0,75 s) + encerramento
+licenciado opcional (2–120 s, medido no arquivo). O teto de 180 s é da fala;
+o arquivo final pode ter até 300,75 s. Pré-validação por destino permanece separada.
+
 Montagem multitrecho é opt-in: `settings.timeline_v3=true` exige protocolo editorial
 2. O plano opcional do editor entra como `assembly_plan` na criação do job (também
 no campo avançado do formulário), com `schema_version=3.0`, `source_duration` e

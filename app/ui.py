@@ -11,7 +11,7 @@ from app.dashboard_health import render_doctor, render_job_ai
 from app.version import VERSION
 from app.asset_library import register_asset
 from app.edit_render import read_assets, browser_preview
-from app.ui_settings import render_settings_controls
+from app.ui_settings import render_settings_controls, render_duration_mode_control
 from app.service import create_job, review_job, retry_candidate, retry_enqueue, verify_existing, review_candidate, reject_job
 from app.editorial import DIMENSIONS, summarize, current_decisions
 from app.quality import normalize_qc
@@ -30,6 +30,7 @@ st.caption('Perfil inicial de novos jobs: Qwen na GPU K4200 + Remotion + alta fi
 with st.expander("Adicionar um vídeo autorizado", expanded=True):
     # Outside st.form so changing the input source causes an immediate Streamlit rerun.
     source_type = st.radio("Origem", ["Upload local", "URL do YouTube"], horizontal=True, key="source_type")
+    duration_mode = render_duration_mode_control(st, key_prefix='production_v2_')
     with st.form("ingest", clear_on_submit=True):
         uploaded = st.file_uploader("Vídeo local (MP4/MOV/MKV)", type=["mp4", "mov", "mkv"]) if source_type == "Upload local" else None
         youtube_url = st.text_input("URL de um vídeo do YouTube (sem playlist)") if source_type == "URL do YouTube" else ""
@@ -42,7 +43,7 @@ with st.expander("Adicionar um vídeo autorizado", expanded=True):
         license_note = st.text_area("Comprovação ou referência da autorização", placeholder="URL/ID da licença, acordo escrito, alcance comercial e permissão para editar/cortar")
         with st.expander('Ajustes de processamento'):
             st.caption('Estes valores são salvos por job e também podem ser enviados pela entrada JSON.')
-            processing_settings = render_settings_controls(st, preferred={'llm_backend':'kepler_gpu'}, key_prefix='production_v2_')
+            processing_settings = render_settings_controls(st, preferred={'llm_backend':'kepler_gpu'}, key_prefix='production_v2_', duration_mode=duration_mode)
             assembly_json = st.text_area('Plano de montagem opcional (JSON avançado)', max_chars=16000,
                                          help='Uma fonte, intervalos source_in/source_out e propósito por trecho. Requer montagem multitrecho e protocolo editorial 2.')
         permitted = st.checkbox("Confirmo que possuo permissão para editar este vídeo e gerar cortes (e para os usos posteriores pretendidos)")
@@ -102,6 +103,16 @@ def doctor_fragment():
 with st.expander("🩺 Doctor / AI Health Check", expanded=True):
     doctor_fragment()
 
+from app.source_review_ui import render_source_review
+# Existing open review sessions predate the workspace selector. Keep rendering
+# their job and widgets so Streamlit does not clean up unsaved review drafts.
+individual_default = bool(st.query_params.get('job') or
+                          ('selected_job' in st.session_state and not st.query_params.get('group')))
+workspace = st.radio('Área editorial', ['Comparar fontes e escolher finais', 'Job individual'],
+                     index=1 if individual_default else 0, horizontal=True, key='editorial_workspace')
+if workspace == 'Comparar fontes e escolher finais':
+    render_source_review(st)
+    st.stop()
 st.subheader("Jobs e aprovação")
 jobs = all_jobs()
 if not jobs:
@@ -123,7 +134,9 @@ else:
         status = 'Revisão individual' if value['status'] in {'APPROVED', 'REJECTED', 'NEEDS_REVIEW'} else value['status']
         return f"{value['original_name']} · {value['creator']} · {status} · {value['id'][:8]}"
     options = {j['id']: job_label(j) for j in reversed(jobs)}
-    choice = st.selectbox("Selecione um job", list(options), format_func=options.__getitem__, key='selected_job')
+    requested_job = st.query_params.get('job')
+    choice = st.selectbox("Selecione um job", list(options), index=list(options).index(requested_job) if requested_job in options else 0,
+                          format_func=options.__getitem__, key='selected_job')
     job = load(choice)
     st.write(f"**{job_label(job)}**")
     st.caption(f"Licença/registro: {job['license_note']}")

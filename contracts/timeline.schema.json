@@ -28,7 +28,7 @@
     "duration": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "maximum": 60
+      "maximum": 180
     },
     "source_range": {
       "type": "object",
@@ -346,6 +346,38 @@
           }
         }
       }
+    },
+    "duration_mode": {
+      "enum": [
+        "classic",
+        "flexible"
+      ]
     }
-  }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "duration_mode": {
+          "enum": [
+            "classic"
+          ]
+        },
+        "duration": {
+          "maximum": 60
+        }
+      }
+    },
+    {
+      "required": [
+        "duration_mode"
+      ],
+      "properties": {
+        "duration_mode": {
+          "enum": [
+            "flexible"
+          ]
+        }
+      }
+    }
+  ]
 }

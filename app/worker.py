@@ -69,7 +69,10 @@ def process(jid: str) -> None:
     try:
         raw_settings = dict(job.get('settings') or {})
         raw_settings.setdefault('render_quality', 'standard')  # preserve pre-profile job intent
-        settings = job['settings'] = normalize_job_settings(raw_settings)
+        settings = normalize_job_settings(raw_settings)
+        # Persisted settings are an immutable job intent, including old snapshots.
+        if 'settings' not in job:
+            job['settings'] = dict(settings)
         if settings['ranker_mode'] == 'external' and not job.get('candidates'):
             raise ValueError('External model plan missing; heuristic selection is forbidden for external replay')
         job['qc_settings'] = normalize_qc(job.get('qc_settings'))
@@ -161,7 +164,7 @@ def process(jid: str) -> None:
                     job['ai_activity'] = {'state': 'disabled', 'updated_at': time.time()}
                     clips = propose_clips(segments, duration, count=max(16, settings['clip_count']),
                                           target=settings['target_seconds'], min_seconds=settings['min_seconds'],
-                                          max_seconds=settings['max_seconds'])
+                                          max_seconds=settings['max_seconds'], duration_mode=settings.get('duration_mode', 'classic'))
                     from .editorial_story import annotate_candidates
                     from .ranker import _select
                     clips = _select(annotate_candidates(clips, segments, job.get('editorial_policy'),

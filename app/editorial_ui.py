@@ -94,6 +94,12 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
             clear_draft()
             st.rerun()
     old = row.get('current_event') or {}
+    notes = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid]
+    if notes:
+        with st.expander('Comentários do Telegram (sem decisão)'):
+            for note in notes:
+                st.caption(note['created_at'] + (' · render atual' if note['artifact_id'] == row['artifact_id'] else ' · render anterior'))
+                st.write(note['text'])
     st.caption(f"Candidato {index+1} · versão {row['candidate_version']} · render {row['render_revision']}")
     decision = row['normalized_decision']
     st.info('Decisão salva: ' + LABELS.get(decision, LABELS['UNCONFIRMED_LEGACY']))

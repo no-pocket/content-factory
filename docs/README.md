@@ -1,6 +1,6 @@
 # Documentação do Content Factory
 
-Atualização: [revisão editorial e conectores locais](REVISAO_CONECTORES_2026-11-07.md). Histórico: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
+Atualização: [comparação por fonte, duração flexível e pacote Hermes](HERMES_EDITORIAL_2026-11-07.md). [Revisão editorial e conectores locais](REVISAO_CONECTORES_2026-11-07.md). Histórico: [consolidação dos três PRs na main](CONSOLIDACAO_MAIN_2026-11-07.md).
 
 Versão de referência: **4.1.0**. Esta página é o ponto de entrada para operar, testar e modificar a aplicação nesta workstation.
 

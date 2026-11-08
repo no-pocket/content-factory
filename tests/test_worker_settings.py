@@ -1,3 +1,5 @@
+import copy
+import pytest
 from types import SimpleNamespace
 
 from app import worker
@@ -21,13 +23,17 @@ def test_completed_analysis_keeps_earlier_fallback_diagnostics(monkeypatch):
     assert job['ai_events'][0]['details']['reason'] == 'No valid duration'
 
 
-def test_worker_uses_job_settings_for_transcription_and_highlights(monkeypatch, tmp_path):
+@pytest.mark.parametrize('legacy', [False, True])
+def test_worker_uses_job_settings_for_transcription_and_highlights(monkeypatch, tmp_path, legacy):
     source = tmp_path / 'source.mp4'
     source.write_bytes(b'fixture')
     settings = normalize_job_settings({'clip_count': 1, 'target_seconds': 25,
                                        'whisper_model': 'small', 'whisper_beam_size': 3,
                                        'director_mode': 'heuristic', 'render_engine': 'ffmpeg',
                                        'llm_backend': 'kepler_gpu'})
+    if legacy:
+        settings.pop('duration_mode')
+    original_settings = copy.deepcopy(settings)
     job = {'id': 'fixture', 'status': 'QUEUED', 'source': str(source), 'settings': settings}
     observed = {}
     monkeypatch.setattr(worker, 'load', lambda jid: job)
@@ -61,6 +67,8 @@ def test_worker_uses_job_settings_for_transcription_and_highlights(monkeypatch, 
 
     worker.process('fixture')
     assert job['status'] == 'NEEDS_REVIEW'
+    assert job['settings'] == original_settings
+    assert observed['settings']['duration_mode'] == 'classic'
     assert (observed['model'], observed['beam'], observed['count']) == ('small', 3, 1)
     assert observed['settings']['target_seconds'] == 25
     assert observed['llm_backend'] == 'kepler_gpu'

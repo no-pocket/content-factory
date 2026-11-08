@@ -11,6 +11,7 @@ DEFAULTS = {
     'framing_roi': None,
     'framing_windows': [],
     'clip_count': 3,
+    'duration_mode': 'classic',
     'target_seconds': 40,
     'min_seconds': 15,
     'max_seconds': 60,
@@ -51,6 +52,11 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    if settings['duration_mode'] not in ('classic', 'flexible'):
+        raise ValueError('Unsupported duration_mode')
+    if settings['duration_mode'] == 'flexible':
+        settings['min_seconds'] = overrides.get('min_seconds', 8)
+        settings['max_seconds'] = overrides.get('max_seconds', 180)
     from .timeline import ASSET_ID
     ident = settings['outro_asset_id']
     if ident is not None and (not isinstance(ident, str) or not ASSET_ID.fullmatch(ident)):
@@ -86,6 +92,8 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
         roi = scene['roi']
     settings['framing_roi'] = roi
     for key, (low, high) in RANGES.items():
+        if settings['duration_mode'] == 'flexible' and key in ('target_seconds', 'min_seconds', 'max_seconds'):
+            low, high = 8, 180
         value = settings[key]
         if type(value) is not int or not low <= value <= high:
             raise ValueError(f'{key} must be an integer from {low} to {high}')

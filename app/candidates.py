@@ -17,6 +17,24 @@ from .telemetry import measure_stage, job_metric_context
 REVIEWABLE = {'VALID', 'WARNING'}
 
 
+def _validate_duration(clip: dict, settings: dict) -> None:
+    """A cached timeline cannot elevate the saved duration opt-in or window."""
+    import math
+    mode = settings.get('duration_mode', 'classic')
+    timeline = clip.get('timeline') or {}
+    if mode == 'classic':
+        if clip.get('duration_mode', 'classic') != 'classic' or timeline.get('duration_mode', 'classic') != 'classic':
+            raise ValueError('Flexible duration requires saved opt-in')
+        return
+    duration = clip.get('assembly', {}).get('duration', clip['end'] - clip['start'])
+    if not math.isfinite(duration) or not settings['min_seconds'] <= duration <= settings['max_seconds']:
+        raise ValueError('Candidate duration outside saved flexible bounds')
+    if 'duration' in timeline and (not math.isfinite(timeline['duration'])
+            or abs(timeline['duration'] - duration) > .002
+            or not settings['min_seconds'] <= timeline['duration'] <= settings['max_seconds']):
+        raise ValueError('Cached timeline duration differs from saved source window')
+
+
 def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                       audio_expected: bool, *, only: int | None = None) -> None:
     settings = normalize_job_settings(settings)
@@ -36,7 +54,11 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
         if clip.get('state') in REVIEWABLE:
             with measure_stage(clip.setdefault('stage_metrics',[]),'QC',job_metric_context(job,index,clip.get('render_revision')),
                                requested='resume_full_decode',resolved='ffmpeg_ffprobe') as metric:
-                current = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                try:
+                    _validate_duration(clip, settings)
+                    current = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                except ValueError as exc:
+                    current = {'state':'FAILED', 'errors':[str(exc)]}
                 metric['qc_state']=current['state']
             if current['state'] in REVIEWABLE:
                 clip['qc'] = current
@@ -64,6 +86,9 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
             job['status'] = 'RENDERING'
             save(job)
             try:
+                _validate_duration(clip, settings)
+                if settings.get('duration_mode') == 'flexible' and 'timeline' not in clip:
+                    clip['duration_mode'] = 'flexible'
                 from .outro import validate_job_outro
                 outro_snapshot = validate_job_outro({**job, 'settings':settings}, assets)
                 if settings['director_mode'] == 'external' and 'timeline' not in clip:

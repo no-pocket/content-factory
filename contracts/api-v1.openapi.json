@@ -1366,19 +1366,19 @@
           "target_seconds": {
             "type": "integer",
             "minimum": 8,
-            "maximum": 60,
+            "maximum": 180,
             "default": 40
           },
           "min_seconds": {
             "type": "integer",
             "minimum": 8,
-            "maximum": 60,
+            "maximum": 180,
             "default": 15
           },
           "max_seconds": {
             "type": "integer",
-            "minimum": 15,
-            "maximum": 60,
+            "minimum": 8,
+            "maximum": 180,
             "default": 60
           },
           "proposal_max_chunks": {
@@ -1440,8 +1440,50 @@
               "high"
             ],
             "default": "high"
+          },
+          "duration_mode": {
+            "type": "string",
+            "enum": [
+              "classic",
+              "flexible"
+            ],
+            "default": "classic",
+            "description": "Flexible: shortest complete relevant story; target is guidance. New jobs only. Source window up to 180 seconds, plus finishing/outro."
           }
-        }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "duration_mode": {
+                "enum": [
+                  "classic"
+                ]
+              },
+              "target_seconds": {
+                "maximum": 60
+              },
+              "min_seconds": {
+                "maximum": 60
+              },
+              "max_seconds": {
+                "minimum": 15,
+                "maximum": 60
+              }
+            }
+          },
+          {
+            "required": [
+              "duration_mode"
+            ],
+            "properties": {
+              "duration_mode": {
+                "enum": [
+                  "flexible"
+                ]
+              }
+            }
+          }
+        ]
       },
       "QcSettings": {
         "type": "object",

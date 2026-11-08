@@ -16,11 +16,22 @@ LABELS = {
 }
 
 
-def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: str = '') -> dict:
+def render_duration_mode_control(st, *, initial: str = 'classic', key_prefix: str = '') -> str:
+    """Keep this selector outside forms so duration bounds update immediately."""
+    return st.selectbox('Duração da história', ['classic', 'flexible'],
+                index=['classic', 'flexible'].index(initial), key=key_prefix+'duration_mode',
+                format_func={'classic': 'Clássica (até 60 segundos)', 'flexible': 'Flexível (até 180 segundos)' }.__getitem__,
+                help='Flexível: prioriza relevância, desenvolvimento e conclusão. O alvo orienta; não preenche tempo. Só novos jobs usam a escolha.')
+
+
+def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: str = '', duration_mode: str | None = None) -> dict:
     """Return a complete settings snapshot from a Streamlit form."""
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'duration_mode':
+            result[key] = duration_mode if duration_mode is not None else render_duration_mode_control(st, initial=initial[key], key_prefix=key_prefix)
+            continue
         if key == 'outro_asset_id':
             from .edit_render import read_assets
             assets = read_assets()
@@ -82,6 +93,14 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
             result[key] = st.selectbox(label, options, index=options.index(initial[key]), key=key_prefix+key, **extra)
         else:
             low, high = RANGES[key]
-            result[key] = int(st.number_input(LABELS[key], min_value=low, max_value=high,
-                                              value=initial[key], step=1, key=key_prefix+key))
+            if result.get('duration_mode') == 'flexible' and key in ('target_seconds', 'min_seconds', 'max_seconds'):
+                low, high = 8, 180
+                if initial['duration_mode'] != 'flexible':
+                    initial[key] = {'target_seconds':40, 'min_seconds':8, 'max_seconds':180}[key]
+            label = 'Duração de referência (segundos, sem preencher tempo)' if key == 'target_seconds' and result.get('duration_mode') == 'flexible' else LABELS[key]
+            widget_key = key_prefix+key
+            if duration_mode is not None and key in ('min_seconds','target_seconds','max_seconds'):
+                widget_key += '_'+duration_mode
+            result[key] = int(st.number_input(label, min_value=low, max_value=high,
+                                              value=min(high, max(low, initial[key])), step=1, key=widget_key))
     return result

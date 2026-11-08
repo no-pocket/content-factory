@@ -35,6 +35,7 @@ def test_selected_job_survives_status_change(monkeypatch):
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
     test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
+    test.radio(key='editorial_workspace').set_value('Job individual').run()
     test.selectbox(key='selected_job').set_value('a').run()
     jobs[0]['status'] = 'FAILED'
     test.run()
@@ -49,6 +50,7 @@ def test_v2_adjustment_and_rejection_persist_without_ratings(v2job, monkeypatch)
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
     test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
     assert not test.exception
+    test.radio(key='editorial_workspace').set_value('Job individual').run()
     comment = next(t for t in test.text_area if t.label == 'Comentário / motivo')
     comment.set_value('SYNTHETIC: bom, mas melhorar o final').run()
     next(b for b in test.button if b.label == 'Aprovar com ajustes').click().run()
@@ -65,3 +67,18 @@ def test_v2_adjustment_and_rejection_persist_without_ratings(v2job, monkeypatch)
     test.selectbox(key='candidate_filter').set_value('REJECTED').run()
     assert len([h for h in test.get('header') if h.value.startswith('Candidato')]) <= 1
     assert len([t for t in test.text_area if t.label == 'Comentário / motivo']) == 1
+
+def test_existing_review_session_keeps_individual_workspace_and_comment_draft(v2job,monkeypatch,tmp_path):
+    monkeypatch.setattr(store,'ROOT',tmp_path)
+    monkeypatch.setattr(edit_render,'read_assets',lambda: {})
+    monkeypatch.setattr(dashboard_health,'render_doctor',lambda: None)
+    test=AppTest.from_file(str(Path(app.__file__).parent/'ui.py'))
+    clip=v2job['candidates'][0]
+    draft_key=f"v2_{v2job['id']}_{clip['candidate_id']}_{clip['artifact_id']}_comment"
+    test.session_state['selected_job']=v2job['id']
+    test.session_state[draft_key]='SYNTHETIC: rascunho aberto antes da atualização'
+    test.run(timeout=20)
+    assert not test.exception
+    assert test.radio(key='editorial_workspace').value=='Job individual'
+    assert test.selectbox(key='selected_job').value==v2job['id']
+    assert test.text_area(key=draft_key).value=='SYNTHETIC: rascunho aberto antes da atualização'

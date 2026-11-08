@@ -61,13 +61,21 @@ class Handler(BaseHTTPRequestHandler):
         self.close_connection = True
 
     def _dispatch(self):
-        token = os.getenv('CONTENT_FACTORY_API_TOKEN', '')
-        if not token or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + token):
+        path = urlsplit(self.path).path.strip('/').split('/')
+        hermes = path[:2] == ['v2', 'hermes']
+        bridge_token = os.getenv('CONTENT_FACTORY_HERMES_TOKEN', '')
+        general_token = os.getenv('CONTENT_FACTORY_API_TOKEN', '')
+        if bridge_token and hmac.compare_digest(bridge_token, general_token):
+            return self._json(503, {'error': {'code': 'credential_scope', 'message': 'Hermes requires a distinct dedicated credential'}})
+        token = os.getenv('CONTENT_FACTORY_HERMES_TOKEN' if hermes else 'CONTENT_FACTORY_API_TOKEN', '')
+        if not token or (hermes and len(token) < 24) or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + token):
             return self._json(401, {'error': {'code': 'unauthorized', 'message': 'Bearer token required'}})
         # No cookie authentication, no CORS, no browser Origin accepted for mutations.
         if self.command == 'POST' and self.headers.get('Origin'):
             raise PermissionError('Browser origins are not enabled')
-        path = urlsplit(self.path).path.strip('/').split('/')
+        if hermes:
+            from .hermes_api import dispatch
+            return dispatch(self, path[2:])
         if path[:2] == ['v2', 'jobs']:
             if len(path) == 3 and self.command == 'GET':
                 job = store.load(path[2])

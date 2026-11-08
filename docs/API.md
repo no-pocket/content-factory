@@ -190,3 +190,7 @@ mestre, WebM e timeline. Falha/retry preserva saídas anteriores. QC válido con
 obrigatório para aprovar; recusa técnica não exige reprodução válida. Ajustes não
 entram na lista compatível de aprovações limpas. Rollback desativa criação v2,
 preservando leitor, eventos e arquivos; não converta ajustes em aprovação limpa.
+
+## Ponte privada Hermes
+
+A superfície /v2/hermes usa credencial própria e operações editoriais limitadas. Veja [contratos, perfil e instalação](../integrations/hermes/OPERACAO.md). Token Hermes não autoriza rotas gerais; configurar tokens iguais bloqueia ambas as superfícies. Comentário sem decisão é distinto de review e seleção final.

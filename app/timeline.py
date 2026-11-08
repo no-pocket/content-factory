@@ -56,9 +56,13 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
     else:
         start = as_float(clip["start"])
         end = as_float(clip["end"])
+    mode = clip.get('duration_mode', 'classic')
+    if mode not in ('classic', 'flexible'):
+        raise ValueError('Invalid duration mode')
+    maximum = 120 if assembly else (180 if mode == 'flexible' else MAX_CLIP_SECONDS)
     duration = end-start if assembly else round(end - start, 3)
-    if not (0 < duration <= (120 if assembly else MAX_CLIP_SECONDS)):
-        raise ValueError("Clip duration must be within 0..60 seconds")
+    if not (0 < duration <= maximum):
+        raise ValueError("Clip duration outside permitted bounds")
     if not assembly:
         words = normalized_words(segments, start, end)
     edit = edit if isinstance(edit, dict) else {}
@@ -117,6 +121,8 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         "caption_style": "bold_karaoke_v1",
         "finishing": {"tail_seconds": 0.35, "fade_seconds": 0.25},
     }
+    if mode == 'flexible':
+        timeline['duration_mode'] = mode
     if clip.get('framing'):
         from .framing import validate_scene
         timeline['framing'] = validate_scene(clip['framing'])
@@ -165,7 +171,10 @@ def validate_timeline(timeline: dict) -> None:
     if version not in ("2.0", "3.0") or timeline.get("fps") != FPS or timeline.get("width") != 720 or timeline.get("height") != 1280:
         raise ValueError("Unsupported timeline schema or output settings")
     duration = as_float(timeline.get("duration"))
-    if not 0 < duration <= (120 if version == '3.0' else MAX_CLIP_SECONDS):
+    mode = timeline.get('duration_mode', 'classic')
+    if mode not in ('classic', 'flexible'):
+        raise ValueError('Invalid duration mode')
+    if not 0 < duration <= (120 if version == '3.0' else (180 if mode == 'flexible' else MAX_CLIP_SECONDS)):
         raise ValueError("Invalid timeline duration")
     if 'finishing' in timeline:
         finishing = timeline['finishing']

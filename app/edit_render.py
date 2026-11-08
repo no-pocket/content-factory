@@ -128,7 +128,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
                                    output_dir / 'base.mp4', quality=quality, **framing_options)
             timeline['segments'] = plan['segments']
         else:
-            render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, **framing_options)
+            render(source, clip["start"], clip["end"], segments, output_dir / "base.mp4", burn_subtitles=False, crf=16 if quality == 'high' else 24, duration_mode=timeline.get('duration_mode', 'classic'), **framing_options)
     staged_broll = []
     for i, piece in enumerate(timeline["layers"]["broll"]):
         if multisegment and any(s.get('framing', {}).get('preset') in {'web','tweet','document'} and
@@ -173,7 +173,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
                      '-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-movflags','+faststart',str(target.resolve())]
             subprocess.run(args,check=True,capture_output=True,text=True,cwd=target.parent)
         else:
-            render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
+            render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, duration_mode=timeline.get('duration_mode', 'classic'), **framing_options)
     def finish_outro():
         if outro_asset_id is not None:
             from .outro import append_outro, validate_job_outro
