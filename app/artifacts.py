@@ -4,6 +4,8 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import time
+from functools import lru_cache
 from pathlib import Path
 
 from . import store
@@ -27,7 +29,13 @@ def render_target(job: dict, index: int, revision: int | None = None) -> Path:
     return store.OUTPUT / job['id'] / cid / f'render_{rev}' / 'master.mp4'
 
 
-def artifact_manifest(job: dict, index: int) -> dict:
+@lru_cache(maxsize=2048)
+def _presentation_file_hash(path: str, fingerprint: tuple) -> str:
+    with Path(path).open('rb') as handle:
+        return hashlib.file_digest(handle,'sha256').hexdigest()
+
+
+def artifact_manifest(job: dict, index: int, *, presentation_cache: bool = False) -> dict:
     clip = job['candidates'][index]
     cid = candidate_key(job['id'], index)
     root = (store.OUTPUT / job['id']).resolve()
@@ -47,8 +55,12 @@ def artifact_manifest(job: dict, index: int) -> dict:
         if not resolved.is_file():
             manifest['files'][kind] = None
             continue
-        with resolved.open('rb') as handle:
-            checksum = hashlib.file_digest(handle, 'sha256').hexdigest()
+        if presentation_cache:
+            stat=resolved.stat()
+            checksum=_presentation_file_hash(str(resolved),(stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns,int(time.monotonic()//2)))
+        else:
+            with resolved.open('rb') as handle:
+                checksum = hashlib.file_digest(handle, 'sha256').hexdigest()
         manifest['files'][kind] = {'path': resolved.relative_to(root).as_posix(), 'sha256': checksum}
     return manifest
 

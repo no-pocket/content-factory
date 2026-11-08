@@ -107,3 +107,16 @@ Legendas FFmpeg agora usam frases de até três palavras com timestamps de palav
 Novas timelines também registram `finishing`: cauda de 0,35 s depois da fala, com último frame congelado e fade visual de 0,25 s. O áudio original termina inteiro, seguido de silêncio; não há música nova nem fade por cima da última palavra. QC considera a cauda na duração final (até 60,35 s para 60 s de fonte). Timeline antiga sem esse campo não ganha cauda. Há uma codificação adicional para esse acabamento, incluída no tempo de render.
 
 O título automático não deve copiar a frase inicial. Resposta inválida ou repetida é omitida; não há fallback que repita transcrição. Novos títulos têm estilo compacto de até três linhas. Um título fornecido explicitamente pelo editor pode ter até 80 caracteres/12 palavras, registra origem humana e não é atribuído ao modelo. A revisão humana continua responsável por sua fidelidade editorial.
+
+
+## Encerramento opcional por job
+
+`outro_asset_id` aceita um ID da biblioteca local com comprovacao de direitos;
+`null` (padrao) desativa o encerramento. Cadastre seu video pronto na biblioteca
+com descricao e referencia de licenca e selecione-o ao criar o job. O arquivo
+de encerramento deve ter entre 2 e 120 segundos; nenhum asset e baixado nem voz
+sintetizada. A selecao integra o snapshot do job. O master recebe o video
+apos a fala e o acabamento; a previa e o QC abrangem a duracao completa. As
+legendas da fonte conservam seus tempos e nao se estendem ao encerramento.
+O hash do asset e salvo no render; alteracoes de bytes impedem sua reutilizacao
+no mesmo candidato. Jobs e candidatos existentes nao sao regenerados.

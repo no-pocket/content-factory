@@ -33,6 +33,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "outro_asset_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-zA-Z0-9_-]{1,50}$",
+          "default": null
+        },
         "editorial_protocol": {
           "type": "integer",
           "enum": [

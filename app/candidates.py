@@ -108,7 +108,8 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 save(job)
                 renderer = render_edited(source, job['id'], index + 1, clip, segments,
                                          clip['timeline'], assets, target, engine=settings['render_engine'], quality=settings['render_quality'],
-                                         metrics=clip['stage_metrics'],metric_context=metric_context)
+                                         metrics=clip['stage_metrics'],metric_context=metric_context,
+                                         outro_asset_id=settings['outro_asset_id'])
                 with measure_stage(clip['stage_metrics'],'QC',metric_context,requested='mp4_webm_full_decode',resolved='ffmpeg_ffprobe') as metric:
                     qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
                     metric['qc_state']=qc['state']

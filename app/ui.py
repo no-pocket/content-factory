@@ -265,6 +265,17 @@ else:
         st.rerun()
 
 with st.expander('Métricas editoriais e comparação de configurações'):
-    st.json(summarize_v2(all_jobs()))
-    st.json(summarize(all_jobs()))
+    if st.button('Calcular métricas agora',key='load_editorial_metrics',
+                   help='Calcula a cobertura e métricas de todos os jobs sob demanda, sem atrasar cada comentário.'):
+        metric_jobs=all_jobs()
+        st.session_state['editorial_metrics_snapshot']=(summarize_v2(metric_jobs),summarize(metric_jobs))
+    if 'editorial_metrics_snapshot' in st.session_state:
+        for metric in st.session_state['editorial_metrics_snapshot']:st.json(metric)
     st.caption('Sem atualização automática da seleção. Compare os mesmos vídeos antes e depois e registre avaliações reais.')
+    st.caption('ML: avaliações viram eventos versionados; não há treino nem promoção automática. '
+               'O alvo proposto usa grau de conteúdo ≥ 2; notas das dimensões ainda não têm pesos treinados. '
+               'O treino exige dataset congelado, 150 candidatos elegíveis de 50 famílias, '
+               '30 positivos/30 negativos, cobertura PT/EN, holdout e aprovação explícita.')
+
+from app.publishing import render_publishing_panel
+render_publishing_panel(st,jobs)

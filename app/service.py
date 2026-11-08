@@ -287,7 +287,7 @@ def get_editorial_view(job: dict) -> dict:
         cid = clip.get('candidate_id') or candidate_key(job['id'], index)
         artifact_id = clip.get('artifact_id')
         # Detect lost/replaced bytes even when the human event count did not change.
-        intact = artifact_id is not None and artifact_id == 'sha256:' + digest(artifact_manifest(job, index))
+        intact = artifact_id is not None and artifact_id == 'sha256:' + digest(artifact_manifest(job, index,presentation_cache=True))
         events = [e for e in job.get('feedback_events', []) if e['candidate_id'] == cid]
         current = next((e for e in reversed(events) if intact and e['artifact_id'] == artifact_id
                         and e['render_revision'] == clip.get('render_revision')

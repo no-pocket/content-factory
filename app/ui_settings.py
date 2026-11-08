@@ -21,6 +21,17 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'outro_asset_id':
+            from .edit_render import read_assets
+            assets = read_assets()
+            options = [None, *assets]
+            if initial[key] is not None and initial[key] not in assets:
+                options.append(initial[key])
+            result[key] = st.selectbox('Encerramento autorizado (opcional)', options,
+                index=options.index(initial[key]), key=key_prefix+key,
+                format_func=lambda ident: 'Desativado (padrão)' if ident is None else assets.get(ident, {}).get('description', ident),
+                help='Cadastre seu vídeo pronto na biblioteca com comprovação de direitos. A fala original é preservada; não há síntese de voz.')
+            continue
         if key=='retrieval_mode':
             result[key]=st.selectbox('Exemplos editoriais confirmados',['off','lexical'],index=['off','lexical'].index(initial[key]),
                 format_func={'off':'Desativados (padrão)','lexical':'Busca local no dataset selecionado'}.__getitem__,key=key_prefix+key)

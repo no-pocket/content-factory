@@ -82,6 +82,44 @@ def test_two_ui_sessions_keep_original_revision_and_preserve_stale_draft(v2job):
     assert len(store.load(v2job['id'])['feedback_events'])==2
 
 
+def test_reviewing_one_candidate_does_not_stale_other_candidate_draft(v2job):
+    from app import store
+    from app.artifacts import register_render
+    from streamlit.testing.v1 import AppTest
+    first=v2job['candidates'][0]
+    v2job['candidates'].append({key:first[key] for key in ('start','end','state','file','timeline_file')})
+    register_render(v2job,1);store.save(v2job)
+    code=f'''from app import store,service
+from app.editorial_ui import render_v2_review
+import streamlit as st
+job=store.load({v2job['id']!r})
+for i,row in enumerate(service.get_editorial_view(job)['candidates']):
+    render_v2_review(st,job,i,row)
+'''
+    page=AppTest.from_string(code,default_timeout=20).run()
+    page.text_area[2].set_value('Second candidate draft')
+    next(b for b in page.button if b.label=='Aprovar').click().run()
+    assert not page.exception
+    [b for b in page.button if b.label=='Recusar'][1].click().run()
+    assert not page.exception and not page.error
+    events=store.load(v2job['id'])['feedback_events']
+    assert len(events)==2 and events[-1]['comment_raw']=='Second candidate draft'
+
+
+def test_explicit_refresh_can_keep_stale_comment_without_submitting(v2job):
+    from app import store
+    a,b=ui_test_session(v2job),ui_test_session(v2job)
+    next(x for x in a.button if x.label=='Aprovar').click().run()
+    b.text_area[0].set_value('Preserve this draft')
+    next(x for x in b.button if x.label=='Aprovar').click().run()
+    assert b.error
+    next(x for x in b.button if x.label=='Atualizar revisão e manter meu rascunho').click().run()
+    assert b.text_area[0].value=='Preserve this draft'
+    assert len(store.load(v2job['id'])['feedback_events'])==1
+    next(x for x in b.button if x.label=='Aprovar').click().run()
+    assert not b.error and store.load(v2job['id'])['feedback_events'][-1]['comment_raw']=='Preserve this draft'
+
+
 def test_adding_minor_edit_preserves_existing_major_and_blocks_clean_approval(v2job):
     import uuid
     from app import store

@@ -143,7 +143,7 @@ def output_duration(timeline: dict) -> float:
 
 
 def candidate_duration(clip: dict) -> float:
-    return output_duration({'duration': clip['end'] - clip['start'], **(clip.get('timeline') or {})})
+    return output_duration({'duration': clip['end'] - clip['start'], **(clip.get('timeline') or {})}) + (clip.get('timeline') or {}).get('outro', {}).get('duration', 0)
 
 
 def validate_timeline(timeline: dict) -> None:

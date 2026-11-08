@@ -83,6 +83,21 @@ def validate_title(title: str, evidence: dict) -> dict:
         reason = 'invalid_title_text'
     elif tokens == source[:len(tokens)]:
         reason = 'transcript_echo'
-    elif any(t not in set(source) for t in tokens if len(t) > 3 or t.isdigit()):
+    elif not _grounded_title(tokens, source):
         reason = 'unsupported_title_claim'
     return {'valid': reason is None, 'reason': reason, 'normalized': normalized}
+
+
+def _grounded_title(tokens: list[str], source: list[str]) -> bool:
+    # Conservative, explainable paraphrases. Unknown claims still fail closed;
+    # this lexical guard is not a semantic proof or a human editorial verdict.
+    function_words = set('como por porque para quando onde qual quais que uma uns umas seu sua seus suas esse essa isso este esta the how why what to of a an and in on with'.split())
+    aliases = {'vendendo':'vender', 'venda':'vender', 'ganhando':'ganhar',
+               'ganho':'ganhar', 'comprando':'comprar', 'compra':'comprar',
+               'selling':'sell', 'buying':'buy', 'earning':'earn'}
+    def canonical(t):
+        t = aliases.get(t, t)
+        return t[:-1] if len(t) > 4 and t.endswith('s') else t
+    known = {canonical(t) for t in source}
+    substantive = [t for t in tokens if t not in function_words and (len(t)>3 or t.isdigit())]
+    return bool(substantive) and all(canonical(t) in known for t in substantive)

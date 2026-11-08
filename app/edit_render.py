@@ -96,7 +96,7 @@ def apply_finishing(target: Path, timeline: dict, *, quality: str = 'standard') 
         pending.unlink(missing_ok=True)
 
 
-def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard', metrics: list | None = None, metric_context: dict | None = None, finishing_mode: str = 'post_encode') -> str:
+def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard', metrics: list | None = None, metric_context: dict | None = None, finishing_mode: str = 'post_encode', outro_asset_id: str | None = None) -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
     if finishing_mode not in ('post_encode','remotion'):
@@ -174,6 +174,13 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
             subprocess.run(args,check=True,capture_output=True,text=True,cwd=target.parent)
         else:
             render(source, clip["start"], clip["end"], segments, target, burn_subtitles=True, crf=18 if quality == 'high' else 24, **framing_options)
+    def finish_outro():
+        if outro_asset_id is not None:
+            from .outro import append_outro
+            clip['outro'] = append_outro(target, outro_asset_id, assets, quality=quality,
+                expected_sha256=clip.get('outro', {}).get('sha256'))
+            timeline['outro'] = clip['outro']
+            write_timeline(target.with_suffix('.timeline.json'), timeline)
     if engine == "ffmpeg":
         with measure_stage(metrics,'REMOTION',metric_context,requested='ffmpeg',resolved='ffmpeg_subtitled') as metric:
             metric['state']='SKIPPED'
@@ -181,6 +188,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
             subtitled_output()
         with measure_stage(metrics,'FINISHING',metric_context,requested='post_encode',resolved='post_encode'):
             apply_finishing(target, timeline, quality=quality)
+        finish_outro()
         with measure_stage(metrics,'PREVIEW',metric_context,requested='webm',resolved='vp8_opus'):
             make_web_preview(target, quality=quality)
         return "ffmpeg_subtitled"
@@ -209,6 +217,7 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
             metric.update(state='INTEGRATED',included_in_stage='REMOTION')
         else:
             apply_finishing(target, timeline, quality=quality)
+    finish_outro()
     with measure_stage(metrics,'PREVIEW',metric_context,requested='webm',resolved='vp8_opus'):
         make_web_preview(target, quality=quality)
     return renderer_used

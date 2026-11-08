@@ -2,6 +2,7 @@
 import json
 
 DEFAULTS = {
+    'outro_asset_id': None,
     'editorial_protocol': 1,
     'retrieval_mode': 'off',
     'retrieval_dataset_id': None,
@@ -50,6 +51,10 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    from .timeline import ASSET_ID
+    ident = settings['outro_asset_id']
+    if ident is not None and (not isinstance(ident, str) or not ASSET_ID.fullmatch(ident)):
+        raise ValueError('Invalid outro asset ID')
     import re
     if settings['retrieval_mode'] not in ('off','lexical'):
         raise ValueError('Unsupported retrieval mode')
