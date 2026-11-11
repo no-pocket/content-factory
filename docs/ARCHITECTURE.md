@@ -29,7 +29,7 @@ Cada job salva uma cópia validada de seus ajustes. A UI e `app/submit.py` usam 
 - Transcrição, descrições e saída Qwen são dados não confiáveis. O ranker valida IDs, tempos e respostas completas; o diretor só sugere campos limitados. A timeline impõe limites e não aceita comandos shell nem caminhos arbitrários do modelo.
 - Na GPU, a ponte consulta contexto e tokenizer reais antes da inferência; rejeita estouro de contexto e opções não implementadas. Ranker e diretor descartam resposta limitada ou prompt truncado. Falhas semânticas acionam heurística, com evento no job.
 - Render Remotion pode cair para FFmpeg com legendas simplificadas, se configurado. Cada MP4 recebe prévia VP8/Opus completamente decodificada antes da publicação. O motor efetivo fica registrado por candidato.
-- `NEEDS_REVIEW` exige decisão humana. Não há publicação social, autenticação para exposição pública, edição manual de timeline nem verificação externa de licença.
+- `NEEDS_REVIEW` exige decisão humana. A agenda opcional publica apenas candidatos com aprovação e QC atuais, após escolha explícita do destino; consulte [Publicação](PUBLICACAO.md). Não há autenticação para exposição pública da interface, edição manual de timeline nem verificação externa de licença.
 
 ## Limites atuais
 

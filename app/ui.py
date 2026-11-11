@@ -260,7 +260,34 @@ else:
             with review_panel:
                 if job.get('editorial_protocol') == 2:
                     render_v2_review(st, job, idx, row)
+                    if row.get('artifact_intact') and st.button('Gerar sugestões de legenda', key=f'caption_{job["id"]}_{idx}_{row["artifact_id"]}'):
+                        from app.social_captions import regenerate
+                        try:
+                            with st.spinner('Criando sugestões a partir da transcrição...'):
+                                regenerate(job['id'], row['candidate_id'], row['artifact_id'])
+                            st.rerun()
+                        except (ValueError, RuntimeError, OSError) as exc:
+                            st.error(f'Não foi possível gerar as sugestões: {exc}')
                     continue
+                legacy_suggestions = clip.get('social_captions', {})
+                if legacy_suggestions:
+                    from app.social_captions import ORIGIN_LABELS, REASON_LABELS
+                    with st.expander('Sugestões de legenda para redes sociais'):
+                        for platform in ('instagram', 'facebook'):
+                            suggestion = legacy_suggestions.get(platform, {})
+                            if suggestion.get('text'):
+                                st.markdown('**' + platform.title() + '**')
+                                st.text(suggestion['text'])
+                                st.caption('Origem: ' + ORIGIN_LABELS.get(suggestion.get('origin'), 'desconhecida') +
+                                           (' · ' + REASON_LABELS.get(suggestion['reason'], 'motivo não informado') if suggestion.get('reason') else ''))
+                if st.button('Gerar sugestões de legenda', key=f'legacy_caption_{job["id"]}_{idx}'):
+                    from app.social_captions import regenerate
+                    try:
+                        with st.spinner('Criando sugestões a partir da transcrição...'):
+                            regenerate(job['id'], row['candidate_id'], None)
+                        st.rerun()
+                    except (ValueError, RuntimeError, OSError) as exc:
+                        st.error(f'Não foi possível gerar as sugestões: {exc}')
                 if row['legacy_decision']:
                     st.info(('Aprovado' if row['legacy_decision'] == 'APPROVED' else 'Recusado')+' — condição não confirmada (legado)')
                 old = previous.get(idx, {})

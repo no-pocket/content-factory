@@ -31,6 +31,14 @@ legenda e direitos antes de confirmar a publicação.
 
 ## Rascunhos locais
 
+As sugestões de legenda são criadas a partir das palavras da timeline renderizada
+(ou do texto do candidato legado quando não há timeline), com modelo local quando
+disponível e fallback explícito. Uma nova renderização preserva o histórico anterior
+e gera novas sugestões. São editáveis por plataforma
+na agenda; a legenda escolhida é congelada no agendamento. O tópico Hermes pode
+ler transcrições de fontes autorizadas e registrar uma nova sugestão para revisão,
+conforme `integrations/hermes/OPERACAO.md`.
+
 A interface também oferece Instagram Reels, Facebook Reels, YouTube e TikTok no painel
 **Rascunhos de publicação**. Essa ação valida e grava um rascunho **local** em
 `data/publishing/`; não conecta contas, não transmite vídeo e não publica.

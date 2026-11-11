@@ -12,7 +12,7 @@ Versão de referência: **4.1.0**. Esta página é o ponto de entrada para opera
 | Entender cada etapa, os arquivos produzidos e os fallbacks | [Processo de produção](PROCESSO.md) |
 | Ajustar parâmetros por job ou configuração da instalação | [Configuração](CONFIGURACAO.md) |
 | Entender serviços, dados, contratos e limites de confiança | [Arquitetura](ARCHITECTURE.md) |
-| Preparar rascunhos de Instagram/Facebook, YouTube e TikTok | [Publicação em dry-run](PUBLICACAO.md) |
+| Criar legendas, agendar publicações Meta ou preparar rascunhos locais | [Publicação e agenda](PUBLICACAO.md) |
 | Configurar ou diagnosticar a Quadro K4200 | [GPU K4200](GPU_K4200.md) |
 | Rodar testes e confirmar que três candidatos são reproduzíveis | [Testes e validação](TESTES.md) |
 | Conferir a aceitação de uma versão | [Plano de aceitação](TEST_PLAN.md) |

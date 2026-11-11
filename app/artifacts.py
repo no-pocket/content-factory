@@ -75,6 +75,10 @@ def register_render(job: dict, index: int, *, revision: int | None = None) -> No
     if clip.get('artifact_manifest'):
         clip.setdefault('render_history', []).append(copy.deepcopy({
             k: clip[k] for k in ('artifact_manifest', 'artifact_id', 'render_revision', 'candidate_version')}))
+        if 'social_captions' in clip:
+            clip.setdefault('social_caption_history', []).append({
+                'artifact_id': clip.get('artifact_id'), 'suggestions': copy.deepcopy(clip['social_captions'])})
+            del clip['social_captions']
     clip.setdefault('candidate_id', candidate_key(job['id'], index))
     clip.setdefault('candidate_version', 1)
     previous_plan = clip.get('artifact_manifest', {}).get('plan_sha256')

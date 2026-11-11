@@ -85,6 +85,19 @@ def render_v2_review(st, job: dict, index: int, row: dict) -> None:
     from .editorial_contracts import REASONS
     from .service import review_candidate_v2, Conflict
     cid = row['candidate_id']
+    suggestions = job['candidates'][index].get('social_captions', {})
+    if suggestions:
+        from .social_captions import ORIGIN_LABELS, REASON_LABELS
+        with st.expander('Sugestões de legenda para redes sociais'):
+            for platform in ('instagram', 'facebook'):
+                suggestion = suggestions.get(platform, {})
+                if suggestion.get('text'):
+                    st.markdown('**' + platform.title() + '**')
+                    st.text(suggestion['text'])
+                    st.caption('Origem: ' + ORIGIN_LABELS.get(suggestion.get('origin'), 'desconhecida') +
+                               (' · ' + REASON_LABELS.get(suggestion['reason'], 'motivo não informado') if suggestion.get('reason') else ''))
+                elif suggestion:
+                    st.caption(platform.title() + ': transcrição indisponível para criar sugestão.')
     # Versioned draft keys prevent accidental reuse of a comment on another render.
     prefix = f"v2_{job['id']}_{cid}_{row['artifact_id']}_"
     if st.session_state.get(prefix+'saved_confirmation'):

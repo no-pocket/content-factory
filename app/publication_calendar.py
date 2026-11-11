@@ -11,6 +11,10 @@ def month_grid(year: int, month: int) -> list[list[int]]:
     return calendar.Calendar(firstweekday=0).monthdayscalendar(year, month)
 
 
+def caption_key(job_id: str, candidate_id: str, artifact_id: str, provider: str) -> str:
+    return f'social_caption:{job_id}:{candidate_id}:{artifact_id}:{provider}'
+
+
 def local_timestamp(day, clock, timezone_name: str) -> float:
     zone = ZoneInfo(timezone_name)
     naive = datetime.combine(day, clock)
@@ -62,14 +66,45 @@ def render(st, jobs: list[dict]) -> None:
             if row.get('normalized_decision') == 'APPROVED' and row.get('artifact_intact'):
                 choices.append((job, job['candidates'][row['original_index']]))
     if choices:
+        selected = st.selectbox('Candidato aprovado', range(len(choices)),
+                                format_func=lambda i: f"{choices[i][0]['id'][:8]} · {choices[i][1]['candidate_id']}")
+        job, clip = choices[selected]
+        suggestions = clip.get('social_captions', {})
+        if not suggestions:
+            st.info('Este candidato ainda não tem sugestões de legenda.')
+        if st.button('Gerar novas sugestões de legenda', key='generate_social_captions'):
+            from .social_captions import regenerate
+            try:
+                with st.spinner('Criando sugestões a partir da transcrição...'):
+                    regenerate(job['id'], clip['candidate_id'], clip['artifact_id'])
+                st.success('Sugestões atualizadas. Edições já digitadas foram preservadas.')
+                st.rerun()
+            except (ValueError, service.Conflict, OSError) as exc:
+                st.error(f'Não foi possível gerar as sugestões: {exc}')
+        destinations = st.multiselect('Destinos', ['instagram', 'facebook'])
+        drafts = st.session_state.setdefault('social_caption_drafts', {})
+        captions = {}
+        for provider in destinations:
+            key = caption_key(job['id'], clip['candidate_id'], clip['artifact_id'], provider)
+            suggestion = suggestions.get(provider, {})
+            if key not in st.session_state:
+                st.session_state[key] = drafts.get(key, suggestion.get('text', ''))
+            if suggestion.get('text') and st.button('Usar sugestão para ' + provider.title(), key='apply_' + key):
+                st.session_state[key] = suggestion['text']
+                drafts[key] = suggestion['text']
+            def save_caption(widget_key=key):
+                st.session_state['social_caption_drafts'][widget_key] = st.session_state[widget_key]
+            captions[provider] = st.text_area('Legenda para ' + provider.title(), key=key, on_change=save_caption)
+            if suggestion:
+                from .social_captions import ORIGIN_LABELS, REASON_LABELS
+                origin = suggestion.get('origin', 'desconhecida')
+                reason = suggestion.get('reason')
+                st.caption('Sugestão: ' + ORIGIN_LABELS.get(origin, 'desconhecida') +
+                           (' · ' + REASON_LABELS.get(reason, 'motivo não informado') if reason else ''))
         with st.form('agenda_form'):
-            selected = st.selectbox('Candidato aprovado', range(len(choices)),
-                                    format_func=lambda i: f"{choices[i][0]['id'][:8]} · {choices[i][1]['candidate_id']}")
-            destinations = st.multiselect('Destinos', ['instagram', 'facebook'])
             page_id = st.text_input('ID da Página do Facebook')
             instagram_id = st.text_input('ID da conta profissional do Instagram')
             title = st.text_input('Título')
-            caption = st.text_area('Legenda')
             st.caption('O título identifica o item na agenda e acompanha o Reel no Facebook; o Instagram usa a legenda.')
             timing = st.radio('Quando publicar', ['Agora', 'Agendar'], horizontal=True)
             target_date = st.date_input('Data', value=today)
@@ -84,12 +119,11 @@ def render(st, jobs: list[dict]) -> None:
                     raise ValueError('Escolha um horário futuro')
                 if not page_id.isdecimal() or ('instagram' in destinations and not instagram_id.isdecimal()):
                     raise ValueError('Informe IDs numéricos das contas')
-                job, clip = choices[selected]
                 created, failures = [], []
                 for provider in destinations:
                     try:
                         agenda.schedule(job['id'], clip['candidate_id'], provider, title=title,
-                                        caption=caption, scheduled_at=when, page_id=page_id,
+                                        caption=captions[provider], scheduled_at=when, page_id=page_id,
                                         instagram_id=instagram_id if provider == 'instagram' else None,
                                         timezone_name=zone.key)
                         created.append(provider)

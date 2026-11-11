@@ -54,6 +54,44 @@ def test_resume_checks_existing_valid_result_without_rerender(monkeypatch, tmp_p
     assert record['candidates'][0]['qc']['state'] == 'VALID'
 
 
+def test_social_caption_generation_runs_after_successful_render(monkeypatch, tmp_path):
+    from app import social_captions
+    setup(monkeypatch, tmp_path)
+    observed=[]
+    def generate(clip, settings, language):
+        observed.append((clip.get('state'), clip.get('timeline')))
+        clip['social_captions']={'instagram':{'text':'Sugestão'}}
+    monkeypatch.setattr(social_captions, 'ensure', generate)
+    record=job()
+    candidates.render_candidates(record, Path('source'), [], {}, False, only=0)
+    assert observed == [('VALID', {'layers': {'captions': []}})]
+    assert record['candidates'][0]['social_captions']['instagram']['text']=='Sugestão'
+
+
+def test_resumed_render_fills_missing_caption_without_rerender(monkeypatch, tmp_path):
+    from app import social_captions
+    calls,_=setup(monkeypatch,tmp_path)
+    record=job()
+    record['candidates']=record['candidates'][:1]
+    monkeypatch.setattr(social_captions,'ensure',lambda clip, settings, language: clip.update(social_captions={'instagram':{'text':'Sugestão'}}))
+    candidates.render_candidates(record,Path('source'),[],{},False)
+    record['candidates'][0].pop('social_captions')
+    candidates.render_candidates(record,Path('source'),[],{},False)
+    assert calls==[1]
+    assert record['candidates'][0]['social_captions']['instagram']['text']=='Sugestão'
+
+
+def test_legacy_rerender_archives_previous_social_caption(monkeypatch, tmp_path):
+    setup(monkeypatch,tmp_path)
+    record=job()
+    record['candidates']=record['candidates'][:1]
+    record['candidates'][0]['social_captions']={'instagram':{'text':'Legenda anterior'}}
+    candidates.render_candidates(record,Path('source'),[],{},False)
+    clip=record['candidates'][0]
+    assert clip['social_caption_history'][-1]['suggestions']['instagram']['text']=='Legenda anterior'
+    assert clip['social_captions']['instagram']['text'] != 'Legenda anterior'
+
+
 def test_v2_retry_uses_new_paths_and_preserves_old_bytes(monkeypatch, tmp_path):
     from app import store
     calls, _ = setup(monkeypatch, tmp_path, fail=True)

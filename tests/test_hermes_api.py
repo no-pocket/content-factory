@@ -37,6 +37,53 @@ def test_hermes_token_is_scoped_and_candidate_has_no_paths(v2job,hermes_server):
     assert hermes_server(route,token='synthetic-general-token-long-enough')[0]==401
 
 
+def test_hermes_can_save_caption_as_suggestion_without_approval(v2job, hermes_server):
+    import uuid
+    job=v2job; clip=job['candidates'][0]
+    route=f"/v2/hermes/jobs/{job['id']}/candidates/{clip['candidate_id']}"
+    payload={'owner_message':'Crie outra legenda', 'caption':{'request_id':str(uuid.uuid4()),
+        'expected_artifact_id':clip['artifact_id'], 'provider':'instagram', 'text':'Uma sugestão para revisão.'}}
+    assert hermes_server(route+'/captions', {'caption':payload['caption']})[0]==422
+    status,result=hermes_server(route+'/captions',payload)
+    assert status==200 and result['text']=='Uma sugestão para revisão.'
+    assert hermes_server(route+'/captions',payload)[1]==result
+    assert hermes_server(route)[1]['social_captions']['instagram']['origin']=='hermes'
+    assert not store.load(job['id']).get('feedback_events')
+    assert hermes_server(route+'/captions',{**payload,'caption':{**payload['caption'],'text':'Outra'}})[0]==409
+
+
+def test_caption_request_id_cannot_be_reused_for_new_artifact(v2job, hermes_server):
+    import uuid
+    from app.artifacts import register_render
+    job=v2job; clip=job['candidates'][0]
+    route=f"/v2/hermes/jobs/{job['id']}/candidates/{clip['candidate_id']}/captions"
+    payload={'owner_message':'Crie outra legenda', 'caption':{'request_id':str(uuid.uuid4()),
+        'expected_artifact_id':clip['artifact_id'], 'provider':'instagram', 'text':'Sugestão.'}}
+    assert hermes_server(route,payload)[0]==200
+    updated=store.load(job['id'])
+    register_render(updated,0)
+    store.save(updated)
+    payload['caption']['expected_artifact_id']=updated['candidates'][0]['artifact_id']
+    assert hermes_server(route,payload)[0]==409
+
+
+def test_hermes_can_read_scoped_source_transcript(v2job, hermes_server):
+    path=store.JOBS / (v2job['id']+'.transcript.json')
+    path.write_text(json.dumps({'language':'pt','segments':[{'start':1,'end':2,'text':'Trecho de teste','private':'ignore'}]}),encoding='utf-8')
+    status,result=hermes_server('/v2/hermes/jobs/'+v2job['id']+'/transcript')
+    assert status==200 and result['segments']==[{'start':1,'end':2,'text':'Trecho de teste'}]
+
+
+def test_hermes_cannot_read_transcript_for_local_only_source(v2job, hermes_server):
+    job=store.load(v2job['id'])
+    job['source_snapshot']={'allowed_model_scopes':['local']}
+    store.save(job)
+    assert hermes_server('/v2/hermes/jobs/'+job['id']+'/transcript')[0]==403
+    caption={'request_id':'00000000-0000-4000-8000-000000000001','expected_artifact_id':job['candidates'][0]['artifact_id'],'provider':'instagram','text':'teste'}
+    route=f"/v2/hermes/jobs/{job['id']}/candidates/{job['candidates'][0]['candidate_id']}/captions"
+    assert hermes_server(route,{'owner_message':'Nova legenda','caption':caption})[0]==403
+
+
 def test_hermes_review_requires_explicit_owner_message_and_trusted_actor(v2job,hermes_server):
     j=v2job;c=j['candidates'][0]
     route=f"/v2/hermes/jobs/{j['id']}/candidates/{c['candidate_id']}/reviews"

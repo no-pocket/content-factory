@@ -48,6 +48,6 @@ fica `PARTIAL_FAILED`, com revisão apenas dos bons; retry limitado é por candi
 As avaliações agora preservam histórico, notas, motivo e retrabalho; siga o
 [protocolo editorial](PROTOCOLO_EDITORIAL.md). UI, CLI e [API](API.md) usam o mesmo serviço.
 
-`NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. `APPROVED`/`REJECTED` são estados locais. Não há postagem automática nem edição manual de timeline pela UI atual.
+`NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. `APPROVED`/`REJECTED` são estados locais. A agenda opcional permite envio imediato ou programado de candidatos aprovados após escolha explícita; a UI atual não permite edição manual da timeline. Consulte [Publicação](PUBLICACAO.md).
 
 As principais lacunas planejadas constam na [auditoria de produto](AUDITORIA_E_OPCOES_2026-11-04.md). Ela é histórica; fila, descoberta por transcrição, prévias e contrato GPU já receberam as mudanças descritas neste guia.

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+import copy
 from pathlib import Path
 
 from .director import direct_edit
@@ -62,11 +63,18 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 metric['qc_state']=current['state']
             if current['state'] in REVIEWABLE:
                 clip['qc'] = current
+                if 'social_captions' not in clip:
+                    from .social_captions import ensure
+                    ensure(clip, settings, job.get('language', ''))
+                    save(job)
                 continue
             clip.update(state='FAILED', qc=current)
             invalidate_approvals(job, {index})
         while clip.get('attempts', 0) < limits['max_attempts']:
             render_revision = clip.get('render_revision', 0) + 1
+            if job.get('editorial_protocol') != 2 and 'social_captions' in clip:
+                clip.setdefault('social_caption_history', []).append({
+                    'artifact_id': clip.get('artifact_id'), 'suggestions': copy.deepcopy(clip.pop('social_captions'))})
             if job.get('editorial_protocol') == 2:
                 target = render_target(job, index, render_revision)
                 # Interrupted attempts may already have bytes; reserve a new directory.
@@ -152,6 +160,9 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 register_render(job, index, revision=render_revision)
                 for metric in clip['stage_metrics'][metric_start:]:
                     metric.update(candidate_version=clip['candidate_version'],render_revision=clip['render_revision'])
+            if clip.get('state') in REVIEWABLE and 'social_captions' not in clip:
+                from .social_captions import ensure
+                ensure(clip, settings, job.get('language', ''))
             save(job)
             # One attempt per dispatch. A human can retry this candidate within the saved limit.
             break

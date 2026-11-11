@@ -94,6 +94,7 @@ def _candidate(jid, cid):
         transcript=clip.get('text', ''), start=clip.get('start'), end=clip.get('end'),
         model=job.get('comparison', {}).get('label') or job.get('settings', {}).get('llm_model'),
         director=clip.get('director_used'), renderer=clip.get('renderer_used'))
+    public['social_captions'] = clip.get('social_captions', {})
     public['artifact_intact'] = bool(row['artifact_id'] and row['artifact_id'] == 'sha256:' + digest(manifest))
     public['master_sha256'] = (manifest['files'].get('mp4') or {}).get('sha256')
     from .media_delivery import get_delivery_metadata
@@ -147,6 +148,25 @@ def dispatch(handler, path):
     if len(path) == 2 and path[0] == 'jobs' and method == 'GET':
         job = store.load(path[1])
         return handler._json(200, {key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')})
+    if len(path) == 3 and path[0] == 'jobs' and path[2] == 'transcript' and method == 'GET':
+        job = store.load(path[1])
+        _require_external(job)
+        transcript_path = store.JOBS / (path[1] + '.transcript.json')
+        try:
+            with transcript_path.open('rb') as source:
+                raw = source.read(4 * 1024 * 1024 + 1)
+        except OSError as exc:
+            raise ValueError('Transcrição indisponível') from exc
+        if len(raw) > 4 * 1024 * 1024:
+            raise ValueError('Transcrição excede o limite')
+        transcript = json.loads(raw.decode('utf-8'))
+        if not isinstance(transcript, dict):
+            raise ValueError('Transcrição inválida')
+        segments = transcript.get('segments')
+        if not isinstance(segments, list) or any(not isinstance(s, dict) for s in segments):
+            raise ValueError('Transcrição inválida')
+        return handler._json(200, {'job_id': path[1], 'language': transcript.get('language'),
+                                   'segments': [{k: s.get(k) for k in ('start', 'end', 'text')} for s in segments]})
     if path == ['groups'] and method == 'GET':
         from .source_review import list_groups
         return handler._json(200, {'groups': [g for g in list_groups()
@@ -169,6 +189,40 @@ def dispatch(handler, path):
         _require_external(store.load(jid))
         if len(path) == 4 and method == 'GET':
             return handler._json(200, _candidate(jid, cid)[2])
+        if len(path) == 5 and path[4] == 'captions' and method == 'POST':
+            import uuid
+            import time
+            body = _body(handler)
+            request = _intent(body, 'caption')
+            if set(request) != {'request_id', 'expected_artifact_id', 'provider', 'text'}:
+                raise ValueError('Invalid caption request')
+            try:
+                if str(uuid.UUID(request['request_id'])) != request['request_id']:
+                    raise ValueError('Invalid request ID')
+            except (ValueError, TypeError, AttributeError):
+                raise ValueError('Invalid request ID')
+            provider, text = request['provider'], request['text']
+            if provider not in ('instagram', 'facebook') or not isinstance(text, str) or not text.strip() or len(text) > 2200 or any(ord(c) < 32 and c not in '\n\r\t' for c in text):
+                raise ValueError('Invalid caption')
+            actor = _actor()
+            with store.job_lock(jid):
+                job, row, _ = _candidate(jid, cid)
+                if not row['artifact_intact'] or row['artifact_id'] != request['expected_artifact_id']:
+                    raise service.Conflict('Candidate artifact changed')
+                clip = job['candidates'][row['original_index']]
+                events = clip.setdefault('social_caption_events', [])
+                existing = next((e for e in events if e['request_id'] == request['request_id']), None)
+                value = {'text': text.strip(), 'origin': 'hermes', 'reason': None}
+                if existing:
+                    if (existing['provider'] != provider or existing['suggestion'] != value
+                            or existing['owner_message'] != body['owner_message'] or existing['artifact_id'] != row['artifact_id']):
+                        raise service.Conflict('Request ID already used')
+                    return handler._json(200, existing['suggestion'])
+                events.append({'request_id': request['request_id'], 'provider': provider, 'suggestion': value,
+                               'artifact_id': row['artifact_id'], 'actor': actor, 'owner_message': body['owner_message'], 'created_at': time.time()})
+                clip.setdefault('social_captions', {})[provider] = value
+                store.save(job)
+                return handler._json(200, value)
         if len(path) == 5 and path[4] == 'deliveries' and method == 'POST':
             from .telegram_deliveries import register
             body = _body(handler)

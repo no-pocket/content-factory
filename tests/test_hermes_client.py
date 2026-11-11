@@ -75,3 +75,13 @@ def test_delivery_routes_require_exact_message_identity():
     assert client.route(SimpleNamespace(command='delivery',chat_id='-100123',message_id=1704))=='/deliveries/-100123/1704'
     with pytest.raises(ValueError):
         client.route(SimpleNamespace(command='delivery',chat_id='../123',message_id=1704))
+
+
+def test_caption_route_is_candidate_scoped():
+    args=SimpleNamespace(command='caption',job='00000000-0000-0000-0000-000000000001',candidate='00000000-0000-0000-0000-000000000002')
+    assert client.route(args).endswith('/candidates/00000000-0000-0000-0000-000000000002/captions')
+
+
+def test_transcript_route_is_job_scoped():
+    args=SimpleNamespace(command='transcript',job='00000000-0000-0000-0000-000000000001')
+    assert client.route(args)=='/jobs/00000000-0000-0000-0000-000000000001/transcript'

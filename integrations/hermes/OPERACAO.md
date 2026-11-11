@@ -52,6 +52,8 @@ A API geral conserva sua credencial própria e contratos existentes.
 
 - GET `groups`, `groups/<source:id>`: fontes, modelos, candidatos e seleção.
 - GET `jobs/<job>/candidates/<candidate>`: texto/revisão/identidade/link e comentários.
+- GET `jobs/<job>/transcript`: transcrição da fonte, limitada a 4 MiB e sujeita ao escopo externo da fonte.
+- POST `jobs/<job>/candidates/<candidate>/captions`: salva sugestão editorial Hermes para Instagram ou Facebook, com instrução do proprietário, request_id e identidade do artefato. Não aprova nem publica; reenvios idênticos são idempotentes.
 - GET `jobs/<job>/candidates/<candidate>/media?artifact_id=sha256:...`: MP4 privado,
   identidade/QC atuais, até50MB; cliente valida SHA e não segue redirecionamento.
 - POST `.../notes`: `{owner_message,note:{request_id,expected_artifact_id}}`.

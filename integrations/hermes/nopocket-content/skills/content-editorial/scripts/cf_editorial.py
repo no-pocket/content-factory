@@ -58,6 +58,7 @@ def route(args):
     if args.command=='sources':return '/sources'
     if args.command=='ingest':return '/ingest'
     if args.command=='status':return '/jobs/'+identifier(args.job)
+    if args.command=='transcript':return '/jobs/'+identifier(args.job)+'/transcript'
     if args.command=='groups':return '/groups'
     if args.command in ('group','select'):
         if not args.group.startswith('source:') or len(args.group)!=71 or any(c not in '0123456789abcdef' for c in args.group[7:]):raise ValueError('Invalid source group')
@@ -65,6 +66,7 @@ def route(args):
     path='/jobs/'+identifier(args.job)+'/candidates/'+identifier(args.candidate)
     if args.command=='review':path+='/reviews'
     if args.command=='note':path+='/notes'
+    if args.command=='caption':path+='/captions'
     if args.command=='record-delivery':path+='/deliveries'
     if args.command=='media':
         if not args.artifact_id.startswith('sha256:') or len(args.artifact_id)!=71 or any(c not in '0123456789abcdef' for c in args.artifact_id[7:]):raise ValueError('Invalid artifact identity')
@@ -75,7 +77,7 @@ def route(args):
 def run(args):
     url,token=config();path=route(args)
     payload=None
-    if args.command in ('review','select','note','ingest','record-delivery'):
+    if args.command in ('review','select','note','ingest','record-delivery','caption'):
         source=Path(args.payload_file)
         if source.stat().st_size>65536:raise ValueError('Action payload too large')
         raw=json.loads(source.read_text(encoding='utf-8-sig'))
@@ -129,12 +131,13 @@ def main():
     p=sub.add_parser('delivery');p.add_argument('--chat-id',required=True);p.add_argument('--message-id',required=True,type=int)
     p=sub.add_parser('ingest');p.add_argument('--payload-file',required=True)
     p=sub.add_parser('status');p.add_argument('--job',required=True)
+    p=sub.add_parser('transcript');p.add_argument('--job',required=True)
     for name in ('group','select'):
         p=sub.add_parser(name);p.add_argument('--group',required=True)
         if name=='select':p.add_argument('--payload-file',required=True)
-    for name in ('candidate','review','media','note','record-delivery'):
+    for name in ('candidate','review','media','note','record-delivery','caption'):
         p=sub.add_parser(name);p.add_argument('--job',required=True);p.add_argument('--candidate',required=True)
-        if name in ('review','note','record-delivery'):p.add_argument('--payload-file',required=True)
+        if name in ('review','note','record-delivery','caption'):p.add_argument('--payload-file',required=True)
         if name=='media':p.add_argument('--artifact-id',required=True)
     try:
         result=run(parser.parse_args());print(json.dumps(result,ensure_ascii=False))
