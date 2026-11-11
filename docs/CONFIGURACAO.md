@@ -170,3 +170,19 @@ repetido podem conservar seu identificador da frase imediatamente anterior
 podem ser descartadas. Falhas geram diagnostico `unsupported_title_relation`
 ou `unsupported_title_polarity`; uma parafrase correta pode ser recusada. Isso
 nao substitui revisao editorial nem demonstra equivalencia semantica geral.
+
+## Agenda de publicação Meta
+
+O executor opcional é definido em `compose.publishing.yaml` e lê o token de
+usuário `USER_ACCESS_TOKEN` do arquivo local `.env.meta` montado somente para
+leitura no serviço `publisher`. Não coloque credenciais nos formulários, logs,
+agendamentos ou arquivos versionados. `META_GRAPH_VERSION` seleciona a versão
+da Graph API e assume `v27.0` se não for definida. A Página e a conta profissional
+do Instagram são selecionadas por seus IDs no formulário e fixadas no agendamento.
+O executor reconfirma o vínculo antes do envio.
+
+Depois de trocar `.env.meta` por substituição atômica, recrie o serviço
+`publisher` para garantir que o bind mount veja o novo arquivo; antes, confirme
+que não há publicação em andamento. O token pode ser invalidado antes da data
+prevista, e o acesso aos dados tem validade própria. Consulte [Publicação](PUBLICACAO.md)
+para operação, estados e recuperação de falhas.

@@ -1,5 +1,21 @@
 # Testes e validação
 
+## Publicação Meta
+
+`tests/test_publication_schedule.py`, `tests/test_publication_worker.py`,
+`tests/test_publication_calendar.py`, `tests/test_meta_http.py` e
+`tests/test_meta_transport.py` cobrem agenda, recuperação, destino, cliente
+HTTPS e protocolos simulados. A suíte não envia conteúdo remoto. Uma publicação
+real deve verificar o histórico da agenda, o estado confirmado pela Meta e a
+reprodução do Reel; um container aceito não prova publicação.
+
+Em 10/11/2026, foi realizado um ensaio autorizado pela interface com o candidato
+aprovado `bde563a3` / `894912fc`: Instagram confirmou
+[o Reel](https://www.instagram.com/reel/Dfkiio-Gqr8/) e a agenda mostrou ✅.
+Um agendamento futuro foi criado e cancelado sem envio. O transporte Facebook
+da aplicação tem testes simulados; a publicação Facebook testada anteriormente
+foi feita diretamente pela API, não pelo fluxo integrado da interface.
+
 ## Suíte automatizada
 
 Renderer (Node22, dependências de desenvolvimento fixadas no lockfile):

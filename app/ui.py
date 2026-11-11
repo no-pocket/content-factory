@@ -24,7 +24,7 @@ st.title("🎬 Content Factory — Creator Clips")
 st.caption(f"Versão {VERSION}")
 if st.session_state.get("review_feedback"):
     st.success(st.session_state.pop("review_feedback"))
-st.caption("v4: vídeo autorizado → Whisper por palavra → Qwen Editor → timeline → FFmpeg/Remotion → revisão humana. Sem postagem automática.")
+st.caption("Vídeo autorizado → transcrição → edição → revisão humana → publicação escolhida na agenda.")
 st.warning("Uso privado: a interface deve ficar acessível apenas via localhost, SSH tunnel ou VPN. Não exponha a porta 8501 publicamente.")
 st.caption('Perfil inicial de novos jobs: Qwen na GPU K4200 + Remotion + alta fidelidade. CPU e outros ajustes continuam disponíveis no formulário.')
 from app.source_registry_ui import render_source_registry
@@ -115,6 +115,13 @@ workspace = st.radio('Área editorial', ['Comparar fontes e escolher finais', 'J
 st.session_state['review_queue_enabled'] = workspace == 'Job individual'
 if workspace == 'Comparar fontes e escolher finais':
     render_source_review(st)
+    from app.publishing import render_publishing_panel
+    from app.publication_calendar import render as render_publication_calendar
+    agenda_tab, draft_tab = st.tabs(['Agenda de publicações', 'Rascunhos de publicação'])
+    with agenda_tab:
+        render_publication_calendar(st, all_jobs())
+    with draft_tab:
+        render_publishing_panel(st, all_jobs())
     st.stop()
 st.subheader("Jobs e aprovação")
 jobs = all_jobs()
@@ -314,4 +321,9 @@ with st.expander('Métricas editoriais e comparação de configurações'):
                '30 positivos/30 negativos, cobertura PT/EN, holdout e aprovação explícita.')
 
 from app.publishing import render_publishing_panel
-render_publishing_panel(st,jobs)
+from app.publication_calendar import render as render_publication_calendar
+agenda_tab, draft_tab = st.tabs(['Agenda de publicações', 'Rascunhos de publicação'])
+with agenda_tab:
+    render_publication_calendar(st, jobs)
+with draft_tab:
+    render_publishing_panel(st, jobs)

@@ -4,7 +4,7 @@
 
 Sprint em validação: [QC, avaliação editorial e API local v1](research/SPRINT_QUALIDADE_RESULTADOS.md).
 
-Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in Streamlit. No paid AI API, Hermes account, or autoposting required.
+Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in Streamlit. Optional Meta publishing and local scheduling are described in [Publicação](docs/PUBLICACAO.md).
 
 
 ## Start the workstation (Linux / Docker Desktop with WSL2)
@@ -76,7 +76,7 @@ The director is not permitted to provide shell commands or arbitrary file paths;
 
 Use os comandos e critérios em [Testes e validação](docs/TESTES.md). Nesta workstation a suíte roda na imagem existente do worker, com o código montado, sem reconstruir a imagem.
 
-The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. This project does not currently include automated social posting, word-level forced alignment after text correction, face tracking, or multi-worker leases.
+The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. Meta publishing is opt-in; word-level forced alignment after text correction, face tracking, and multi-worker leases are not provided.
 
 ## Troubleshooting — Hugging Face certificate verification
 

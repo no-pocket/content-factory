@@ -1,0 +1,14 @@
+# Opt-in: docker compose -f compose.yaml -f compose.kepler.yaml -f compose.publishing.yaml up -d --no-deps publisher
+services:
+  publisher:
+    image: content-factory-worker:latest
+    entrypoint: ["python", "-m", "app.publication_worker"]
+    environment:
+      DATA_DIR: /data
+      META_CREDENTIAL_FILE: /run/secrets/meta.env
+      META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v27.0}
+    volumes:
+      - ./data:/data
+      - ./app:/app/app:ro
+      - ./.env.meta:/run/secrets/meta.env:ro
+    restart: unless-stopped
