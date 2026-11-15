@@ -92,6 +92,7 @@ def process(jid: str) -> None:
     if job["status"] != "QUEUED":
         return
     try:
+        job.pop('failure_code', None)
         raw_settings = dict(job.get('settings') or {})
         raw_settings.setdefault('render_quality', 'standard')  # preserve pre-profile job intent
         settings = normalize_job_settings(raw_settings)
@@ -206,7 +207,8 @@ def process(jid: str) -> None:
             if 'fallback' in stage['resolved']:
                 stage['fallback_reason']=job.get('ai_activity',{}).get('reason','UNKNOWN')
         if not clips:
-            raise ValueError("No usable speech windows found; try a longer video with speech")
+            job['failure_code'] = 'NO_USABLE_CANDIDATES'
+            raise ValueError(empty_candidate_failure(job))
         job.update({"language": transcript['language'], "duration": duration, "status": "RENDERING", "candidates": clips})
         from .editorial_context import build_candidate_context
         from .artifacts import digest
@@ -249,6 +251,13 @@ def process(jid: str) -> None:
                                               seconds=time.time() - job['run_started_at'])
         save(job)
 
+
+
+def empty_candidate_failure(job):
+    events = [e for e in job.get('ai_events', []) if e.get('at', 0) >= job.get('run_started_at', 0)]
+    if any(e.get('event') == 'proposal_chunk_failed' and 'length' in e.get('details', {}).get('reason', '') for e in events):
+        return 'Nenhum candidato: resposta incompleta do modelo; heurística não encontrou cortes válidos.'
+    return 'Nenhum candidato passou nas validações editoriais; confira o diagnóstico do job.'
 
 def main() -> None:
     threading.Thread(target=heartbeat_loop, daemon=True, name="worker-heartbeat").start()

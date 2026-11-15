@@ -100,3 +100,9 @@ def test_hermes_reprocess_cannot_bypass_local_scope(setup, hermes_server, monkey
     body = {'owner_message':'Reprocesse.', 'reprocess':request(job)}
     assert hermes_server('/v2/hermes/jobs/'+job['id']+'/reprocess', body)[0] == 403
     assert not q.ids and store.load(job['id'])['status'] == 'FAILED'
+
+def test_empty_selection_reports_incomplete_model_response():
+    from app.worker import empty_candidate_failure
+    job = {'ai_events':[{'event':'proposal_chunk_failed','details':{'reason':'Model response ended with length'}}]}
+    assert 'resposta incompleta' in empty_candidate_failure(job).lower()
+    assert 'fala' not in empty_candidate_failure(job).lower()

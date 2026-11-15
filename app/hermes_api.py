@@ -136,7 +136,7 @@ def _pipeline(job):
         rejected = Counter()
         for event in events:
             rejected.update(event.get('details', {}).get('rejections', {}))
-        empty = str(job.get('error', '')).startswith('No usable speech windows found')
+        empty = job.get('failure_code') == 'NO_USABLE_CANDIDATES' or str(job.get('error', '')).startswith('No usable speech windows found')
         result['failure'] = {'code': 'NO_USABLE_CANDIDATES' if empty else 'PROCESSING_FAILED',
             'message': 'Nenhum corte passou nas validações; isso não significa ausência de fala.' if empty else 'Falha de processamento; consulte o diagnóstico na aplicação privada.',
             'proposal_rejections': dict(rejected),
