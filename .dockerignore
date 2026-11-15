@@ -4,6 +4,10 @@
 !.env.example
 .github
 .venv
+.venv-web
+.web
+frontend/node_modules
+frontend/dist
 .pytest_cache
 .pytest_tmp
 **/__pycache__

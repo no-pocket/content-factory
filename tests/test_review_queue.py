@@ -47,7 +47,7 @@ def page(monkeypatch):
     import app
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
-    return AppTest.from_file(str(Path(app.__file__).parent / 'ui.py'), default_timeout=20).run()
+    return AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit' / 'ui.py'), default_timeout=20).run()
 
 
 def test_default_pending_and_completed_jobs_remain_accessible(v2job, monkeypatch):
@@ -136,7 +136,7 @@ def test_old_completed_job_filter_migrates_without_hiding_saved_review(v2job, mo
     review(v2job)
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
-    ui = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py'), default_timeout=20)
+    ui = AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit' / 'ui.py'), default_timeout=20)
     ui.session_state['job_filter'] = 'Aprovados'
     ui.session_state['selected_job'] = v2job['id']
     ui.run()

@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 EDIT_HINT_SCHEMA = {
     "type": "object",
     "properties": {
+        "pace": {"enum": ["auto", "natural"]},
         "hook": {"type": "string"},
         "story": {"type": "object", "properties": {
             "closure": {"enum": ["COMPLETE", "INCOMPLETE", "UNCERTAIN"]},
@@ -30,7 +31,7 @@ EDIT_HINT_SCHEMA = {
 
 
 def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = None,
-                llm_backend: str = 'ollama', model: str | None = None) -> tuple[dict, str]:
+                llm_backend: str = 'ollama', model: str | None = None, auto_pace: bool = False) -> tuple[dict, str]:
     """Returns (hints, engine_used); untrusted output validated by timeline builder."""
     if (mode if mode is not None else os.getenv("EDIT_DIRECTOR", "heuristic")).lower() != "ollama":
         return {}, "heuristic"
@@ -42,6 +43,8 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         {"asset_id": asset_id, "description": meta.get("description", ""), "duration": meta.get("duration", 0)} for asset_id, meta in list(assets.items())[:15]
     ]}
     context = clip.get('editorial_context')
+    if clip.get('revision_feedback'):
+        brief['human_feedback']=clip['revision_feedback']
     if context:
         from .editorial_context import compact_source_context
         brief['source_context'] = compact_source_context(context)
@@ -55,6 +58,7 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         "Sugira 0 a 3 punch_zoom nos instantes de destaque (segundos relativos ao corte), "
         "e 0 a 2 inserções B-roll de 2-5s apenas com asset_id listado; nunca invente IDs. "
         "Mantenha a fala original audível e evite sobrecarregar de efeitos. "
+        f"{'Pode retornar pace=auto para ajuste leve de fala lenta ou natural para manter ritmo. A aplicação valida timestamps e limita aceleração. ' if auto_pace else ''}"
         "source_context contém tabelas com colunas fields e grupos before/segments/after; use segment_id como evidência. "
         "Quando houver source_context, inclua story com closure COMPLETE/INCOMPLETE/UNCERTAIN, "
         "evidence [{segment_id,quote literal}] incluindo o final e parts {hook,setup,proof,payoff} por ID. "
@@ -71,10 +75,16 @@ def direct_edit(clip: dict, assets: dict, on_event=None, *, mode: str | None = N
         from .editorial_context import require_prompt_budget
         from .editorial_retrieval import append_prompt_examples
         examples=clip.get('retrieval_snapshot',{}).get('examples',[])
-        prompt,used=append_prompt_examples(prompt,examples,context_window=4096,reserve=450)
+        if llm_backend=='kepler_gpu' and clip.get('revision_feedback'):
+            used=[]  # Prioritize the complete current human instructions over optional examples.
+        else:
+            prompt,used=append_prompt_examples(prompt,examples,context_window=4096,reserve=450)
         if examples and on_event:
             on_event('retrieval_context',{'used_candidate_ids':used,'reason':'APPLIED' if used else 'CONTEXT_RESERVE_PRESERVED'})
-        budget = require_prompt_budget(prompt, context_window=4096, reserve=450)
+        if llm_backend=='kepler_gpu' and clip.get('revision_feedback'):
+            budget={'method':'live_bridge_tokenizer_preflight','generation_reserve':450,'context_window':4096,'prefix_truncated':False}
+        else:
+            budget = require_prompt_budget(prompt, context_window=4096, reserve=450)
         payload=json.loads(body);payload['prompt']=prompt;body=json.dumps(payload).encode('utf-8')
         if on_event:
             on_event("analyzing", {'context_budget': budget})

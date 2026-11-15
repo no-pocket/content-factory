@@ -38,6 +38,9 @@ def test_verified_metadata_and_concurrent_dedup(setup):
     job = results[0]['job']
     assert job['source_snapshot']['channel_id'] == CHANNEL
     assert job['youtube_metadata']['video_id'] == 'g8Q1UxPJulc'
+    assert job['youtube_video_id'] == 'g8Q1UxPJulc'
+    assert job['video_title'] == 'Vídeo'
+    assert job['original_name'] == 'Vídeo'
     assert len(store.all_jobs()) == 1
 
 @pytest.mark.parametrize('change', [{'channel_id':'UC'+'b'*22}, {'language':None}, {'is_live':True}])

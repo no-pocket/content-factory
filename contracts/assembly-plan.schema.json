@@ -51,6 +51,7 @@
             "minLength": 1,
             "maxLength": 300
           },
+          "playback_rate": {"type": "number", "minimum": 1, "maximum": 1.15},
           "frame_count": {
             "type": "integer",
             "minimum": 1

@@ -12,7 +12,7 @@ def test_streamlit_form_exposes_per_job_settings(monkeypatch, tmp_path):
     monkeypatch.setattr(store, 'all_jobs', lambda: [])
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
-    test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
+    test = AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit' / 'ui.py')).run(timeout=20)
     assert not test.exception
     settings_numbers = [v for v in test.get('number_input') if not (v.key or '').startswith('agenda_')]
     settings_selects = [v for v in test.get('selectbox') if not (v.key or '').startswith(('registry_', 'agenda_'))]
@@ -36,7 +36,7 @@ def test_selected_job_survives_status_change(monkeypatch):
     monkeypatch.setattr(store, 'load', lambda jid: next(j for j in jobs if j['id'] == jid))
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
-    test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
+    test = AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit' / 'ui.py')).run(timeout=20)
     test.radio(key='editorial_workspace').set_value('Job individual').run()
     test.selectbox(key='job_filter').set_value('Todos').run()
     test.selectbox(key='selected_job').set_value('a').run()
@@ -51,7 +51,7 @@ def test_v2_adjustment_and_rejection_persist_without_ratings(v2job, monkeypatch)
     monkeypatch.setattr(store, 'all_jobs', lambda: [store.load(v2job['id'])])
     monkeypatch.setattr(edit_render, 'read_assets', lambda: {})
     monkeypatch.setattr(dashboard_health, 'render_doctor', lambda: None)
-    test = AppTest.from_file(str(Path(app.__file__).parent / 'ui.py')).run(timeout=20)
+    test = AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit' / 'ui.py')).run(timeout=20)
     assert not test.exception
     test.radio(key='editorial_workspace').set_value('Job individual').run()
     comment = next(t for t in test.text_area if t.label == 'Comentário / motivo')
@@ -77,7 +77,7 @@ def test_existing_review_session_keeps_individual_workspace_and_comment_draft(v2
     monkeypatch.setattr(store,'ROOT',tmp_path)
     monkeypatch.setattr(edit_render,'read_assets',lambda: {})
     monkeypatch.setattr(dashboard_health,'render_doctor',lambda: None)
-    test=AppTest.from_file(str(Path(app.__file__).parent/'ui.py'))
+    test=AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit'/'ui.py'))
     clip=v2job['candidates'][0]
     draft_key=f"v2_{v2job['id']}_{clip['candidate_id']}_{clip['artifact_id']}_comment"
     test.session_state['selected_job']=v2job['id']

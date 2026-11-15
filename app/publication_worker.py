@@ -117,7 +117,12 @@ def main() -> None:
         def heartbeat():
             while True:
                 try:
-                    publication_schedule.write_heartbeat()
+                    try:
+                        read_user_token()
+                        configured = True
+                    except ConfigurationError:
+                        configured = False
+                    publication_schedule.write_heartbeat(configured=configured)
                 except OSError:
                     logging.error('Não foi possível atualizar o estado da agenda')
                 time.sleep(10)

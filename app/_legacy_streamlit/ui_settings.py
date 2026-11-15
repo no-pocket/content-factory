@@ -1,7 +1,7 @@
 """Streamlit controls for the versioned per-job processing settings."""
 import json
 
-from .job_settings import DEFAULTS, RANGES
+from ..job_settings import DEFAULTS, RANGES
 
 LABELS = {
     'editorial_protocol': 'Protocolo editorial (1 legado, 2 revisão versionada)',
@@ -29,11 +29,14 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'auto_pace':
+            result[key] = st.selectbox('Ajuste leve de fala lenta', [False,True],index=int(initial[key]),key=key_prefix+key)
+            continue
         if key == 'duration_mode':
             result[key] = duration_mode if duration_mode is not None else render_duration_mode_control(st, initial=initial[key], key_prefix=key_prefix)
             continue
         if key == 'outro_asset_id':
-            from .edit_render import read_assets
+            from ..edit_render import read_assets
             assets = read_assets()
             options = [None, *assets]
             if initial[key] is not None and initial[key] not in assets:

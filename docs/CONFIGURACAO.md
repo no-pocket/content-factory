@@ -77,7 +77,7 @@ comparados em blocos sem alegar ordenação global pelo modelo; a direção que 
 usa fallback explícito, com motivo. Esta opção pode recusar prompts que caberiam no
 tokenizer; não indica melhoria editorial comprovada ou ganho de desempenho.
 
-Abra **Adicionar um vídeo autorizado → Ajustes de processamento**. Todos os campos abaixo são salvos no JSON do job e validados em `app/job_settings.py`. O valor salvo prevalece sobre mudanças futuras dos padrões do worker.
+Abra **Novo vídeo → Ajustes de processamento**. A aba **Configurações** salva preferências para novos formulários neste navegador. Todos os campos abaixo são salvos no JSON do job e validados em `app/job_settings.py`. O valor salvo prevalece sobre mudanças futuras dos padrões do worker.
 
 | Campo (`settings`) | Padrão | Limite / efeito |
 | --- | ---: | --- |
@@ -111,6 +111,7 @@ em [Controle de qualidade](CONTROLE_QUALIDADE.md). O servidor opcional usa
 | Ingestão | `ENABLE_YOUTUBE_DOWNLOAD`, `YOUTUBE_MAX_DURATION`, `YOUTUBE_MAX_BYTES` | Habilitar e limitar downloads autorizados |
 | Whisper | `WHISPER_DEVICE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_INITIAL_PROMPT` | Mudar execução ASR e vocabulário inicial |
 | Qwen/Ollama | `OLLAMA_MODEL`, `OLLAMA_TIMEOUT`, `OLLAMA_PROPOSAL_MAX_CHUNKS` | Padrões do backend; ajustes por job prevalecem onde houver campo correspondente |
+| Análise visual | `FRAME_VISION_MODEL`, `FRAME_VISION_TIMEOUT` | Modelo de visão já instalado no Ollama local; vazio desativa classificação visual, mantendo OCR |
 | Render | `RENDER_FALLBACK_FFMPEG`, `RENDER_TIMEOUT` | Controlar fallback e prazo do Remotion |
 | K4200 | `KEPLER_CTX_SIZE`, `KEPLER_BATCH_SIZE`, `KEPLER_UBATCH_SIZE`, `KEPLER_GPU_LAYERS`, `KEPLER_THREADS`, `KEPLER_REQUEST_TIMEOUT`, `KEPLER_CONTEXT_MARGIN` | Ajustar o servidor legado, com teste de VRAM/contexto |
 
@@ -124,10 +125,14 @@ novos jobs exigem `framing_windows`: intervalos em segundos da **fonte**, por ex
 Só durante esses intervalos a página fica inteira (ou na ROI manual), sobre fundo
 desfocado da própria fonte, com legenda próxima. Fora deles volta o vertical.
 Em montagens v3 os intervalos são convertidos para o relógio de cada trecho.
-Não há detecção visual/OCR automática: o editor informa e confere os intervalos.
+O editor visual pode analisar até oito quadros amostrados: OCR Tesseract local
+identifica texto legível; um modelo de visão Ollama opcional sugere rosto do criador,
+gameplay, tela/documento ou incerteza e uma região aproximada. A amostragem não é
+rastreamento contínuo nem garante detectar transições. Confira os quadros e selecione
+as sugestões; análise nenhuma muda a timeline até a confirmação explícita.
 
 `framing_roi` opcional usa `x`, `y`, `width`, `height` normalizados dentro da fonte.
-`face` e `gameplay` continuam disponíveis como foco manual. Timelines antigas e
+`face` e `gameplay` continuam disponíveis como foco manual ou sugestão confirmada. Timelines antigas e
 snapshots existentes mantêm sua geometria; a composição compacta nova é
 versionada como `proof_compact_v2`, sem sobrescrever renders anteriores.
 
@@ -186,3 +191,14 @@ Depois de trocar `.env.meta` por substituição atômica, recrie o serviço
 que não há publicação em andamento. O token pode ser invalidado antes da data
 prevista, e o acesso aos dados tem validade própria. Consulte [Publicação](PUBLICACAO.md)
 para operação, estados e recuperação de falhas.
+
+## Interface React e defaults
+
+`frontend` serve o build estático na porta local 8501. `web-api` adapta serviços existentes sem expor Redis ou arquivos internos. Veja [API web](API_WEB.md) para proxy, desenvolvimento e DEMO. As preferências da aba Configurações não alteram `.env` nem jobs existentes. Novos jobs web usam protocolo editorial 2.
+
+`ENABLE_YOUTUBE_DOWNLOAD` agora assume `true`; `false` explícito é respeitado. Direitos e autorização da plataforma permanecem obrigatórios. `.env` existente não é reescrito. `CONTENT_FACTORY_WEB_HOSTS` restringe hosts/origens privados; o segredo interno é gerado no volume `web_auth`. `CONTENT_FACTORY_META_ENABLED` assume `auto`: reutiliza o publisher configurado, sem compartilhar credenciais com a UI. `false` desabilita o envio web. Cada envio continua exigindo consentimento explícito.
+
+`settings.render_fallback_ffmpeg` é booleano opcional, congelado nos jobs web novos. High sempre exige Remotion. Legados sem esse campo conservam a resolução anterior pelo ambiente, sem regravação de snapshots.
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](REEDICAO.md).

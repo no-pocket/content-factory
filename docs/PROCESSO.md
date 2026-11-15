@@ -2,9 +2,9 @@
 
 ## 1. Entrada e configuração
 
-A interface Streamlit (`app/ui.py`) e a entrada JSON (`app/submit.py`) criam o mesmo registro via `app/store.py`. `app/job_settings.py` valida e grava um snapshot dos ajustes por job. Portanto, Streamlit é uma interface substituível: um frontend novo deve enviar o mesmo objeto `settings` e ler os estados/artefatos documentados aqui. Não deve escrever diretamente na lista Redis sem criar e validar o registro.
+A interface React (`frontend/`) usa o adaptador FastAPI (`app/web_api.py`) e os mesmos serviços de criação da entrada JSON (`app/submit.py`), persistindo via `app/store.py`. `app/job_settings.py` valida e grava um snapshot dos ajustes por job. A apresentação Streamlit está arquivada. O frontend envia o mesmo objeto `settings` e ler os estados/artefatos documentados aqui. Não deve escrever diretamente na lista Redis sem criar e validar o registro.
 
-Upload local copia o arquivo para `data/input/`. URL do YouTube é normalizada e fica desabilitada por padrão; direitos do titular e autorização aplicável da plataforma são declarados antes do download. O projeto não verifica licenças externamente.
+Upload local copia o arquivo para `data/input/`. URL do YouTube é normalizada e fica habilitada por padrão, respeitando `ENABLE_YOUTUBE_DOWNLOAD=false` explícito; direitos do titular e autorização aplicável da plataforma são declarados antes do download. O projeto não verifica licenças externamente.
 
 ## 2. Fila e transcrição
 
@@ -39,7 +39,7 @@ Para cada corte, `app/director.py` pode pedir título, zooms e B-roll ao Qwen. `
 
 FFmpeg normaliza a fonte e o B-roll autorizado. Remotion compõe a versão animada. No perfil standard, se configurado, uma falha do Remotion usa FFmpeg com legendas simplificadas; high falha explicitamente para preservar o estilo. O campo `renderer_used` informa qual caminho produziu o corte. Novas timelines usam título compacto independente das legendas e cauda suave após a fala; as antigas preservam sua composição. O MP4 fica em `data/output/<id>/candidate_N.mp4`.
 
-Depois do MP4, `app/edit_render.py` cria `candidate_N.preview.webm` com VP8/Opus, decodifica a prévia inteira e só então a publica para o navegador. A UI usa WebM para assistir e oferece MP4 separadamente para download. O JSON da timeline fica ao lado dos vídeos; a decisão de aprovação registra os índices aceitos, sem alterar os arquivos mestres.
+Depois do MP4, `app/edit_render.py` cria `candidate_N.preview.webm` com VP8/Opus, decodifica a prévia inteira e só então a publica para o navegador. A UI usa WebM para assistir e oferece MP4 separadamente para download. O JSON da timeline fica ao lado dos vídeos. Na revisão, o editor pode ajustar corte v2, título, palavras das legendas e enquadramento; cada submissão gera um artefato novo e preserva o anterior.
 
 ## 6. Revisão humana e limites
 
@@ -48,6 +48,9 @@ fica `PARTIAL_FAILED`, com revisão apenas dos bons; retry limitado é por candi
 As avaliações agora preservam histórico, notas, motivo e retrabalho; siga o
 [protocolo editorial](PROTOCOLO_EDITORIAL.md). UI, CLI e [API](API.md) usam o mesmo serviço.
 
-`NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. `APPROVED`/`REJECTED` são estados locais. A agenda opcional permite envio imediato ou programado de candidatos aprovados após escolha explícita; a UI atual não permite edição manual da timeline. Consulte [Publicação](PUBLICACAO.md).
+`NEEDS_REVIEW` significa que a renderização terminou, não que o conteúdo esteja pronto para publicar. A pessoa revisa escolha do trecho, fatos, direitos, áudio, legendas e imagem. OCR e visão local podem sugerir o tipo de quadro e uma região; não alteram a timeline sem seleção e confirmação humana. Uma revisão invalida a aprovação anterior e volta a exigir revisão técnica/editorial. `APPROVED`/`REJECTED` são estados locais. A agenda opcional permite envio imediato ou programado de candidatos aprovados após escolha explícita. Consulte [Publicação](PUBLICACAO.md).
 
 As principais lacunas planejadas constam na [auditoria de produto](AUDITORIA_E_OPCOES_2026-11-04.md). Ela é histórica; fila, descoberta por transcrição, prévias e contrato GPU já receberam as mudanças descritas neste guia.
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](REEDICAO.md).

@@ -37,6 +37,22 @@ def test_hermes_token_is_scoped_and_candidate_has_no_paths(v2job,hermes_server):
     assert hermes_server(route,token='synthetic-general-token-long-enough')[0]==401
 
 
+def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(v2job, hermes_server, monkeypatch, tmp_path):
+    monkeypatch.setattr(store, 'ROOT', tmp_path)
+    jid = v2job['id']
+    (store.JOBS / (jid + '.transcript.json')).write_text(json.dumps({'language':'pt','segments':[{'start':0,'end':20,'text':'Synthetic speech.'}]}))
+    status, payload = hermes_server('/v2/hermes/jobs/' + jid)
+    assert status == 200
+    assert payload['pipeline']['ready'] is True
+    assert payload['group_id'].startswith('source:')
+    assert payload['model']['requested']['whisper_model'] == 'base'
+    assert payload['transcript']['available'] is True
+    assert payload['candidates'][0]['candidate_id'] == v2job['candidates'][0]['candidate_id']
+    assert payload['candidates'][0]['renders']['mp4'].startswith('/v2/hermes/jobs/')
+    assert '/#revisao?job=' in payload['application_url']
+    assert str(store.OUTPUT) not in json.dumps(payload)
+
+
 def test_hermes_can_save_caption_as_suggestion_without_approval(v2job, hermes_server):
     import uuid
     job=v2job; clip=job['candidates'][0]

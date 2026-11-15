@@ -12,7 +12,7 @@ docker compose -f compose.yaml -f compose.kepler.yaml ps
 Invoke-RestMethod http://127.0.0.1:11436/health
 ```
 
-Abra <http://localhost:8501/>. Em **Doctor**, confirme Worker e GPU online. O Ollama pode aparecer separadamente; cada job escolhe o backend. Se usar somente CPU/Ollama, execute `docker compose up -d --no-build` e selecione Ollama no job. A instalação inicial e o build da K4200 estão em [GPU K4200](GPU_K4200.md).
+Abra <http://localhost:8501/> (React). Em **Painel → Doctor**, confirme Worker e GPU online. O Ollama pode aparecer separadamente; cada job escolhe o backend. Se usar somente CPU/Ollama, execute `docker compose up -d --no-build` e selecione Ollama no job. A instalação inicial e o build da K4200 estão em [GPU K4200](GPU_K4200.md).
 
 ## Acessar pelo celular via Tailscale
 
@@ -43,12 +43,12 @@ ajustes** ou **Recusar**; comentário/pedidos descrevem os ajustes e motivos/not
 opcionais. O filtro **Filtrar candidatos** encontra recusas dentro de jobs mistos.
 As contagens separam aprovação limpa, ajustes, pendência e legado não confirmado.
 O painel apresenta vídeo e revisão lado a lado no desktop e empilhados no celular.
-Uma alteração concorrente pede recarregar; o rascunho fica ligado ao render original.
+Alterações recebidas são sincronizadas automaticamente e preservam o rascunho; confira novamente o vídeo quando o render mudar. O job aberto permanece visível ao concluir a revisão.
 Nenhum botão aprova automaticamente uma versão corrigida.
 
-1. Em **Adicionar um vídeo autorizado**, escolha um MP4/MOV/MKV local ou uma URL individual do YouTube. Informe criador, referência da autorização e marque a confirmação. Download por URL exige também permissão aplicável da plataforma e a opção `ENABLE_YOUTUBE_DOWNLOAD=true`.
+1. Em **Novo vídeo**, escolha um MP4/MOV/MKV local ou uma URL individual do YouTube. Informe criador, referência da autorização e marque a confirmação. Download por URL exige também permissão aplicável da plataforma e a opção `ENABLE_YOUTUBE_DOWNLOAD=true`.
 2. Abra **Ajustes de processamento**. Defina quantidade e duração dos cortes, modelo Whisper, análise/direção Qwen, backend Ollama ou GPU K4200 e render. Esses valores são salvos no job; alterações posteriores do `.env` não mudam um job existente.
-3. Clique **Criar job de cortes**. A fila aceita um job por vez nesta implantação. O Doctor mostra a atividade da IA; em **Jobs e aprovação**, use **Atualizar status** para ver mudanças de etapa.
+3. Clique **Criar job de cortes**. A fila aceita um job por vez nesta implantação. O Doctor mostra a atividade da IA; em **Revisão**, use **Atualizar status** para ver mudanças de etapa.
 4. Em `NEEDS_REVIEW`, reproduza cada candidato até o fim. O WebM é a prévia para o navegador; o MP4 é o arquivo mestre para download. Confira também a transcrição, o corte, o áudio, as legendas, o enquadramento e o motor de render registrado.
 5. Para cada candidato, informe um comentário e clique **Aprovar candidato** ou **Recusar candidato**. Notas de gancho, contexto, fechamento e legendas são opcionais no expander. Arquivos com falha podem ser recusados, mas só os tecnicamente válidos podem ser aprovados. O expander **Recusar o job inteiro** registra uma recusa com comentário para todos. O histórico fica no JSON do job; não há publicação automática.
 
@@ -107,7 +107,7 @@ incluindo a tentativa original); os outros resultados não são renderizados nov
 
 ```powershell
 docker compose -f compose.yaml -f compose.kepler.yaml ps
-docker compose -f compose.yaml -f compose.kepler.yaml logs --tail=100 worker kepler-bridge kepler-engine ui
+docker compose -f compose.yaml -f compose.kepler.yaml logs --tail=100 worker kepler-bridge kepler-engine web-api frontend
 docker exec content-factory-redis-1 redis-cli LLEN clips:queue
 docker exec content-factory-redis-1 redis-cli LLEN clips:processing
 Invoke-RestMethod http://127.0.0.1:11436/api/ps
@@ -121,8 +121,19 @@ Invoke-RestMethod http://127.0.0.1:11436/api/ps
 | Job `FAILED` | Leia `error` no JSON; confira entrada, modelo Whisper em cache, logs e espaço. Não apague o registro antes de identificar a etapa. |
 | Vídeo não reproduz | Confira se existe a prévia WebM e decodifique-a com FFmpeg. Veja [Testes e validação](TESTES.md). O MP4 para download permanece separado. |
 
-Para reiniciar uma mudança de código montada pelo override, use `docker compose -f compose.yaml -f compose.kepler.yaml up -d --no-build --force-recreate worker ui kepler-bridge`. Faça isso com a fila vazia ou depois que o job atual terminar.
+Para reiniciar uma mudança de código montada pelo override, use `docker compose -f compose.yaml -f compose.kepler.yaml up -d --no-build --force-recreate worker web-api frontend kepler-bridge`. Faça isso com a fila vazia ou depois que o job atual terminar.
 
 ### Enviar a avaliação completa
 
 Cada candidato tem um formulário: comentário, motivos, estrelas e grau ficam no navegador até Aprovar, Aprovar com ajustes ou Recusar. Alterar campos não envia o feedback nem recarrega a página. O envio atualiza somente a revisão daquele candidato, mantém os outros rascunhos e mostra confirmação no próprio formulário. Mudança de render bloqueia ações até recarregar o vídeo inteiro. Os bytes e a revisão continuam verificados pelo backend ao salvar.
+
+## Atualização da interface React
+
+Antes do corte, confira fila/processamento, publicações em andamento e espaço. A imagem web usa a imagem existente do worker como base; para instalação nova, construa primeiro `docker compose build worker`, depois `docker compose build web-api frontend`. Não reconstrua o worker só para uma mudança visual. Suba `web-api frontend` com `--no-deps --no-build` após preparar as imagens. Na migração, pare apenas o container Streamlit antigo antes de liberar a mesma porta 8501; não use `--remove-orphans`, pois API e publisher opcionais podem aparecer como órfãos quando seus overrides não são listados. Não remova volumes.
+
+O serviço padrão `ui` deixou o Compose. Código Streamlit arquivado em `app/_legacy_streamlit/`. Caso mude código Python carregado pelo worker, reinicie-o somente com fila/processamento vazios. A aba Configurações não reinicia nada. Preferências e rascunhos editoriais ficam no navegador; settings e decisões confirmadas ficam no job.
+
+Agenda real exige o publisher separado, configuração reconhecida em modo `auto` (ou override `true`) e consentimento por envio; sem integração, a UI permite somente rascunhos. Testes de reagendamento precisam usar uma instância isolada do publisher real. [Contrato web e desenvolvimento](API_WEB.md).
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](REEDICAO.md).

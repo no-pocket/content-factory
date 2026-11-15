@@ -19,7 +19,7 @@ Versão de referência: **4.1.0**. Esta página é o ponto de entrada para opera
 
 ## Código e contratos
 
-- Interface: [`app/ui.py`](../app/ui.py); controles de cada job: [`app/ui_settings.py`](../app/ui_settings.py) e [`app/job_settings.py`](../app/job_settings.py).
+- Interface React: [`frontend/`](../frontend/); adaptador [`app/web_api.py`](../app/web_api.py); [API web e desenvolvimento](API_WEB.md). Validação compartilhada: [`app/job_settings.py`](../app/job_settings.py). Streamlit arquivado em `app/_legacy_streamlit/`.
 - Fila, estado e worker: [`app/queueing.py`](../app/queueing.py), [`app/store.py`](../app/store.py), [`app/worker.py`](../app/worker.py).
 - Seleção e edição: [`app/ranker.py`](../app/ranker.py), [`app/director.py`](../app/director.py), [`app/timeline.py`](../app/timeline.py).
 - Render e prévia: [`app/edit_render.py`](../app/edit_render.py), [`renderer/`](../renderer/).
@@ -41,3 +41,8 @@ Rodada atual para avaliação: [cinco vídeos, quinze candidatos GPU/Qwen 2.5](.
 Os relatórios em [`research/`](../research/) registram experimentos, resultados e limitações. O [relatório REA da K4200](../research/AUDITORIA_REA_K4200_2026-11-05.md) contém o benchmark CPU/GPU e o manifesto do ambiente. A [auditoria de produto](AUDITORIA_E_OPCOES_2026-11-04.md) é um retrato histórico; consulte os guias acima para o comportamento atual.
 
 Execução atual: [aceitação e limites da evolução editorial](planning/content-factory-next/ACCEPTANCE_STATUS.md); proposta de [brief DRAFT](planning/content-factory-next/EDITORIAL_BRIEF_DRAFT.json), sem ativação automática.
+
+Interface React: [contrato web e desenvolvimento](API_WEB.md), [aceitação observada da migração](../research/react_frontend_acceptance.md).
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](REEDICAO.md).

@@ -34,7 +34,7 @@ def _save(item: dict) -> None:
         temporary.unlink(missing_ok=True)
 
 
-def schedule(jid: str, candidate_id: str, provider: str, *, title: str, caption: str, scheduled_at: float, page_id: str, instagram_id: str | None = None, timezone_name: str = 'America/Sao_Paulo') -> dict:
+def schedule(jid: str, candidate_id: str, provider: str, *, title: str, caption: str, scheduled_at: float, page_id: str, instagram_id: str | None = None, timezone_name: str = 'America/Sao_Paulo', expected_artifact_id: str | None = None) -> dict:
     if provider not in ('instagram', 'facebook'):
         raise ValueError('unsupported platform')
     if not isinstance(page_id, str) or not page_id.isdecimal() or (provider == 'instagram' and (not isinstance(instagram_id, str) or not instagram_id.isdecimal())):
@@ -48,6 +48,8 @@ def schedule(jid: str, candidate_id: str, provider: str, *, title: str, caption:
     ROOT.mkdir(parents=True, exist_ok=True)
     with store.job_lock(jid):
         draft = publishing.build_draft(store.load(jid), candidate_id, provider, title=title, description=caption)
+        if expected_artifact_id is not None and draft['artifact_id'] != expected_artifact_id:
+            raise service.Conflict('O artefato mudou antes do agendamento')
         item = {'id': str(uuid.uuid4()), 'state': 'SCHEDULED', 'scheduled_at': scheduled_at,
                 'created_at': time.time(), 'draft': draft, 'remote_id': None, 'timezone': timezone_name,
                 'destination': {'page_id': page_id, 'instagram_id': instagram_id}}
@@ -72,7 +74,7 @@ def due_items(*, now: float | None = None) -> list[dict]:
     return [item for item in list_items() if item['state'] == 'SCHEDULED' and item['scheduled_at'] <= now]
 
 
-def write_heartbeat(*, now: float | None = None) -> None:
+def write_heartbeat(*, now: float | None = None, configured: bool | None = None) -> None:
     ROOT.mkdir(parents=True, exist_ok=True)
     target = ROOT / 'worker.heartbeat'
     temporary = ROOT / ('heartbeat.' + uuid.uuid4().hex + '.tmp')
@@ -81,6 +83,22 @@ def write_heartbeat(*, now: float | None = None) -> None:
         os.replace(temporary, target)
     finally:
         temporary.unlink(missing_ok=True)
+    if configured is not None:
+        target = ROOT / 'worker.configuration'
+        temporary = ROOT / ('configuration.' + uuid.uuid4().hex + '.tmp')
+        try:
+            temporary.write_text(json.dumps({'configured': configured is True}), encoding='utf-8')
+            os.replace(temporary, target)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def configured() -> bool:
+    """Publisher-owned readiness declaration; never contains credentials."""
+    try:
+        return json.loads((ROOT / 'worker.configuration').read_text(encoding='utf-8')).get('configured') is True
+    except (OSError, ValueError, AttributeError):
+        return False
 
 
 def worker_online(*, now: float | None = None) -> bool:

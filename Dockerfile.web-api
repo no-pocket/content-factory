@@ -1,0 +1,7 @@
+# Thin adapter layer: no model downloads or worker rebuild.
+ARG WORKER_IMAGE=content-factory-worker:latest
+FROM ${WORKER_IMAGE}
+COPY requirements.web.lock /tmp/requirements.web.lock
+RUN pip install --no-cache-dir -r /tmp/requirements.web.lock
+COPY app /app/app
+CMD ["python", "-m", "uvicorn", "app.web_api:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

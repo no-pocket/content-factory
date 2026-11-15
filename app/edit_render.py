@@ -96,7 +96,7 @@ def apply_finishing(target: Path, timeline: dict, *, quality: str = 'standard') 
         pending.unlink(missing_ok=True)
 
 
-def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard', metrics: list | None = None, metric_context: dict | None = None, finishing_mode: str = 'post_encode', outro_asset_id: str | None = None, outro_snapshot: dict | None = None) -> str:
+def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments: list[dict], timeline: dict, assets: dict, target: Path, *, engine: str | None = None, quality: str = 'standard', metrics: list | None = None, metric_context: dict | None = None, finishing_mode: str = 'post_encode', outro_asset_id: str | None = None, outro_snapshot: dict | None = None, fallback_ffmpeg: bool | None = None) -> str:
     """Use FFmpeg for normalization and Remotion for visual edits, fallback if configured."""
     validate_timeline(timeline)
     if finishing_mode not in ('post_encode','remotion'):
@@ -205,7 +205,8 @@ def render_edited(source: Path, job_id: str, ordinal: int, clip: dict, segments:
                            check=True, capture_output=True, text=True, timeout=int(os.getenv("RENDER_TIMEOUT", "900")))
         renderer_used = "remotion"
     except (subprocess.SubprocessError, OSError) as exc:
-        if quality == "high" or os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() != "true":
+        allow_fallback = fallback_ffmpeg if fallback_ffmpeg is not None else os.getenv("RENDER_FALLBACK_FFMPEG", "true").lower() == "true"
+        if quality == "high" or not allow_fallback:
             render_metric.update(resolved='NONE',fallback_reason='disabled_for_high_fidelity' if quality=='high' else 'fallback_disabled')
             raise
         compose_finishing=False

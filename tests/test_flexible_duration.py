@@ -258,7 +258,7 @@ def test_duration_mode_reruns_outside_ingest_form_without_creating_job(monkeypat
     monkeypatch.setattr(dashboard_health,'render_doctor',lambda:None)
     submitted=[]
     monkeypatch.setattr(service,'create_job',lambda payload,**kwargs: (submitted.append(payload) or {'id':'synthetic-only'}))
-    page=AppTest.from_file(str(Path(app.__file__).parent/'ui.py')).run(timeout=20)
+    page=AppTest.from_file(str(Path(app.__file__).parent / '_legacy_streamlit'/'ui.py')).run(timeout=20)
     assert not page.exception
     page.radio(key='source_type').set_value('URL do YouTube').run()
     mode=page.selectbox(key='production_v2_duration_mode')

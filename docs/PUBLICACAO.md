@@ -100,3 +100,11 @@ Validação: `tests/test_publishing.py` usa arquivos sintéticos e rede bloquead
 testa rejeição sem aprovação, render alterado, legado/ajustes, outbox idempotente,
 ausência de segredos e planos distintos. Não é evidência de integração ao vivo
 ou de aprovação por qualquer plataforma.
+
+## Interface React
+
+O módulo **Publicação** oferece agenda, rascunhos e preparação de envio. O modo padrão `CONTENT_FACTORY_META_ENABLED=auto` reutiliza o publisher existente: ele declara disponibilidade de credenciais no arquivo local `worker.configuration`, sem compartilhar tokens com o web-api/nginx. `false` desabilita envio pela UI; abrir a aba não executa OAuth/upload. Destinos usados em publicações confirmadas aparecem no seletor, com entrada manual alternativa.
+
+O consentimento é vinculado ao artefato selecionado; mudar render, título, legenda, provedor ou destino exige reconfirmação. O backend confere a identidade esperada dentro do mesmo lock que grava rascunho/agendamento. Apenas `PUBLISHED` confirmado apresenta o link público da publicação. Ver [aceitação da migração](../research/react_frontend_acceptance.md) para o teste real autorizado.
+
+O filtro **Somente candidatos não publicados** oculta candidatos com publicação `PUBLISHED` confirmada na agenda em qualquer destino. Rascunhos, agendamentos e envios incertos não contam como publicados; publicações feitas fora da aplicação não são consultadas.

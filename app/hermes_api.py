@@ -95,6 +95,7 @@ def _candidate(jid, cid):
         model=job.get('comparison', {}).get('label') or job.get('settings', {}).get('llm_model'),
         director=clip.get('director_used'), renderer=clip.get('renderer_used'))
     public['social_captions'] = clip.get('social_captions', {})
+    public['pace']=clip.get('pace')
     public['artifact_intact'] = bool(row['artifact_id'] and row['artifact_id'] == 'sha256:' + digest(manifest))
     public['master_sha256'] = (manifest['files'].get('mp4') or {}).get('sha256')
     from .media_delivery import get_delivery_metadata
@@ -102,14 +103,75 @@ def _candidate(jid, cid):
     public['delivery_media_error'] = None
     try:
         public['delivery_media'] = get_delivery_metadata(Path(clip['file']))
-    except (ValueError, OSError, subprocess.SubprocessError, KeyError) as exc:
+    except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError) as exc:
         public['delivery_media_error'] = type(exc).__name__
     public['notes'] = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid and n['artifact_id'] == row['artifact_id']]
     public['historical_notes'] = [n for n in job.get('editorial_notes', []) if n['candidate_id'] == cid and n['artifact_id'] != row['artifact_id']]
     from .telegram_deliveries import list_deliveries
     public['deliveries'] = list_deliveries(jid, cid)
-    public['application_url'] = os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/?' + urlencode({'job': jid})
+    public['application_url'] = os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/#revisao?' + urlencode({'job': jid})
     return job, row, public
+
+
+def _pipeline(job):
+    """Compact handoff: poll references, then inspect full transcript/media explicitly."""
+    from .source_review import list_groups
+    from .editorial_contracts import candidate_key
+    jid = job['id']
+    result = {key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')}
+    if not _external_allowed(job):
+        return {**result, 'pipeline': {'ready': False, 'missing': ['external_source_authorization']}}
+    group = next((g for g in list_groups() if any(j['id'] == jid for j in g['jobs'])), None)
+    settings = job.get('settings') or {}
+    result['parent_id']=job.get('source_parent_job') if job.get('editorial_rework') else None
+    from .editorial_rework import enabled
+    result['auto_rework_enabled']=enabled()
+    result['reworks']=[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])]
+    runs = job.get('processing_runs', [])
+    result['latest_run_id'] = runs[-1].get('run_id') if runs else None
+    result['reprocess_available'] = job['status'] == 'FAILED' and not job.get('candidates')
+    if job['status'] in ('FAILED', 'PARTIAL_FAILED'):
+        from collections import Counter
+        events = [e for e in job.get('ai_events', []) if e.get('at', 0) >= (runs[-1].get('started_at', 0) if runs else 0)]
+        rejected = Counter()
+        for event in events:
+            rejected.update(event.get('details', {}).get('rejections', {}))
+        empty = str(job.get('error', '')).startswith('No usable speech windows found')
+        result['failure'] = {'code': 'NO_USABLE_CANDIDATES' if empty else 'PROCESSING_FAILED',
+            'message': 'Nenhum corte passou nas validações; isso não significa ausência de fala.' if empty else 'Falha de processamento; consulte o diagnóstico na aplicação privada.',
+            'proposal_rejections': dict(rejected),
+            'incomplete_responses': sum(e['event'] == 'proposal_chunk_failed' and 'length' in e.get('details', {}).get('reason', '') for e in events)}
+    transcript_exists = (store.JOBS / (jid + '.transcript.json')).is_file()
+    idle = job['status'] in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED'}
+    candidates = []
+    for index, clip in enumerate(job.get('candidates', [])):
+        cid = clip.get('candidate_id') or candidate_key(jid, index)
+        if idle:
+            row = _candidate(jid, cid)[2]
+        else:
+            row = {'candidate_id': cid, 'technical_state': clip.get('state', 'PENDING'),
+                   'artifact_id': clip.get('artifact_id'), 'artifact_intact': False}
+        render_ready = bool(row.get('artifact_intact') and row['technical_state'] in ('VALID', 'WARNING'))
+        row['renders'] = {'ready': render_ready, 'mp4': '/v2/hermes/jobs/' + jid + '/candidates/' + cid + '/media?' +
+                          urlencode({'artifact_id': row['artifact_id']}) if render_ready else None,
+                          'application_url': os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/#revisao?' + urlencode({'job': jid})}
+        candidates.append(row)
+    missing = ([] if transcript_exists else ['transcript']) + ([] if candidates else ['candidates'])
+    if not idle:
+        missing.append('processing')
+    if not candidates or not all(c['renders']['ready'] for c in candidates):
+        missing.append('renders')
+    result.update(video_id=job.get('youtube_video_id') or (job.get('youtube_metadata') or {}).get('video_id'),
+                  title=job.get('video_title') or job['original_name'], creator=job['creator'],
+                  group_id=group['group_id'] if group else None,
+                  model={'requested': {k: settings.get(k) for k in ('whisper_model', 'llm_model', 'llm_backend', 'ranker_mode', 'director_mode', 'render_engine')},
+                         'resolved': {'ranker': job.get('ranker_used'), 'whisper': job.get('transcript_model') or job.get('model')}},
+                  transcript={'available': transcript_exists, 'language': job.get('language'),
+                              'endpoint': '/v2/hermes/jobs/' + jid + '/transcript'},
+                  candidates=candidates, pipeline={'ready': not missing, 'missing': missing,
+                    'next': 'inspect_transcript_and_renders' if not missing else 'diagnose_failure' if job['status'] in ('FAILED', 'PARTIAL_FAILED', 'QUEUE_FAILED') else 'wait'},
+                  application_url=os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/#revisao?' + urlencode({'job': jid}))
+    return result
 
 
 def dispatch(handler, path):
@@ -139,15 +201,22 @@ def dispatch(handler, path):
         defaults = {'duration_mode': 'flexible', 'min_seconds': 8, 'target_seconds': 40, 'max_seconds': 180}
         # Explicit classic uses its existing normalized limits; never inherit the flexible ceiling.
         request['settings'] = {**(defaults if settings.get('duration_mode', 'flexible') == 'flexible' else {}),
-                               **settings, 'editorial_protocol': 2}
+                               'auto_pace':True, **settings, 'editorial_protocol': 2}
         request.update(owner_message=body['owner_message'], actor_id=_actor())
         result = ingest_youtube(request)
         return handler._json(200 if result['duplicate'] else 201,
-                             {'job': {key: result['job'].get(key) for key in ('id', 'status', 'created_at', 'updated_at')},
+                             {'job': _pipeline(result['job']),
                               'duplicate': result['duplicate']})
     if len(path) == 2 and path[0] == 'jobs' and method == 'GET':
         job = store.load(path[1])
-        return handler._json(200, {key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')})
+        return handler._json(200, _pipeline(job))
+    if len(path) == 3 and path[0] == 'jobs' and path[2] == 'reprocess' and method == 'POST':
+        job = store.load(path[1])
+        _require_external(job)
+        body = _body(handler)
+        request = _intent(body, 'reprocess')
+        result = service.reprocess_failed_job(path[1], request, owner_message=body['owner_message'], actor_id=_actor())
+        return handler._json(200, _pipeline(result))
     if len(path) == 3 and path[0] == 'jobs' and path[2] == 'transcript' and method == 'GET':
         job = store.load(path[1])
         _require_external(job)

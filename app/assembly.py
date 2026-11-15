@@ -36,7 +36,7 @@ def validate_assembly(plan: dict, source_duration: float) -> dict:
         raise ValueError('Assembly requires 1..12 nonempty segments')
     result, ids, frames = [], set(), 0
     for segment in segments:
-        keys = {'segment_id', 'source_in', 'source_out', 'output_start', 'purpose', 'framing', 'framing_resolved', 'frame_count', 'duration'}
+        keys = {'segment_id', 'source_in', 'source_out', 'output_start', 'purpose', 'framing', 'framing_resolved', 'frame_count', 'duration', 'playback_rate'}
         if not isinstance(segment, dict) or set(segment)-keys or not {'segment_id','source_in','source_out','purpose'} <= set(segment):
             raise ValueError('Invalid assembly segment fields')
         ident = segment['segment_id']
@@ -54,7 +54,10 @@ def validate_assembly(plan: dict, source_duration: float) -> dict:
                 raise ValueError('Nonchronological assembly requires explicit human approval')
         if not isinstance(segment['purpose'], str) or not 0 < len(segment['purpose']) <= 300:
             raise ValueError('Segment purpose required')
-        count = math.ceil((Fraction(str(end))-Fraction(str(start)))*FPS)
+        rate = _number(segment.get('playback_rate', 1))
+        if not 1 <= rate <= 1.15:
+            raise ValueError('Playback rate must be between 1 and 1.15')
+        count = math.ceil((Fraction(str(end))-Fraction(str(start)))*FPS/Fraction(str(rate)))
         output_start = frames/FPS
         if 'output_start' in segment and abs(_number(segment['output_start'])-output_start) > 1e-7:
             raise ValueError('Noncontiguous assembly output clock')
@@ -82,6 +85,46 @@ def validate_assembly(plan: dict, source_duration: float) -> dict:
     return {**copy.deepcopy(plan), 'source_duration': source_duration, 'segments': result, 'fps': FPS, 'duration': duration}
 
 
+def native_word_groups(segments: list[dict]) -> list[dict]:
+    """Group zero-duration ASR tokens with adjacent observed speech; never interpolate."""
+    result=[]
+    for i,segment in enumerate(segments):
+        words=segment.get('words',[])
+        if words and all(w.get('source_word_ids') and w['end']>w['start'] for w in words):
+            result.append(segment); continue
+        units=[]; pending=[]; invalid=False
+        for j,word in enumerate(words):
+            try:
+                start,end=_number(word['start']),_number(word['end'])
+                text=word.get('text',word.get('word','')).strip()
+                if start<0 or end<start or not text:raise ValueError('Invalid native word')
+            except (ValueError,KeyError,TypeError,AttributeError):
+                invalid=True; break
+            native={**word,'text':text,'source_word_ids':word.get('source_word_ids') or [f'{i}:{j}'],
+                    'word_id':word.get('word_id',f'{i}:{j}')}
+            if start==end:
+                pending.append(native); continue
+            members=pending+[native]
+            token=' '.join(w['text'] for w in members)
+            if len(token)>64:invalid=True; break
+            units.append({**native,'start':min(w['start'] for w in members),
+                'end':max(w['end'] for w in members),'text':token,'word_id':members[0]['word_id'],
+                'source_word_ids':[ident for w in members for ident in w['source_word_ids']],
+                'zero_duration_word_count':len(pending)+native.get('zero_duration_word_count',0)})
+            pending=[]
+        if pending and units and not invalid:
+            last=units[-1]; token=last['text']+' '+' '.join(w['text'] for w in pending)
+            if len(token)>64:invalid=True
+            else:
+                units[-1]={**last,'start':min([last['start']]+[w['start'] for w in pending]),
+                    'end':max([last['end']]+[w['end'] for w in pending]),'text':token,
+                    'source_word_ids':last['source_word_ids']+[ident for w in pending for ident in w['source_word_ids']],
+                    'zero_duration_word_count':last.get('zero_duration_word_count',0)+len(pending)}
+        # All-zero/unanchorable segments remain invalid; strict map_words rejects them if selected.
+        result.append(segment if invalid or (pending and not units) else {**segment,'words':units})
+    return result
+
+
 def map_words(plan: dict, words: list[dict]) -> list[dict]:
     plan = validate_assembly(plan, plan['source_duration'])
     mapped = []
@@ -100,17 +143,22 @@ def map_words(plan: dict, words: list[dict]) -> list[dict]:
             if start < segment['source_out'] and end > segment['source_in']:
                 if start < segment['source_in']-1e-7 or end > segment['source_out']+1e-7:
                     raise ValueError('Assembly cuts a partial source word')
-                mapped.append({'start': segment['output_start']+start-segment['source_in'],
-                               'end': segment['output_start']+end-segment['source_in'], 'text': text.strip(),
+                rate = segment.get('playback_rate', 1)
+                mapped.append({'start': segment['output_start']+(start-segment['source_in'])/rate,
+                               'end': segment['output_start']+(end-segment['source_in'])/rate, 'text': text.strip(),
                                'word_id': word.get('word_id', str(index)), 'segment_id': segment['segment_id'],
                                'output_segment_end': segment['output_start']+segment['duration'],
                                'source_start': start, 'source_end': end})
+                if word.get('source_word_ids'):
+                    mapped[-1]['source_word_ids']=list(word['source_word_ids'])
+                    mapped[-1]['zero_duration_word_count']=word.get('zero_duration_word_count',0)
     return sorted(mapped, key=lambda w:(w['start'],w['end']))
 
 
 def build_assembly_context(plan: dict, segments: list[dict]) -> dict:
     plan = validate_assembly(plan, plan['source_duration'])
-    source_words = [{**word,'word_id':f'{i}:{j}'} for i,s in enumerate(segments) for j,word in enumerate(s.get('words',[]))]
+    segments=native_word_groups(segments)
+    source_words = [{**word,'word_id':word.get('word_id',f'{i}:{j}')} for i,s in enumerate(segments) for j,word in enumerate(s.get('words',[]))]
     words = map_words(plan, source_words)
     excluded_zero = [w['word_id'] for w in source_words if w['start']==w['end']]
     anchored = []
@@ -126,6 +174,8 @@ def build_assembly_context(plan: dict, segments: list[dict]) -> dict:
     return {'schema_version':'1.0','text':' '.join(w['text'] for w in words) if words else ' '.join(s['text'] for s in anchored),
             'segments':anchored,'before':[],'after':[], 'assembly':plan,
             'word_timing_diagnostics':{'excluded_zero_duration_words_outside_assembly':excluded_zero,
+                                       'zero_duration_words_grouped':sum(w.get('zero_duration_word_count',0) for w in words),
+                                       'native_timestamps_interpolated':False,
                                        'selected_words_have_positive_duration':True},
             'source_range':{'start':min(s['source_in'] for s in plan['segments']),'end':max(s['source_out'] for s in plan['segments'])},
             'coverage':{'complete_candidate':True,'prefix_truncated':False,'discontinuous':True}}
@@ -153,7 +203,8 @@ def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 's
         local = [{**window, 'start':max(window['start'],segment['output_start'])-segment['output_start'],
                   'end':min(window['end'],segment['output_start']+duration)-segment['output_start']}
                  for window in schedule if max(window['start'],segment['output_start']) < min(window['end'],segment['output_start']+duration)]
-        timing = f'[0:v:0]trim=start={start}:end={end},setpts=PTS-STARTPTS,fps=30,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={segment["frame_count"]}'
+        rate = segment.get('playback_rate', 1)
+        timing = f'[0:v:0]trim=start={start}:end={end},setpts=(PTS-STARTPTS)/{rate},fps=30,tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={segment["frame_count"]}'
         if local or (resolved and resolved.get('layout_version')=='proof_compact_v2'):
             filters.append(timing+f'[trimmed{index}]')
             filters.append(framing_graph(f'trimmed{index}',f'v{index}',framing=resolved,schedule=local))
@@ -161,7 +212,7 @@ def render_assembly(source: Path, plan: dict, target: Path, *, quality: str = 's
             filters.append(timing+f',{vf},setsar=1[v{index}]')
         labels.append(f'[v{index}]')
         if audio:
-            filters.append(f'[0:a:0]atrim=start={start}:end={end},asetpts=PTS-STARTPTS,aresample=48000,apad,atrim=duration={duration}[a{index}]')
+            filters.append(f'[0:a:0]atrim=start={start}:end={end},asetpts=PTS-STARTPTS,atempo={rate},aresample=48000,apad,atrim=duration={duration}[a{index}]')
             labels.append(f'[a{index}]')
     filters.append(''.join(labels)+f'concat=n={len(plan["segments"])}:v=1:a={int(audio)}[video]'+('[audio]' if audio else ''))
     target.parent.mkdir(parents=True,exist_ok=True)

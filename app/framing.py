@@ -141,8 +141,9 @@ def build_framing_schedule(clip: dict, settings: dict) -> list[dict]:
         for window in windows:
             a,b=max(piece['source_in'],window['start']),min(piece['source_out'],window['end'])
             if a<b:
-                result.append({'start':piece['output_start']+a-piece['source_in'],
-                               'end':piece['output_start']+b-piece['source_in'],'framing':scene})
+                rate=piece.get('playback_rate',1)
+                result.append({'start':piece['output_start']+(a-piece['source_in'])/rate,
+                               'end':piece['output_start']+(b-piece['source_in'])/rate,'framing':scene})
     return sorted(result,key=lambda item:item['start'])
 
 

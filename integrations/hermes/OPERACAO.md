@@ -51,6 +51,23 @@ as superfícies falharem fechadas (503); credencial curta/ausente não ativa a p
 A API geral conserva sua credencial própria e contratos existentes.
 
 - GET `groups`, `groups/<source:id>`: fontes, modelos, candidatos e seleção.
+- POST `ingest`: URL autorizada com fonte ativa; preserva o ID YouTube e deduplica.
+  A resposta confirma o job persistido; falha de conexão não confirma criação.
+- GET `jobs/<job>`: status e handoff com grupo, modelo solicitado/resolvido,
+  referência da transcrição, candidatos e referências autenticadas de render.
+  Só iniciar revisão editorial quando `pipeline.ready=true`; enquanto houver
+  `pipeline.missing`, aguardar ou diagnosticar a falha indicada em `pipeline.next`.
+  Fontes sem escopo externo não expõem esse conteúdo ao Hermes.
+- POST `jobs/<job>/reprocess`: `{owner_message,reprocess:{request_id,expected_run_id}}`.
+  Só aceita FAILED sem candidatos e fonte com acesso externo vigente. Mantém o
+  snapshot, entrada, transcrição e histórico; reconcilia fila atomicamente.
+  `expected_run_id` vem de `latest_run_id` do status. Repetir request_id/conteúdo
+  recupera resposta perdida; nunca inicia outra tentativa após uma nova falha.
+  ID com conteúdo diferente ou execução desatualizada retorna 409. Enquanto o
+  worker não confirmar o encerramento da execução, também é preciso aguardar (409).
+  Candidatos existentes usam retry individual; ajustes editoriais não são aplicados por retry.
+  `status` também expõe diagnóstico seguro `failure` e `reprocess_available`,
+  sem mensagens arbitrárias de exceção, caminhos ou conteúdo de prompts.
 - GET `jobs/<job>/candidates/<candidate>`: texto/revisão/identidade/link e comentários.
 - GET `jobs/<job>/transcript`: transcrição da fonte, limitada a 4 MiB e sujeita ao escopo externo da fonte.
 - POST `jobs/<job>/candidates/<candidate>/captions`: salva sugestão editorial Hermes para Instagram ou Facebook, com instrução do proprietário, request_id e identidade do artefato. Não aprova nem publica; reenvios idênticos são idempotentes.
@@ -92,6 +109,11 @@ em feedback_events. Mesclar grupos previamente selecionados pede reconciliação
 
 A interface abre comparação por fonte; `?group=...` abre rodada e `?job=UUID` abre
 revisão individual. Nenhum grupo é unido por título, idioma ou similaridade textual.
+
+Se o Pi retornar `URLError`, verificar a tarefa Windows existente
+`Content Factory Hermes Private API` e o túnel privado antes de repetir ingestão.
+Confirmar conectividade autenticada e consultar o ID do vídeo para evitar duplicação.
+Não imprimir tokens nem reiniciar o worker durante processamento.
 
 Documentação oficial consultada em07/11/2026: [perfis](https://hermes-agent.nousresearch.com/docs/user-guide/profiles),
 [Telegram/tópicos](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram),

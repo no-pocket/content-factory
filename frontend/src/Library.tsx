@@ -1,0 +1,28 @@
+import {useState} from 'react'
+import {useS,saveSource,addAsset,toast,message} from './store'
+import type {Source} from './types'
+import {Head,Field,Seg,Tag} from './ui'
+const empty:Source={id:'',name:'',status:'pending',ref:'',rights:false,platform:false,langs:'pt',kinds:['video'],scopes:['local'],rev:0}
+function SourceForm({source}:{source:Source}){
+  const [r,set]=useState({...source}),[busy,setBusy]=useState(false),[error,setError]=useState('')
+  async function save(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{await saveSource(r,r.rev);set({...r,rev:r.rev+1});toast('Fonte salva. Cadastro não inicia jobs nem monitoramento.')}catch(e){setError(message(e))}finally{setBusy(false)}}
+  return <form className="cand" onSubmit={save}><div className="two"><Field l="ID canônico do canal (UC + 22 caracteres)"><input required pattern="UC[A-Za-z0-9_-]{22}" readOnly={source.rev>0||r.rev>0} value={r.id} onChange={e=>set({...r,id:e.target.value})}/></Field><Field l="Nome do canal"><input required maxLength={4000} value={r.name} onChange={e=>set({...r,name:e.target.value})}/></Field>
+    <Field l="Status"><select value={r.status} onChange={e=>set({...r,status:e.target.value as Source['status']})}><option value="pending">Pendente</option><option value="active">Ativo</option><option value="disabled">Desabilitado</option></select></Field><Field l="Idiomas permitidos, separados por vírgula"><input value={r.langs} onChange={e=>set({...r,langs:e.target.value.replaceAll(' ','')})}/></Field></div>
+    <Field l="Referência e escopo da autorização"><textarea required={r.status==='active'} maxLength={4000} value={r.ref} onChange={e=>set({...r,ref:e.target.value})}/></Field>
+    <label className="ck"><input type="checkbox" checked={r.rights} onChange={e=>set({...r,rights:e.target.checked})}/>Direitos de edição e usos declarados pelo titular</label><label className="ck"><input type="checkbox" checked={r.platform} onChange={e=>set({...r,platform:e.target.checked})}/>Permissão aplicável da plataforma</label>
+    <fieldset><legend>Tipos autorizados</legend>{[['video','Vídeos'],['short','Shorts'],['live_archive','Lives arquivadas']].map(([k,l])=><label className="ck" key={k}><input type="checkbox" checked={r.kinds.includes(k)} onChange={e=>set({...r,kinds:e.target.checked?[...r.kinds,k]:r.kinds.filter(x=>x!==k)})}/>{l}</label>)}</fieldset>
+    <fieldset><legend>Escopo dos modelos</legend>{[['local','Modelos locais'],['external','Serviços externos (exige autorização específica)']].map(([k,l])=><label className="ck" key={k}><input type="checkbox" checked={r.scopes.includes(k)} onChange={e=>set({...r,scopes:e.target.checked?[...r.scopes,k]:r.scopes.filter(x=>x!==k)})}/>{l}</label>)}</fieldset>
+    {error&&<div role="alert" className="warn">{error}<button className="b" type="button" onClick={()=>{set({...source});setError('')}}>Recarregar cadastro atual</button></div>}
+    <button className="b p" disabled={busy}>{busy?'Salvando…':'Salvar fonte'}</button><p className="hint">Revisão {r.rev}. Nenhum job ou monitoramento é iniciado ao salvar.</p>
+  </form>
+}
+export function Library(){
+  const s=useS(),[mode,setMode]=useState('sources'),[selected,setSelected]=useState(''),[file,setFile]=useState<File>(),[description,setDescription]=useState(''),[license,setLicense]=useState(''),[rights,setRights]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('')
+  async function upload(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{if(!file)throw new Error('Selecione um arquivo.');await addAsset(description,{file,license_note:license,rights_confirmed:rights});toast('Asset licenciado cadastrado.');setDescription('');setLicense('');setRights(false)}catch(e){setError(message(e))}finally{setBusy(false)}}
+  return <><Head t="Biblioteca" s="Fontes autorizadas e B-roll com licença registrada."/><Seg v={mode} on={setMode} o={[["sources","Fontes / canais"],["assets","B-roll / encerramento"]]}/>
+    {mode==='sources'?<><Field l="Fonte para editar"><select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">Cadastrar novo canal</option>{s.sources.map(r=><option key={r.id} value={r.id}>{r.name} · {r.status} · revisão {r.rev}</option>)}</select></Field><SourceForm key={selected} source={s.sources.find(r=>r.id===selected)??empty}/></>:<>
+      {s.assets.length?s.assets.map(a=><article key={a.id} className="rw col"><strong>{a.d}</strong> <Tag>{a.duration.toFixed(1)} s</Tag><p>{a.license}</p><small className="mo">{a.id}</small></article>):<p>Nenhum asset cadastrado.</p>}
+      <h2>Cadastrar asset autorizado</h2><form className="cand" onSubmit={upload}><Field l="Arquivo B-roll / encerramento"><input type="file" accept=".mp4,.mov,.mkv,.webm" required onChange={e=>setFile(e.target.files?.[0])}/></Field><Field l="Descrição do conteúdo"><input value={description} required maxLength={150} onChange={e=>setDescription(e.target.value)}/></Field><Field l="Referência de licença e usos permitidos"><textarea value={license} required maxLength={500} onChange={e=>setLicense(e.target.value)}/></Field><label className="ck"><input type="checkbox" required checked={rights} onChange={e=>setRights(e.target.checked)}/>Confirmo permissão para editar e usar este material.</label><p className="hint">Até 300 MB. Encerramento exige vídeo de 2 a 120 segundos; o snapshot é congelado no novo job.</p>{error&&<p role="alert" className="warn">{error}</p>}<button className="b p" disabled={busy}>{busy?'Enviando…':'Adicionar à biblioteca'}</button></form>
+    </>}
+  </>
+}

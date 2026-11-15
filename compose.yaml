@@ -4,24 +4,44 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes: [redis_data:/data]
     restart: unless-stopped
-  ui:
-    build: .
-    command: ["streamlit", "run", "app/ui.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.maxUploadSize=2048"]
+  frontend:
+    build: ./frontend
+    image: content-factory-frontend:latest
+    volumes: ["web_auth:/run/web-auth:ro"]
+    ports: ["127.0.0.1:8501:80"]
+    depends_on: [web-api]
+    restart: unless-stopped
+  web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.web-api
+    image: content-factory-web-api:latest
     environment:
+      CONTENT_FACTORY_AUTO_REWORK: ${CONTENT_FACTORY_AUTO_REWORK:-true}
       REDIS_URL: redis://redis:6379/0
       DATA_DIR: /data
       OLLAMA_URL: http://ollama:11434
+      FRAME_VISION_MODEL: ${FRAME_VISION_MODEL:-}
+      FRAME_VISION_TIMEOUT: ${FRAME_VISION_TIMEOUT:-90}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       ASSETS_DIR: /data/assets
-    volumes: ["./data:/data"]
-    ports: ["127.0.0.1:8501:8501"]
+      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-true}
+      YOUTUBE_MAX_DURATION: ${YOUTUBE_MAX_DURATION:-7200}
+      YOUTUBE_MAX_BYTES: ${YOUTUBE_MAX_BYTES:-1500000000}
+      RENDER_FALLBACK_FFMPEG: ${RENDER_FALLBACK_FFMPEG:-true}
+      CONTENT_FACTORY_WEB_TOKEN_FILE: /run/web-auth/token
+      CONTENT_FACTORY_WEB_HOSTS: ${CONTENT_FACTORY_WEB_HOSTS:-localhost:8501,127.0.0.1:8501,workstation:8501,workstation.taild835d6.ts.net:8501,100.78.0.122:8501}
+      CONTENT_FACTORY_META_ENABLED: ${CONTENT_FACTORY_META_ENABLED:-auto}
+    volumes: ["./data:/data", "web_auth:/run/web-auth"]
     depends_on: [redis]
     restart: unless-stopped
   worker:
     build: .
+    image: content-factory-worker:latest
     # Trust optional local root CAs before the worker contacts Hugging Face.
     command: ["sh", "-ec", "update-ca-certificates >/dev/null && exec python -m app.worker"]
     environment:
+      CONTENT_FACTORY_AUTO_REWORK: ${CONTENT_FACTORY_AUTO_REWORK:-true}
       REDIS_URL: redis://redis:6379/0
       DATA_DIR: /data
       # HTTPX/Hugging Face uses this combined system + custom trust store.
@@ -42,7 +62,7 @@ services:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       OLLAMA_TIMEOUT: ${OLLAMA_TIMEOUT:-180}
       OLLAMA_PROPOSAL_MAX_CHUNKS: ${OLLAMA_PROPOSAL_MAX_CHUNKS:-12}
-      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-false}
+      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-true}
       YOUTUBE_MAX_DURATION: ${YOUTUBE_MAX_DURATION:-7200}
       YOUTUBE_MAX_BYTES: ${YOUTUBE_MAX_BYTES:-1500000000}
     volumes:
@@ -61,3 +81,4 @@ volumes:
   ollama_models:
   redis_data:
   hf_cache:
+  web_auth:

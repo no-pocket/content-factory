@@ -65,9 +65,11 @@ def build_draft(job: dict, candidate_id: str, provider: str, *, title: str, desc
             'plan': request_plan(provider, title=title.strip(), description=description, size=size)}
 
 
-def queue_dry_run(jid: str, candidate_id: str, provider: str, *, title: str, description: str = '') -> dict:
+def queue_dry_run(jid: str, candidate_id: str, provider: str, *, title: str, description: str = '', expected_artifact_id: str | None = None) -> dict:
     with store.job_lock(jid):
         draft = build_draft(store.load(jid), candidate_id, provider, title=title, description=description)
+        if expected_artifact_id is not None and draft['artifact_id'] != expected_artifact_id:
+            raise service.Conflict('O artefato mudou antes de salvar o rascunho')
         key = digest(draft)
         ROOT.mkdir(parents=True, exist_ok=True)
         path = ROOT / (key + '.json')

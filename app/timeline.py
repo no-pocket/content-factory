@@ -49,9 +49,9 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
     """Build validated timeline from ASR + constrained director hints."""
     assembly = None
     if clip.get('assembly'):
-        from .assembly import validate_assembly, map_words
+        from .assembly import validate_assembly, map_words, native_word_groups
         assembly = validate_assembly(clip['assembly'], clip['assembly']['source_duration'])
-        words = map_words(assembly, [word for segment in segments for word in segment.get('words', [])])
+        words = map_words(assembly, [word for segment in native_word_groups(segments) for word in segment.get('words', [])])
         start, end = 0, assembly['duration']
     else:
         start = as_float(clip["start"])
@@ -137,6 +137,8 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         timeline.pop('source_range')
         timeline.update(schema_version='3.0', segments=assembly['segments'],
                         source_duration=assembly['source_duration'], duration=assembly['duration'])
+        grouped=sum(w.get('zero_duration_word_count',0) for w in words)
+        if grouped:timeline['word_timing_diagnostics']={'zero_duration_words_grouped':grouped,'native_timestamps_interpolated':False}
         if 'reorder_approval' in assembly:
             timeline['reorder_approval'] = assembly['reorder_approval']
     validate_timeline(timeline)
@@ -200,8 +202,9 @@ def validate_timeline(timeline: dict) -> None:
                 raise ValueError('Missing v3 caption source provenance')
             if not piece['source_in']<=word['source_start']<word['source_end']<=piece['source_out']:
                 raise ValueError('V3 caption outside its source segment')
-            expected_start=piece['output_start']+word['source_start']-piece['source_in']
-            expected_end=piece['output_start']+word['source_end']-piece['source_in']
+            rate=piece.get('playback_rate',1)
+            expected_start=piece['output_start']+(word['source_start']-piece['source_in'])/rate
+            expected_end=piece['output_start']+(word['source_end']-piece['source_in'])/rate
             if (abs(word['start']-expected_start)>1e-7 or abs(word['end']-expected_end)>1e-7 or
                     abs(word['output_segment_end']-(piece['output_start']+piece['duration']))>1e-7):
                 raise ValueError('V3 caption clock disagrees with source provenance')

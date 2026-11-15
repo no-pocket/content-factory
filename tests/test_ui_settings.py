@@ -1,4 +1,4 @@
-from app.ui_settings import render_settings_controls
+from app._legacy_streamlit.ui_settings import render_settings_controls
 from app.job_settings import DEFAULTS
 
 

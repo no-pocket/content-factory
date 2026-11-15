@@ -1,0 +1,12 @@
+# Isolated browser acceptance: never include compose.publishing.yaml here.
+# docker compose -p content-factory-web-qa -f compose.yaml -f compose.web-qa.yaml up -d --no-build redis web-api frontend
+services:
+  frontend:
+    ports: !override ["127.0.0.1:8502:80"]
+  web-api:
+    environment:
+      CONTENT_FACTORY_WEB_HOSTS: localhost:8502,127.0.0.1:8502
+      CONTENT_FACTORY_META_ENABLED: "true"
+    volumes:
+      - ./.web/qa:/data
+      - ./app:/app/app:ro
