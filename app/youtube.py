@@ -40,7 +40,7 @@ def download_youtube(url: str, destination: Path, *, source_snapshot: dict | Non
     This function does not use cookies, private videos, login or anti-bot workarounds.
     Creator rights alone do not necessarily grant permission from YouTube.
     """
-    if os.getenv("ENABLE_YOUTUBE_DOWNLOAD", "false").lower() != "true":
+    if os.getenv("ENABLE_YOUTUBE_DOWNLOAD", "true").lower() != "true":
         raise PermissionError("Download por URL desabilitado; defina ENABLE_YOUTUBE_DOWNLOAD=true somente quando autorizado pelo YouTube e pelo titular")
     canonical = normalize_youtube_url(url)
     from yt_dlp import YoutubeDL

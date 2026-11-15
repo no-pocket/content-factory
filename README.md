@@ -4,19 +4,21 @@
 
 Sprint em validação: [QC, avaliação editorial e API local v1](research/SPRINT_QUALIDADE_RESULTADOS.md).
 
-Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in Streamlit. Optional Meta publishing and local scheduling are described in [Publicação](docs/PUBLICACAO.md).
+Local-first, **human-reviewed** short-video creator for authorized source media. Input an uploaded video or an explicitly authorized YouTube URL; transcribe with **faster-whisper**, shortlist highlights using a heuristic or local **Qwen2.5 via Ollama**, create an editable **timeline JSON** with a constrained **AI Editing Director**, then render 9:16 cuts using **FFmpeg + Remotion**. Preview and approve in the React interface (TypeScript/Vite, served by nginx). Optional Meta publishing and local scheduling are described in [Publicação](docs/PUBLICACAO.md).
 
 
 ## Start the workstation (Linux / Docker Desktop with WSL2)
 
 ```bash
 cp .env.example .env
-docker compose up --build -d
+docker compose build worker
+docker compose build web-api frontend
+docker compose up --no-build -d
 # Browse http://localhost:8501
 docker compose logs -f worker
 ```
 
-By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The **Ajustes de processamento** panel saves model, beam size, highlight count/duration, Qwen analysis limits and engine choices with each job; `app.submit` accepts the same `settings` object. New UI forms start with K4200/Qwen, Remotion and high fidelity. High fidelity fails explicitly if Remotion fails; the standard profile can use the configured FFmpeg fallback, which lacks animated typography and B-roll. Existing job snapshots are preserved. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
+By default, the Python worker transcribes locally (`WHISPER_MODEL=base`, CPU/int8) and creates up to three clips. The **Configurações / Ajustes de processamento** panel saves model, beam size, highlight count/duration, Qwen analysis limits and engine choices with each job; `app.submit` accepts the same `settings` object. New UI forms start with K4200/Qwen, Remotion and high fidelity. High fidelity fails explicitly if Remotion fails; the standard profile can use the configured FFmpeg fallback, which lacks animated typography and B-roll. Existing job snapshots are preserved. Inspect each candidate's `director_used`, `renderer_used`, `word_count`, and downloadable `.timeline.json` in the UI.
 
 Each finished candidate keeps its 720×1280 MP4 for download and gets a VP8/Opus WebM preview (720×1280 high fidelity; 540×960 standard). The UI displays a compact player and offers both formats. Both outputs must pass complete decoding and technical QC before approval. Rejection with comments is available even for failed candidates. Legacy files require an explicit QC pass; a missing preview is a technical failure, while the existing master remains on disk. See [candidate QC and retries](docs/CONTROLE_QUALIDADE.md).
 
@@ -37,7 +39,7 @@ The K4200 can run Qwen 2.5 through a CUDA 10.2 build of `llama.cpp` even though 
 
 ```powershell
 ./research/build-kepler.ps1
-docker compose -f compose.yaml -f compose.kepler.yaml up -d worker ui kepler-engine kepler-bridge
+docker compose -f compose.yaml -f compose.kepler.yaml up -d worker web-api frontend kepler-engine kepler-bridge
 Invoke-RestMethod http://127.0.0.1:11436/health
 ```
 
@@ -55,10 +57,11 @@ Source (uploaded video or permitted YouTube URL)
   -> timeline.py validates bounds, IDs and source-anchored text
   -> FFmpeg stages center-cropped video and rights-registered B-roll
   -> Remotion composes overlays, active-word subtitles and final MP4
-  -> manual approval in Streamlit
+  -> optional local OCR/vision suggestions and human-confirmed, versioned edits
+  -> manual approval in React
 ```
 
-The director is not permitted to provide shell commands or arbitrary file paths; it only proposes restricted editing hints. Register B-roll under the **Biblioteca de gameplay** expander, including documented permission, so it becomes selectable. `data/` contains media, job records and sidecar timelines; preserve it across updates.
+The director is not permitted to provide shell commands or arbitrary file paths; it only proposes restricted editing hints. Register B-roll in the **Biblioteca** module, including documented permission, so it becomes selectable. `data/` contains media, job records and sidecar timelines; preserve it across updates.
 
 ## Environment options
 
@@ -70,13 +73,13 @@ The director is not permitted to provide shell commands or arbitrary file paths;
 | `RENDER_FALLBACK_FFMPEG` | `true` | Subtitle-only output if Remotion fails |
 | `WHISPER_MODEL` | `base` | `small` improves many transcripts at greater compute cost |
 | `WHISPER_DEVICE` | `cpu` | Switch to `cuda` only with compatible worker image |
-| `ENABLE_YOUTUBE_DOWNLOAD` | `false` | Opt-in, rights- and platform-permission-gated URL ingestion |
+| `ENABLE_YOUTUBE_DOWNLOAD` | `true` | Opt-in, rights- and platform-permission-gated URL ingestion |
 
 ## Test the code
 
 Use os comandos e critérios em [Testes e validação](docs/TESTES.md). Nesta workstation a suíte roda na imagem existente do worker, com o código montado, sem reconstruir a imagem.
 
-The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. Meta publishing is opt-in; word-level forced alignment after text correction, face tracking, and multi-worker leases are not provided.
+The tests cover timeline bounds and media safety, per-job settings, ranker fallback, queue restart recovery, the Doctor, YouTube URL parsing and synthetic FFmpeg output. End-to-end Remotion/Chromium and actual Ollama inference must also be tested on the workstation. Meta publishing is opt-in; word-level forced alignment after text correction, continuous face tracking, and multi-worker leases are not provided.
 
 ## Troubleshooting — Hugging Face certificate verification
 
@@ -93,3 +96,12 @@ If a job fails during `TRANSCRIBING` with `CERTIFICATE_VERIFY_FAILED`, read [`do
 ## License notes
 
 The repository code is a reference implementation. Third-party model, media, and rendering dependencies retain their respective terms. Review Remotion licensing before commercial operation.
+
+## React interface
+
+Modules: Painel/Doctor, Novo vídeo, Revisão (including Comparar fontes), Publicação, Biblioteca, Métricas and Configurações. Preferences are local to the browser; each new job freezes its settings. YouTube download is enabled by default, with mandatory rights/platform confirmations; an explicit false remains respected. Existing `.env` files are not changed.
+
+FastAPI adapts the existing Python services; nginx proxies `/api` without exposing its token. The optional integration API is preserved. [Web API, development and DEMO](docs/API_WEB.md). Streamlit presentation is archived in `app/_legacy_streamlit/` and is not started by Compose. Meta sending reuses the separately configured publisher with `CONTENT_FACTORY_META_ENABLED=auto` (default); `false` disables web sending; approval never publishes by itself.
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](docs/REEDICAO.md).

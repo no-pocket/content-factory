@@ -168,6 +168,11 @@ def process(jid: str) -> None:
             if job.get('candidates'):
                 clips = job['candidates']
                 stage['state']='CACHED'
+            elif job.get('editorial_rework'):
+                from .editorial_rework import propose_revision
+                job['status']='DIRECTING'; save(job)
+                clips=propose_revision(job,transcript,duration,
+                    on_event=lambda event,details:record_ai_event(job,event,details))
             elif job.get('assembly_plan'):
                 if not settings['timeline_v3']:
                     raise ValueError('Assembly requires saved timeline_v3 opt-in')
@@ -251,8 +256,13 @@ def main() -> None:
     recovered = recover_inflight(queue, load, save)
     recovered += reconcile_pending(queue, all_jobs())
     log.info("Worker waiting on %s; recovered=%s", PENDING, recovered)
+    next_revision_scan=0
     while True:
         try:
+            if time.monotonic()>=next_revision_scan:
+                from .editorial_rework import reconcile_requests
+                reconcile_requests(queue=queue)
+                next_revision_scan=time.monotonic()+30
             jid = queue.brpoplpush(PENDING, PROCESSING, timeout=5)
             if jid:
                 process(jid)

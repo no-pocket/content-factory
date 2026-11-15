@@ -2,6 +2,7 @@
 import json
 
 DEFAULTS = {
+    'auto_pace': False,
     'outro_asset_id': None,
     'editorial_protocol': 1,
     'retrieval_mode': 'off',
@@ -48,10 +49,14 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
         overrides = {}
     if not isinstance(overrides, dict):
         raise ValueError('settings must be an object')
-    unknown = set(overrides) - set(DEFAULTS)
+    unknown = set(overrides) - set(DEFAULTS) - {'render_fallback_ffmpeg'}
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    if type(settings['auto_pace']) is not bool:
+        raise ValueError('auto_pace must be boolean')
+    if 'render_fallback_ffmpeg' in settings and type(settings['render_fallback_ffmpeg']) is not bool:
+        raise ValueError('render_fallback_ffmpeg must be boolean')
     if settings['duration_mode'] not in ('classic', 'flexible'):
         raise ValueError('Unsupported duration_mode')
     if settings['duration_mode'] == 'flexible':

@@ -1,4 +1,5 @@
 import pytest
+import uuid
 
 from app import store
 
@@ -155,3 +156,47 @@ def test_operator_revision_render_gets_new_version_and_keeps_old_artifacts_and_r
     assert view['candidates'][0]['legacy_decision'] is None
     assert view['candidates'][1]['legacy_decision'] == 'APPROVED'
     assert needs_review(revised)
+
+
+def test_timeline_edit_revision_is_idempotent_and_preserves_old_artifact(tmp_path, monkeypatch):
+    from app.editorial_revisions import request_render_revision
+    from app.timeline import build_timeline
+    from app.artifacts import artifact_manifest, digest
+    from pathlib import Path
+
+    job, transcript = reviewed_job(tmp_path, monkeypatch)
+    transcript['segments'][0]['words'] = [{'start': 1, 'end': 2, 'text': 'Conclusion.'}]
+    job['transcript_sha256'] = digest(transcript)
+    clip = job['candidates'][0]
+    clip['text'] = 'Conclusion.'
+    clip['timeline'] = build_timeline(clip, transcript['segments'])
+    clip['timeline_file'] = str(Path(clip['file']).with_suffix('.timeline.json'))
+    clip['artifact_manifest'] = artifact_manifest(job, 0)
+    clip['artifact_id'] = 'sha256:' + digest(clip['artifact_manifest'])
+    store.save(job)
+    messages = []
+    class Queue:
+        def lpush(self, key, value):
+            messages.append((key, value))
+    request_id = str(uuid.uuid4())
+    arguments = dict(
+        kind='timeline_edit', expected_artifact_id=clip['artifact_id'], expected_render_revision=2,
+        expected_candidate_version=1, expected_editorial_revision=4, reason='Human-reviewed timeline edit',
+        changes={'caption_overrides': [{'source_start': 1, 'source_end': 2, 'text': 'Fixed.'}],
+                 'title': 'Human title'},
+        request_id=request_id, queue=Queue(),
+    )
+
+    result = request_render_revision(job['id'], 0, transcript, **arguments)
+    replay = request_render_revision(job['id'], 0, transcript, **arguments)
+
+    assert result == replay
+    assert messages == [('clips:queue', job['id'])]
+    assert result['status'] == 'QUEUED'
+    assert result['approved'] == [1]
+    revised = result['candidates'][0]
+    assert revised['state'] == 'PENDING'
+    assert revised['timeline']['layers']['text'][0]['origin'] == 'human'
+    assert revised['timeline']['layers']['captions'][0]['text'] == 'Fixed.'
+    assert Path(job['candidates'][0]['file']).read_bytes() == b'old master keep'
+    assert result['candidate_revision_history'][-1]['kind'] == 'timeline_edit'

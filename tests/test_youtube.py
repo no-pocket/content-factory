@@ -23,8 +23,8 @@ def test_reject(url):
         normalize_youtube_url(url)
 
 
-def test_download_disabled_by_default(tmp_path, monkeypatch):
-    monkeypatch.delenv("ENABLE_YOUTUBE_DOWNLOAD", raising=False)
+def test_download_explicitly_disabled(tmp_path, monkeypatch):
+    monkeypatch.setenv("ENABLE_YOUTUBE_DOWNLOAD", "false")
     with pytest.raises(PermissionError):
         download_youtube("https://www.youtube.com/watch?v=dQw4w9WgXcQ", tmp_path)
 

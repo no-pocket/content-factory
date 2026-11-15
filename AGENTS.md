@@ -15,13 +15,13 @@ O Content Factory é uma aplicação local para produzir candidatos de cortes de
 
 - `app/ui.py`, `app/ui_settings.py`, `app/submit.py` e `app/job_settings.py`: interface, criação e configuração dos jobs.
 - `app/worker.py`, `app/queueing.py`, `app/store.py` e `app/core.py`: processamento, fila e persistência.
-- `app/ranker.py`, `app/llm_routing.py`, `app/director.py`, `app/timeline.py` e `app/edit_render.py`: seleção, direção, validação e renderização.
+- `app/ranker.py`, `app/llm_routing.py`, `app/director.py`, `app/timeline.py`, `app/editorial_edits.py`, `app/frame_analysis.py` e `app/edit_render.py`: seleção, direção, validação, edições versionadas, análise visual local e renderização.
 - `app/asset_library.py` e `app/youtube.py`: biblioteca de mídias e ingestão de vídeos autorizados.
 - Hermes/Telegram: consulte `integrations/hermes/OPERACAO.md`. O perfil `nopocket-content` fica no Pi em `/srv/nopocket/data/hermes/profiles/nopocket-content`; o acesso pode usar o MCP `nopocket_hermes` para conversas e SSH `nopocket-pi` para inspeção e manutenção autorizada. Não exponha credenciais nem presuma que o MCP de mensagens execute comandos no Pi.
 - `renderer/`: renderizador Remotion; `contracts/`: esquemas dos dados; `tests/`: testes automatizados.
 - `compose.yaml` e os overrides `compose.*.yaml`: implantação e opções de GPU. Confirme a configuração efetivamente usada antes de alterá-la.
 
-As configurações de processamento são normalizadas e salvas por job. Preserve esse snapshot: mudar o ambiente ou as opções da interface não deve alterar silenciosamente jobs existentes. A implantação documentada opera com um worker; não presuma que a recuperação de jobs ofereça coordenação segura entre múltiplos workers. Prévia WebM e MP4 mestre têm finalidades distintas: mudanças no render devem preservar ambos e sua reprodução.
+As configurações de processamento são normalizadas e salvas por job. Preserve esse snapshot: mudar o ambiente ou as opções da interface não deve alterar silenciosamente jobs existentes. A implantação documentada opera com um worker; não presuma que a recuperação de jobs ofereça coordenação segura entre múltiplos workers. Prévia WebM e MP4 mestre têm finalidades distintas: mudanças no render devem preservar ambos e sua reprodução. A revisão React permite edições manuais versionadas; cada novo render invalida a aprovação anterior. OCR e classificação por visão são locais e consultivos; nunca aplique suas sugestões sem confirmação humana explícita.
 
 ## Segurança, dados e operação
 

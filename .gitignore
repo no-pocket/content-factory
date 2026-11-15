@@ -17,6 +17,15 @@ renderer/node_modules/
 renderer/public/jobs/*
 !renderer/public/jobs/.gitkeep
 renderer/output/
+frontend/node_modules/
+frontend/dist/
+.venv-web/
+.web/
+research/web_dependencies.log
+research/web_*.log
+research/editorial_rework_*.log
+research/hermes_reprocess_*.log
+research/web_browser_*.png
 *.mp4
 *.mov
 *.mkv

@@ -45,6 +45,40 @@ def fetch_youtube_metadata(url: str) -> dict:
                    'extract_flat':False,'socket_timeout':20,'retries':2,'js_runtimes':{'deno':{}}}) as ydl:
         return ydl.extract_info(normalize_youtube_url(url), download=False)
 
+
+def find_existing_youtube(video_id: str) -> dict | None:
+    """Read legacy and new identities; callers serialize creation with the ingestion lock."""
+    # Explicit editorial revisions share the source; ordinary ingestion prefers the root job.
+    for job in sorted(store.all_jobs(),key=lambda j:bool(j.get('source_parent_job'))):
+        if job.get('source_type') != 'youtube':
+            continue
+        stored = job.get('youtube_video_id') or (job.get('youtube_metadata') or {}).get('video_id')
+        if not stored:
+            try:
+                stored = normalize_youtube_url(job.get('source_url') or '').split('v=')[-1]
+            except ValueError:
+                continue
+        if stored == video_id:
+            return job
+    return None
+
+
+def public_metadata(url: str) -> dict:
+    canonical = normalize_youtube_url(url)
+    try:
+        metadata = fetch_youtube_metadata(canonical)
+    except Exception as exc:
+        raise ValueError('Não foi possível consultar o vídeo público. Verifique se está disponível e sem restrição de membros/login.') from exc
+    vid = canonical.split('v=')[-1]
+    if not isinstance(metadata, dict) or metadata.get('id') != vid:
+        raise ValueError('Metadata video identity mismatch')
+    channel_id = source_registry.validate_channel_id(metadata.get('channel_id'))
+    title, creator = metadata.get('title'), metadata.get('channel') or metadata.get('uploader')
+    if any(not isinstance(v, str) or not v.strip() or len(v) > 4000 for v in (title, creator)):
+        raise ValueError('YouTube metadata requires title and creator')
+    return {'video_id': vid, 'channel_id': channel_id, 'title': title, 'creator': creator,
+            'source_url': canonical, 'language': metadata.get('language'), 'duration': metadata.get('duration')}
+
 def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings: dict) -> dict:
     """Fail closed on missing channel/language or ambiguous video kinds under narrower policy."""
     if not isinstance(metadata,dict) or metadata.get('id',metadata.get('video_id')) != video_id:
@@ -78,7 +112,7 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
     fields = {'source_url','source_id','settings','owner_message','actor_id'}
     if not isinstance(payload,dict) or set(payload)-fields:
         raise ValueError('Unknown ingestion fields')
-    if os.getenv('ENABLE_YOUTUBE_DOWNLOAD','false').lower() != 'true':
+    if os.getenv('ENABLE_YOUTUBE_DOWNLOAD','true').lower() != 'true':
         raise PermissionError('YouTube ingestion is disabled in this installation')
     url = normalize_youtube_url(payload.get('source_url',''))
     video_id = url.split('v=')[-1]
@@ -100,8 +134,7 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
                 raise PermissionError('Channel is not registered as authorized') from exc
             verified = verify_source_metadata(metadata,video_id,source,settings)
             verified['source_url'] = url
-            existing = next((j for j in store.all_jobs() if j.get('source_type') == 'youtube'
-                             and j.get('source_url') == url),None)
+            existing = find_existing_youtube(video_id)
             if existing:
                 if existing.get('status') in {'QUEUED','QUEUE_FAILED'}:
                     existing = recover_import_enqueue(existing['id'],queue=queue)
@@ -113,5 +146,6 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
                 'license_note':source['authorization_reference'],'rights_confirmed':True,
                 'platform_permission':True,'settings':settings},queue=queue,
                 source_provenance={'source_id':channel_id,'source_snapshot':source,
+                    'youtube_video_id':video_id,'video_title':verified['title'],'original_name':verified['title'],
                     'youtube_metadata':verified,'ingestion_context':context,'metadata_verified_at':time.time()})
             return {'job':job,'duplicate':False}

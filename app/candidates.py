@@ -124,7 +124,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                         hints, director_used = direct_edit(clip, assets, on_event=event,
                                                            mode=settings['director_mode'],
                                                            model=settings['llm_model'],
-                                                           llm_backend=settings['llm_backend'])
+                                                           llm_backend=settings['llm_backend'],auto_pace=settings.get('auto_pace',False))
                         metric['resolved']=director_used
                         if 'fallback' in director_used:
                             metric['fallback_reason']=job.get('editing_activity',{}).get('reason','UNKNOWN')
@@ -132,6 +132,10 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                         clip['story_assessment'] = assess_story(clip['editorial_context'], {}, hints.get('story'))
                         if clip['story_assessment']['closure'] == 'INCOMPLETE':
                             raise ValueError('Editorial model found incomplete closure; a new validated boundary is required')
+                    from .pacing import apply_candidate_pacing, retime_hints
+                    rate=apply_candidate_pacing(clip,segments,job.get('duration'),settings,preference=hints.get('pace','auto'))
+                    hints=retime_hints(hints,rate)
+                    _validate_duration(clip,settings)
                     clip['timeline'] = build_timeline(clip, segments, edit=hints, assets=assets)
                     clip['director_used'] = director_used
                     save(job)
@@ -144,13 +148,14 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 renderer = render_edited(source, job['id'], index + 1, clip, segments,
                                          clip['timeline'], assets, target, engine=settings['render_engine'], quality=settings['render_quality'],
                                          metrics=clip['stage_metrics'],metric_context=metric_context,
-                                         outro_asset_id=settings['outro_asset_id'], outro_snapshot=outro_snapshot)
+                                         outro_asset_id=settings['outro_asset_id'], outro_snapshot=outro_snapshot,
+                                         **({'fallback_ffmpeg': settings['render_fallback_ffmpeg']} if 'render_fallback_ffmpeg' in settings else {}))
                 with measure_stage(clip['stage_metrics'],'QC',metric_context,requested='mp4_webm_full_decode',resolved='ffmpeg_ffprobe') as metric:
                     qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
                     metric['qc_state']=qc['state']
                 clip.update(qc=qc, state=qc['state'], renderer_used=renderer,
                             file=str(target), timeline_file=str(target.with_suffix('.timeline.json')),
-                            word_count=len(clip['timeline']['layers']['captions']))
+                            word_count=sum(max(1,len(w.get('source_word_ids') or [])) for w in clip['timeline']['layers']['captions']))
                 attempt.update(state=qc['state'], qc=qc)
             except Exception as exc:
                 clip['state'] = 'FAILED'

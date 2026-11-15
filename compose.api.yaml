@@ -3,9 +3,10 @@ services:
     image: content-factory-worker:latest
     command: ["python", "-m", "app.api"]
     environment:
+      CONTENT_FACTORY_AUTO_REWORK: ${CONTENT_FACTORY_AUTO_REWORK:-true}
       REDIS_URL: redis://redis:6379/0
       DATA_DIR: /data
-      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-false}
+      ENABLE_YOUTUBE_DOWNLOAD: ${ENABLE_YOUTUBE_DOWNLOAD:-true}
       YOUTUBE_MAX_DURATION: ${YOUTUBE_MAX_DURATION:-7200}
       YOUTUBE_MAX_BYTES: ${YOUTUBE_MAX_BYTES:-1500000000}
       CONTENT_FACTORY_API_BIND: 0.0.0.0

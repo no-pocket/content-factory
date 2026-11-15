@@ -66,7 +66,7 @@ def test_media_download_checks_candidate_checksum_before_returning_attachment(tm
         client.run(args)
     assert not list(tmp_path.glob('*.mp4'))
 
-@pytest.mark.parametrize('command,expected', [('sources','/sources'), ('status','/jobs/00000000-0000-0000-0000-000000000001'), ('ingest','/ingest')])
+@pytest.mark.parametrize('command,expected', [('sources','/sources'), ('status','/jobs/00000000-0000-0000-0000-000000000001'), ('ingest','/ingest'), ('reprocess','/jobs/00000000-0000-0000-0000-000000000001/reprocess')])
 def test_ingestion_routes(command, expected):
     args = SimpleNamespace(command=command, job='00000000-0000-0000-0000-000000000001')
     assert client.route(args) == expected

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import time
+import uuid
 
 from . import store
 from .artifacts import artifact_manifest, digest
@@ -14,21 +15,45 @@ def request_render_revision(jid: str, index: int, transcript: dict, *, kind: str
                                 expected_artifact_id: str, expected_render_revision: int,
                                 expected_candidate_version: int, expected_editorial_revision: int,
                                 reason: str, assets: dict | None = None,
-                                editorial_title: str | None = None, queue=None) -> dict:
+                                editorial_title: str | None = None, changes: dict | None = None,
+                                request_id: str | None = None, queue=None) -> dict:
     """Validate parent bindings under lock, snapshot history and dispatch one revision.
 
     Call only after operator authorization. A prepared replacement is PENDING,
     not FAILED; its render gets a fresh attempt budget and versioned output path.
     The old manifest stays available for register_render's version/history logic.
     """
-    if kind not in {'source_end', 'media_sync'}:
-        raise ValueError('Revision kind must be source_end or media_sync')
+    if kind not in {'source_end', 'media_sync', 'timeline_edit'}:
+        raise ValueError('Invalid revision kind')
     if kind == 'media_sync' and editorial_title is not None:
         raise ValueError('Media sync revision must preserve the editorial title')
+    if kind != 'timeline_edit' and changes is not None:
+        raise ValueError('Timeline changes require a timeline edit revision')
     if not isinstance(reason, str) or not reason.strip() or len(reason) > 4000:
         raise ValueError('Revision reason required, max 4000 characters')
+    request_hash = None
+    if request_id is not None:
+        try:
+            if str(uuid.UUID(request_id)) != request_id:
+                raise ValueError('Invalid request ID')
+        except (TypeError, AttributeError) as exc:
+            raise ValueError('Invalid request ID') from exc
+        request_hash = digest({'kind': kind, 'index': index, 'artifact': expected_artifact_id,
+                              'render_revision': expected_render_revision,
+                              'candidate_version': expected_candidate_version,
+                              'editorial_revision': expected_editorial_revision,
+                              'reason': reason, 'changes': changes})
+    elif kind == 'timeline_edit':
+        raise ValueError('Timeline edit request ID required')
     with store.job_lock(jid):
         job = store.load(jid)
+        if request_id is not None:
+            previous = next((entry for entry in job.get('candidate_revision_history', [])
+                             if entry.get('request_id') == request_id), None)
+            if previous:
+                if previous.get('request_hash') != request_hash:
+                    raise Conflict('Request ID reused with different timeline edits')
+                return job
         if job.get('editorial_protocol') != 2:
             raise Conflict('Versioned editorial protocol required')
         if job.get('status') not in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'APPROVED', 'REJECTED'}:
@@ -58,6 +83,10 @@ def request_render_revision(jid: str, index: int, transcript: dict, *, kind: str
         if kind == 'source_end':
             plan = prepare_source_end_revision(job, index, transcript, assets=assets,
                                                editorial_title=editorial_title)
+        elif kind == 'timeline_edit':
+            from .editorial_edits import prepare_timeline_edit
+            from .edit_render import read_assets
+            plan = prepare_timeline_edit(job, index, transcript, changes, assets=assets or read_assets())
         else:
             from .timeline import validate_timeline
             timeline = copy.deepcopy(clip.get('timeline'))
@@ -72,6 +101,8 @@ def request_render_revision(jid: str, index: int, transcript: dict, *, kind: str
         job.setdefault('candidate_revision_history', []).append({
             'created_at': time.time(), 'reason': reason.strip(), 'origin': 'operator_render_revision',
             'kind': kind,
+            **({'request_id': request_id, 'request_hash': request_hash} if request_id is not None else {}),
+            **({'changes': copy.deepcopy(changes)} if kind == 'timeline_edit' else {}),
             'candidate_index': index, 'editorial_revision': expected_editorial_revision,
             'candidate': copy.deepcopy(clip), 'boundary': plan['boundary']})
         clip.update(plan['clip'])

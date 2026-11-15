@@ -40,10 +40,10 @@ As verificações desta sprint também cobrem QC MP4/WebM, decisões versionadas
 direcionado, interrupções sintéticas, métricas por idioma e API HTTP autenticada.
 Evidências atuais e limitações: [relatório da sprint](../research/SPRINT_QUALIDADE_RESULTADOS.md).
 
-Na workstation, a imagem já construída do worker contém pytest e dependências. Rode os testes sem build novo:
+A imagem web-api é uma camada fina sobre o worker existente e acrescenta FastAPI e o cliente de testes. Para a suíte atual, prepare-a com `docker compose build web-api` (sem reconstruir o worker). Rode com dados de teste isolados:
 
 ```powershell
-docker run --rm -v 'E:\CodexFiles\content-factory\content-factory:/workspace' -w /workspace -e PYTHONPATH=/workspace --entrypoint python content-factory-worker:latest -m pytest -q --tb=short --basetemp=/workspace/research/pytest_temp_full
+docker run --rm -v 'E:\CodexFiles\content-factory\content-factory:/workspace' -w /workspace -e PYTHONPATH=/workspace -e DATA_DIR=/tmp/cf-tests --entrypoint python content-factory-web-api:latest -m pytest -q --tb=short --basetemp=/workspace/research/pytest_temp_full
 docker compose -f compose.yaml -f compose.kepler.yaml config --quiet
 git diff --check
 ```
@@ -116,3 +116,32 @@ bloqueada e imagem candidata isolada. O relatório resumido observado está em
 O ganho médio de 2,70% ficou dentro da variação observada. O acabamento integrado
 permanece exclusivamente experimental na biblioteca/benchmark; o worker conserva
 pós-encode. Não há promoção automática ou alegação de ganho editorial.
+
+## Migração React / FastAPI
+
+```powershell
+npm --prefix frontend ci --no-audit --no-fund
+npm --prefix frontend test
+npm --prefix frontend run build
+docker compose -f compose.yaml -f compose.kepler.yaml config --quiet
+git diff --check
+```
+
+`tests/test_web_api.py` cobre origem/token, snapshots, direitos/YouTube, revisões e identidades, fonte otimista, métricas/heartbeat, caminhos, Range/HEAD e agenda local. A suíte completa também continua cobrindo timeline, formatos, duração, render, recuperação e o Streamlit arquivado. A UI legada é testada em `app/_legacy_streamlit/`, sem reativar seu serviço.
+
+Use **agent-browser CLI** para o fluxo real React, inclusive nos viewports 1440, 1024, 820, 430 e 375. Emulação de viewport não comprova Safari/iPhone físico. Instruções e resultados observados da migração ficam em [aceitação React](../research/react_frontend_acceptance.md).
+
+O [follow-up de ingestão e acesso móvel](../research/web_followup_acceptance.md)
+registra o lote YouTube autorizado, a deduplicação pelo Hermes e a regressão
+HTTP/Tailscale (`crypto.randomUUID` indisponível fora de contexto seguro).
+
+`tests/test_hermes_reprocess.py` cobre reprocessamento explícito de FAILED sem
+candidatos: snapshot/histórico, identidade da execução, repetição concorrente,
+resposta perdida e acknowledgment terminal do worker. Consulte a
+[aceitação do reprocessamento Hermes](../research/hermes_reprocess_acceptance.md).
+Não use um job real para validar essa mutação sem pedido explícito do proprietário.
+
+A agenda de ensaio usa `compose.web-qa.yaml` com projeto `content-factory-web-qa`, porta 8502, dados em `.web/qa` e volumes próprios; subir somente redis, web-api e frontend. Nunca incluir `compose.publishing.yaml` nem iniciar publisher/worker nesse projeto. Não usar `--remove-orphans` ou remover volumes. DEMO usa build `VITE_DEMO=true`, visível e sem acesso mutável à API.
+
+
+Atualização 2026-11-11: reedição automática após concluir avaliações com ajustes, ritmo limitado e snapshots preservados: [guia de reedição](REEDICAO.md).

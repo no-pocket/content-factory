@@ -41,6 +41,9 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
             raise ValueError(f'{key} required, max 4000 characters')
     if payload.get('rights_confirmed') is not True:
         raise PermissionError('Rights confirmation required')
+    title = payload.get('video_title')
+    if title is not None and (not isinstance(title, str) or not title.strip() or len(title) > 4000):
+        raise ValueError('video_title must be nonempty text, max 4000 characters')
     settings = normalize_job_settings(payload.get('settings'))
     if settings['framing_preset'] in {'web','tweet','document'} and not settings['framing_windows']:
         raise ValueError('Informe os intervalos da fonte em que a página/tweet aparece; fora deles o vídeo mantém o vertical aprovado')
@@ -86,6 +89,8 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
                         source_url=source_url, platform_permission=bool(source_url), settings=settings,
                         source_provenance=source_provenance)
     job.update(qc_settings=qc, source_fingerprint=fingerprint, pipeline_version='quality-v2')
+    if title is not None:
+        job['video_title'] = title.strip()
     if assembly is not None:
         job['assembly_plan'] = assembly
     if evaluation is not None:
@@ -153,7 +158,8 @@ def _append_editorial_event(job: dict, decisions: list, *, complete: bool, origi
 
 
 def review_candidate(jid: str, index: int, decision: str, reason: str, *, expected_revision: int,
-                     ratings: dict | None = None, rework: bool = False, adjustments: str = '', origin: str = 'ui') -> dict:
+                     ratings: dict | None = None, rework: bool = False, adjustments: str = '', origin: str = 'ui',
+                     expected_artifact_id: str | None = None, expected_candidate_history: int | None = None) -> dict:
     with store.job_lock(jid):
         job = store.load(jid)
         _require_v1(job)
@@ -162,6 +168,14 @@ def review_candidate(jid: str, index: int, decision: str, reason: str, *, expect
         history = job.get('decision_history', [])
         if type(expected_revision) is not int or len(history) != expected_revision:
             raise Conflict('Stale revision; reload job')
+        if expected_artifact_id is not None:
+            from .artifacts import artifact_manifest, digest
+            if expected_artifact_id != 'sha256:' + digest(artifact_manifest(job, index)):
+                raise Conflict('Stale or changed artifact; reload and verify render')
+        if expected_candidate_history is not None:
+            count = sum(any(d.get('candidate') == index for d in e.get('decisions', [])) for e in history)
+            if type(expected_candidate_history) is not int or expected_candidate_history != count:
+                raise Conflict('Candidate history changed; reload job')
         value = validate_decision({'candidate': index, 'decision': decision, 'reason': reason,
                                    'rework': rework, 'adjustments': adjustments, **(ratings or {})}, len(job['candidates']))
         if decision == 'APPROVED' and not verify_reviewable(job, index):
@@ -217,6 +231,51 @@ def retry_candidate(jid: str, index: int, *, queue=None) -> dict:
         job.update(status='QUEUED', error=None, retry_candidate=index)
         store.save(job)
         return enqueue(job, queue)
+
+
+def reprocess_failed_job(jid: str, request: dict, *, owner_message: str, actor_id: str, queue=None) -> dict:
+    """Explicitly retry a pre-candidate failure without changing its saved intent."""
+    from .artifacts import digest
+    from .source_ingestion import recover_import_enqueue, require_active_source
+    if not isinstance(request, dict) or set(request) != {'request_id', 'expected_run_id'}:
+        raise ValueError('request_id and expected_run_id required')
+    try:
+        if str(uuid.UUID(request['request_id'])) != request['request_id']:
+            raise ValueError('Canonical request UUID required')
+    except (TypeError, AttributeError):
+        raise ValueError('Canonical request UUID required') from None
+    if any(not isinstance(v, str) or not v.strip() or len(v) > 4000 for v in (owner_message, actor_id)):
+        raise ValueError('Explicit owner instruction and trusted actor required')
+    fingerprint = digest({'request': request, 'owner_message': owner_message, 'actor_id': actor_id})
+    with store.job_lock(jid):
+        job = store.load(jid)
+        if job.get('source_snapshot'):
+            from .source_registry import get_source
+            require_active_source(job['source_snapshot'])
+            require_active_source(get_source(job['source_snapshot']['channel_id']))
+        receipts = job.setdefault('reprocess_requests', {})
+        previous = receipts.get(request['request_id'])
+        if previous:
+            if previous['request_hash'] != fingerprint:
+                raise Conflict('Request ID reused with different content')
+        else:
+            if job['status'] != 'FAILED' or job.get('candidates'):
+                raise Conflict('Only FAILED jobs without candidates may be reprocessed; use candidate retry for existing results')
+            from .queueing import PROCESSING
+            if (queue or store.rconn()).lpos(PROCESSING, jid) is not None:
+                raise Conflict('Worker terminal acknowledgment pending; reload job before retry')
+            runs = job.get('processing_runs', [])
+            latest = runs[-1].get('run_id') if runs else None
+            if request['expected_run_id'] != latest:
+                raise Conflict('Processing run changed; reload job')
+            receipts[request['request_id']] = {'request_hash': fingerprint, 'previous_run_id': latest,
+                'previous_error': job.get('error'), 'owner_message': owner_message, 'actor_id': actor_id,
+                'requested_at': time.time()}
+            job.update(status='QUEUED', error=None)
+            store.save(job)
+    # Reuse atomic queue reconciliation outside job_lock, including lost replies.
+    # Replaying this request after another FAILED run never starts a second attempt.
+    return recover_import_enqueue(jid, queue=queue)
 
 
 def retry_enqueue(jid: str, *, queue=None) -> dict:
@@ -318,7 +377,21 @@ def get_editorial_view(job: dict) -> dict:
             'review_status': 'COMPLETED' if rows and reviewed == len(rows) else 'PARTIAL' if reviewed else 'PENDING'}
 
 
-def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: str = 'streamlit', actor_id: str = 'local-owner') -> dict:
+def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: str = 'streamlit', actor_id: str = 'local-owner',
+                        expected_candidate_history: int | None = None) -> dict:
+    result=_record_review_candidate_v2(jid,candidate_id,request,channel=channel,actor_id=actor_id,
+                                       expected_candidate_history=expected_candidate_history)
+    if result.get('rework_job_id'):
+        from .editorial_rework import deliver
+        try:deliver(jid)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception('Review committed; revision delivery pending for job %s',jid)
+    return result
+
+
+def _record_review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: str, actor_id: str,
+                                expected_candidate_history: int | None = None) -> dict:
     """One lock, one atomic JSON write: event, receipt and projections commit together."""
     from datetime import datetime, timezone
     from .artifacts import artifact_manifest, digest
@@ -360,6 +433,10 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
                       if (c.get('candidate_id') or candidate_key(jid, i)) == candidate_id), None)
         if index is None:
             raise ValueError('Unknown candidate ID')
+        if expected_candidate_history is not None:
+            count = sum(e['candidate_id'] == candidate_id for e in job.get('feedback_events', []))
+            if type(expected_candidate_history) is not int or expected_candidate_history != count:
+                raise Conflict('Candidate history changed; reload job')
         clip = job['candidates'][index]
         expected = request['expected_artifact_id']
         actual = 'sha256:' + digest(artifact_manifest(job, index))
@@ -393,6 +470,9 @@ def review_candidate_v2(jid: str, candidate_id: str, request: dict, *, channel: 
         if any(c.get('state') not in {'VALID', 'WARNING'} for c in job['candidates']) and job['status'] != 'REJECTED':
             job['status'] = 'PARTIAL_FAILED'
         result = {'event': event, 'editorial_revision': revision + 1}
+        from .editorial_rework import register_request
+        child_id=register_request(job,view)
+        if child_id:result['rework_job_id']=child_id
         job.setdefault('review_receipts', {})[request['request_id']] = {'hash_version':2,'request_hash': request_hash, 'result': result}
         store.save(job)
         return result

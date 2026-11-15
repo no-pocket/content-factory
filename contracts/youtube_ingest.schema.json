@@ -193,6 +193,7 @@
             }
           ]
         },
+        "auto_pace": {"type": "boolean", "default": false},
         "timeline_v3": {
           "type": "boolean",
           "default": false

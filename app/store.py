@@ -30,6 +30,9 @@ def new_job(path: Path | None, filename: str, creator: str, license_note: str, *
               "approved": [], "created_at": time.time(), "settings_version": 1,
               "qc_settings": normalize_qc(), "decision_history": [],
               "settings": normalize_job_settings(settings), "model": os.getenv("WHISPER_MODEL", "base")}
+    if source_url:
+        from .youtube import normalize_youtube_url
+        record['youtube_video_id'] = normalize_youtube_url(source_url).split('v=')[-1]
     if record['settings']['outro_asset_id'] is not None:
         from .outro import snapshot_outro
         from .edit_render import read_assets

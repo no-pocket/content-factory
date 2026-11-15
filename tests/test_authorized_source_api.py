@@ -20,9 +20,13 @@ def test_source_registry_scopes_and_admin_mutation(hermes_server, monkeypatch):
     assert calls == [(record, 0)]
 
 
-def test_hermes_ingest_explicit_instruction_actor_and_duplicate(hermes_server, monkeypatch):
+def test_hermes_ingest_explicit_instruction_actor_and_duplicate(hermes_server, monkeypatch, tmp_path):
+    from app import store
+    monkeypatch.setattr(store, 'ROOT', tmp_path)
+    monkeypatch.setattr(store, 'JOBS', tmp_path)
     calls = []
-    job = {'id': 'job', 'status': 'QUEUED', 'source': '/private/input', 'candidates': [{'text': 'PRIVATE TRANSCRIPT'}]}
+    job = store.new_job(None, 'Synthetic title', 'Synthetic creator', 'Test authorization')
+    job.update(status='QUEUED', source='/private/input', candidates=[{'text': 'PRIVATE TRANSCRIPT'}])
     def ingest(payload):
         calls.append(payload)
         return {'job': job, 'duplicate': len(calls) > 1}
@@ -60,7 +64,8 @@ def test_local_only_job_cannot_escape_through_hermes(v2job, hermes_server, monke
         assert hermes_server(base + suffix)[0] == 403
     assert hermes_server(base + '/notes', {'owner_message': 'note', 'note': {}})[0] == 403
     assert hermes_server('/v2/hermes/jobs/' + job['id'])[1] == {
-        key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')}
+        **{key: job.get(key) for key in ('id', 'status', 'created_at', 'updated_at')},
+        'pipeline': {'ready': False, 'missing': ['external_source_authorization']}}
 
 def test_current_source_revocation_blocks_old_external_snapshot(v2job, hermes_server, monkeypatch, tmp_path):
     from app import store

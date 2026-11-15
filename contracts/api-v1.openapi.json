@@ -1433,6 +1433,7 @@
             ],
             "default": "qwen2.5:3b"
           },
+          "auto_pace": {"type": "boolean", "default": false},
           "render_quality": {
             "type": "string",
             "enum": [

@@ -11,7 +11,7 @@ from app.dashboard_health import render_doctor, render_job_ai
 from app.version import VERSION
 from app.asset_library import register_asset
 from app.edit_render import read_assets, browser_preview
-from app.ui_settings import render_settings_controls, render_duration_mode_control
+from app._legacy_streamlit.ui_settings import render_settings_controls, render_duration_mode_control
 from app.service import create_job, review_job, retry_candidate, retry_enqueue, verify_existing, review_candidate, reject_job
 from app.editorial import DIMENSIONS, summarize, current_decisions
 from app.quality import normalize_qc

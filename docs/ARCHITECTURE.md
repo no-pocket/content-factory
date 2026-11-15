@@ -3,7 +3,7 @@
 ## Componentes e fluxo
 
 ```text
-Streamlit :8501 ──> registro JSON em data/work ──> Redis clips:queue
+React/nginx :8501 -> FastAPI web-api -> serviços Python -> data/work + Redis clips:queue
                                                 └──> worker único
                                                       ├── ingestão autorizada / yt-dlp opcional
                                                       ├── faster-whisper (CPU, timestamps por palavra)
@@ -15,7 +15,7 @@ Streamlit :8501 ──> registro JSON em data/work ──> Redis clips:queue
                                                       └── MP4 mestre + WebM de prévia -> revisão humana
 ```
 
-`compose.yaml` define UI, worker, Redis e Ollama opcional. `compose.kepler.yaml` acrescenta servidor GPU e ponte Ollama compatível, exposta somente em localhost para diagnóstico. A UI é uma camada de apresentação: `app/job_settings.py`, `app/store.py`, `app/queueing.py` e o worker mantêm a lógica e os dados necessários a outro frontend.
+`compose.yaml` define frontend nginx, web-api FastAPI interno, worker, Redis e Ollama opcional. `compose.kepler.yaml` acrescenta servidor GPU e ponte Ollama compatível, exposta somente em localhost para diagnóstico. A UI React é uma camada de apresentação: `app/job_settings.py`, `app/store.py`, `app/queueing.py` e o worker mantêm a lógica e os dados necessários a outro frontend.
 
 ## Dados e contratos
 
@@ -29,12 +29,12 @@ Cada job salva uma cópia validada de seus ajustes. A UI e `app/submit.py` usam 
 - Transcrição, descrições e saída Qwen são dados não confiáveis. O ranker valida IDs, tempos e respostas completas; o diretor só sugere campos limitados. A timeline impõe limites e não aceita comandos shell nem caminhos arbitrários do modelo.
 - Na GPU, a ponte consulta contexto e tokenizer reais antes da inferência; rejeita estouro de contexto e opções não implementadas. Ranker e diretor descartam resposta limitada ou prompt truncado. Falhas semânticas acionam heurística, com evento no job.
 - Render Remotion pode cair para FFmpeg com legendas simplificadas, se configurado. Cada MP4 recebe prévia VP8/Opus completamente decodificada antes da publicação. O motor efetivo fica registrado por candidato.
-- `NEEDS_REVIEW` exige decisão humana. A agenda opcional publica apenas candidatos com aprovação e QC atuais, após escolha explícita do destino; consulte [Publicação](PUBLICACAO.md). Não há autenticação para exposição pública da interface, edição manual de timeline nem verificação externa de licença.
+- `NEEDS_REVIEW` exige decisão humana. O editor cria revisões imutáveis e invalida a aprovação da versão anterior. A agenda opcional publica apenas candidatos com aprovação e QC atuais, após escolha explícita do destino; consulte [Publicação](PUBLICACAO.md). Não há autenticação para exposição pública da interface nem verificação externa de licença.
 
 ## Limites atuais
 
 O serviço compartilhado `app/service.py` agora centraliza criação, revisão com histórico,
-QC de legados e retry por candidato para Streamlit/CLI/HTTP. O adaptador opcional
+QC de legados e retry por candidato para React/CLI/HTTP. O adaptador opcional
 `app/api.py` publica v1 com Bearer em localhost via `compose.api.yaml`.
 `app/candidates.py` mantém checkpoints e tentativas; `app/quality.py` valida os dois
 formatos. Veja [contrato](API.md) e [QC](CONTROLE_QUALIDADE.md). O reinício reaproveita
@@ -43,3 +43,7 @@ transcrição, seleção e timelines persistidas; continua limitado a um worker.
 Whisper continua em CPU nesta workstation. A K4200 acelera leitura de prompts, mas a geração 3B foi mais lenta nos testes pareados; a escolha de backend permanece por job. NVENC funcionou isoladamente no container com a capacidade `video`, mas não foi integrado nem validado em qualidade no pipeline, que usa `libx264`. Há checkpoints locais de transcrição, seleção, timeline e candidatos, mas não há transação distribuída Redis/arquivos nem leases multiworker. A UI só deve ficar em localhost, túnel SSH ou VPN.
 
 Leia [Processo de produção](PROCESSO.md) para a sequência operacional, [GPU K4200](GPU_K4200.md) para o caminho legado e [Testes](TESTES.md) para validação.
+
+## Interface web
+
+O proxy nginx mantém a porta local 8501 e a origem da API. O volume adicional `web_auth` contém apenas a credencial interna do proxy, sem token no bundle. `data/` não é exposta estaticamente. A API opcional v1/v2/Hermes continua separada. Streamlit foi arquivado, preservando serviços de domínio e dados. [Contrato, concorrência, mídia e desenvolvimento](API_WEB.md).

@@ -470,6 +470,7 @@
                     "event": {
                       "$ref": "./editorial-feedback-v2.schema.json"
                     },
+                    "rework_job_id": {"type": "string", "format": "uuid", "description": "Optional new job requested after all human reviews, with adjusted approval present; never a publication."},
                     "editorial_revision": {
                       "type": "integer"
                     }
