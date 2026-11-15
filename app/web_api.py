@@ -520,3 +520,10 @@ def cancel(pid: str, body: dict):
         if 'pending' in str(exc):
             raise service.Conflict('O envio já começou; não pode ser cancelado') from exc
         raise
+
+
+@app.post('/api/publications/{pid}/retry')
+def retry_publication(pid: str, body: dict):
+    if set(body) != {'confirmed_not_published'} or body['confirmed_not_published'] is not True:
+        raise ValueError('Confirma\u00e7\u00e3o obrigat\u00f3ria')
+    return item_view(agenda.retry(pid, confirmed_not_published=True))

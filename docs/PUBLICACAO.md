@@ -108,3 +108,5 @@ O módulo **Publicação** oferece agenda, rascunhos e preparação de envio. O 
 O consentimento é vinculado ao artefato selecionado; mudar render, título, legenda, provedor ou destino exige reconfirmação. O backend confere a identidade esperada dentro do mesmo lock que grava rascunho/agendamento. Apenas `PUBLISHED` confirmado apresenta o link público da publicação. Ver [aceitação da migração](../research/react_frontend_acceptance.md) para o teste real autorizado.
 
 O filtro **Somente candidatos não publicados** oculta candidatos com publicação `PUBLISHED` confirmada na agenda em qualquer destino. Rascunhos, agendamentos e envios incertos não contam como publicados; publicações feitas fora da aplicação não são consultadas.
+
+Na agenda, publicações incertas ou bloqueadas podem ser repetidas após conferência explícita de que não foram publicadas. A tentativa anterior fica no histórico local; a nova tentativa repete o preflight. Novas falhas registram etapa e categoria sem guardar detalhes sensíveis. Registros antigos podem não conter a etapa.

@@ -8,7 +8,7 @@ export type Stage='QUEUED'|'DOWNLOADING'|'TRANSCRIBING'|'DIRECTING'|'RENDERING'
 export type Settings=Record<string,string|number|boolean|null|unknown[]|Record<string,number>>
 export interface Job{id:string;auto_rework_enabled?:boolean;parent_id?:string|null;reworks?:{child_id:string;state:string;error:string|null;review_revision:number}[];name:string;who:string;st:Stage|'NEEDS_REVIEW'|'APPROVED'|'REJECTED'|'PARTIAL_FAILED'|'FAILED'|'QUEUE_FAILED';lang:string;eng:string;dur:number|null;lic:string;created:number;cands:Cand[];settings:Settings;qc_settings:Record<string,number>;protocol:number;review_status:string;error:string|null;events:unknown[];activity:unknown}
 export type Prov='instagram'|'facebook'|'youtube'|'tiktok'
-export interface Item{id:string;at:number;pv:Prov;st:string;t:string;job_id:string;candidate_id:string;artifact:string;caption?:string;timezone?:string;error?:string|null;remote_id?:string|null;permalink?:string|null}
+export interface Item{id:string;at:number;pv:Prov;st:string;t:string;job_id:string;candidate_id:string;artifact:string;caption?:string;timezone?:string;error?:string|null;remote_id?:string|null;remote_container_id?:string|null;failure_stage?:string|null;failure_kind?:string|null;permalink?:string|null}
 export interface Draft{id:string;pv:Prov;cand:string;job_id:string;artifact:string;title:string;desc:string;at:number}
 export interface Source{id:string;name:string;status:'pending'|'active'|'disabled';ref:string;rights:boolean;platform:boolean;langs:string;kinds:string[];scopes:string[];rev:number}
 export interface Asset{id:string;d:string;t:string;duration:number;license:string}
