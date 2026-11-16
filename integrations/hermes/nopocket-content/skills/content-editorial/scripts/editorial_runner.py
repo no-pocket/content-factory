@@ -122,6 +122,8 @@ def build_prompt(view):
         'Caso contrario retorne {"outcome":"candidates_proposed","candidates":[...]} com no maximo 6 candidatos. '
         'Cada candidato exige proposal_id UUID unico, editorial_title, intent, segments (uma lista com um trecho), '
         'direction e risks. O trecho exige source_in_ms e source_out_ms inteiros na fonte, '
+        'Um trecho continuo pode abranger varios segmentos consecutivos da transcricao; '
+        'nao limite a duracao do corte a duracao de um unico segmento ASR. '
         'start_anchor e end_anchor com segment_id e quote literal dentro do segmento, e boundary_status '
         '"requires_audio_review". Direction exige layout_preset_id e subtitle_preset_id das capacidades, '
         'pacing "natural" e word_highlight "only_if_word_timing_reliable". Risks e lista de objetos '
