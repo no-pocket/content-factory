@@ -5,6 +5,11 @@ O Content Factory recebe um vídeo autorizado, produz candidatos de cortes e agu
 A aprovação não exige um botão separado para confirmar as bordas no áudio. Os
 alertas e metadados editoriais permanecem disponíveis para a revisão do corte.
 
+As sugestões locais de legenda para publicação são chamadas originais baseadas
+na transcrição do corte, com emojis; não são citações literais nem verificações
+automáticas de fatos. Revise o texto antes de publicar. O Hermes também pode
+criar ou atualizar uma sugestão quando solicitado pelo proprietário no tópico.
+
 ## Iniciar nesta workstation
 
 Para a instalação já construída, com GPU K4200 e volumes existentes:
