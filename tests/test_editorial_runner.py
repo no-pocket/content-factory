@@ -12,6 +12,31 @@ def test_parse_stream_requires_single_success_result_and_preserves_executor_mode
     with pytest.raises(ValueError): runner.parse_hermes_stream(raw.replace('"exit_code":0','"exit_code":1'))
     with pytest.raises(ValueError): runner.parse_hermes_stream(raw.replace('"reason\\":\\"sem cortes','"reason\\":\\"sem cortes')) if False else runner.parse_hermes_stream('{}')
 
+
+@pytest.mark.parametrize('raw,code',[
+    ('not-json','invalid_json'),
+    ('{"type":"system","subtype":"init","session_id":"s"}','incomplete_response'),
+    ('{"type":"system","subtype":"init","session_id":"s"}\n{"type":"result","exit_code":0,"session_id":"s","text":"{"}', 'invalid_json'),
+])
+def test_stream_failure_has_safe_diagnostic_code(raw,code):
+    with pytest.raises(runner.EditorialExecutionError) as exc:
+        runner.parse_hermes_stream(raw)
+    assert exc.value.code==code
+
+
+def test_stream_reports_nonzero_result_as_process_failure():
+    raw='{"type":"system","subtype":"init","session_id":"s"}\n{"type":"result","exit_code":1,"session_id":"s"}'
+    with pytest.raises(runner.EditorialExecutionError) as exc:
+        runner.parse_hermes_stream(raw)
+    assert exc.value.code=='model_process_failed'
+
+
+def test_stream_requires_an_observed_session_identity():
+    raw='{"type":"system","subtype":"init"}\n{"type":"result","exit_code":0,"text":"{}"}'
+    with pytest.raises(runner.EditorialExecutionError) as exc:
+        runner.parse_hermes_stream(raw)
+    assert exc.value.code=='incomplete_response'
+
 def test_runner_replays_persisted_submission_without_regeneration():
     calls=[];saved={}
     request={'job_id':'job','request_id':'request','editorial_attempt_id':'attempt','run_id':'run','source_fingerprint':'a'*64,'duration_ms':10000,'transcript_digest':'sha256:x','min_seconds':1,'max_seconds':20}
@@ -30,6 +55,27 @@ def test_runner_replays_persisted_submission_without_regeneration():
     result=runner.process_request('job','request',api=api,invoke=invoke,load_pending=lambda:dict(saved) if saved else None,save_pending=save,clear_pending=lambda:saved.clear())
     assert result['state']=='NO_CANDIDATES' and not saved
     assert sum(m=='invoke' for m,_ in calls)==1
+
+
+def test_runner_reports_technical_failure_and_replays_lost_receipt():
+    calls=[];saved={}
+    request={'job_id':'job','request_id':'request'}
+    def api(method,path,body=None):
+        calls.append((method,path,body))
+        if path.endswith('/editorial-request'): return {'request':request,'transcript':{}}
+        if path.endswith('/editorial-claim'): return {'token':'secret','version':1}
+        if path.endswith('/editorial-start'): return {'started':True}
+        if path.endswith('/editorial-failure') and sum(p.endswith('/editorial-failure') for _,p,_ in calls)==1:
+            raise OSError('response lost')
+        return {'state':'TECHNICAL_FAILED'}
+    def invoke(_): raise runner.EditorialExecutionError('model_timeout')
+    def save(value): saved.clear();saved.update(value)
+    args=dict(api=api,invoke=invoke,load_pending=lambda:dict(saved) if saved else None,
+              save_pending=save,clear_pending=lambda:saved.clear())
+    with pytest.raises(OSError): runner.process_request('job','request',**args)
+    assert saved['route']=='editorial-failure' and saved['body']['failure_code']=='model_timeout'
+    assert runner.process_request('job','request',**args)['state']=='TECHNICAL_FAILED'
+    assert not saved and sum(path.endswith('/editorial-start') for _,path,_ in calls)==1
 
 def test_pending_submission_is_private_and_survives_reload(tmp_path):
     store=runner.PendingSubmission(tmp_path/'pending.json')
@@ -103,6 +149,32 @@ def test_terminal_invalid_replay_does_not_block_future_jobs(tmp_path):
     def offline(*args): raise urllib.error.HTTPError('http://localhost',503,'offline',{},None)
     with pytest.raises(urllib.error.HTTPError): runner.poll_once(api=offline,invoke=lambda _:None,pending=pending)
     assert pending.load() == payload
+
+
+def test_revoked_source_receipt_is_discarded_without_hiding_other_403_errors(tmp_path):
+    import io,urllib.error
+    pending=runner.PendingSubmission(tmp_path/'pending.json')
+    payload={'job_id':'job','request_id':'req','route':'editorial-failure','body':{}}
+    pending.save(payload)
+    def revoked(*args):
+        raise urllib.error.HTTPError('http://localhost',403,'denied',{},io.BytesIO(b'{"error":{"code":"editorial_source_denied"}}'))
+    with pytest.raises(urllib.error.HTTPError): runner.poll_once(api=revoked,invoke=lambda _:None,pending=pending)
+    assert pending.load() is None
+    assert runner.poll_once(api=lambda *args:{'requests':[]},invoke=lambda _:None,pending=pending) is None
+    pending.save(payload)
+    def forbidden(*args):
+        raise urllib.error.HTTPError('http://localhost',403,'denied',{},io.BytesIO(b'{"error":{"code":"permission_required"}}'))
+    with pytest.raises(urllib.error.HTTPError): runner.poll_once(api=forbidden,invoke=lambda _:None,pending=pending)
+    assert pending.load()==payload
+    def missing_job(*args):
+        raise urllib.error.HTTPError('http://localhost',404,'missing',{},io.BytesIO(b'{"error":{"code":"not_found","message":"Job or artifact not found"}}'))
+    with pytest.raises(urllib.error.HTTPError): runner.poll_once(api=missing_job,invoke=lambda _:None,pending=pending)
+    assert pending.load() is None
+    pending.save(payload)
+    def missing_route(*args):
+        raise urllib.error.HTTPError('http://localhost',404,'missing',{},io.BytesIO(b'{"error":{"code":"not_found","message":"Unknown route"}}'))
+    with pytest.raises(urllib.error.HTTPError): runner.poll_once(api=missing_route,invoke=lambda _:None,pending=pending)
+    assert pending.load()==payload
 
 def test_poll_once_does_not_call_model_when_no_requests(tmp_path):
     pending=runner.PendingSubmission(tmp_path/'pending.json')

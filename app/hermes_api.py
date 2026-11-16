@@ -231,10 +231,25 @@ def dispatch(handler, path):
             segments=[{'segment_id':segment_id(i),**{k:part.get(k) for k in ('start','end','text','words')}} for i,part in enumerate(tx['segments'])]
             keys=('request_id','editorial_attempt_id','job_id','run_id','source_fingerprint','duration_ms','transcript_digest','min_seconds','max_seconds','expires_at','layout_presets','subtitle_presets')
             return handler._json(200,{'request':{k:req.get(k) for k in keys},'transcript':{'language':tx.get('language'),'segments':segments}})
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-failure' and method=='POST':
+        import time
+        from .editorial_requests import EditorialSourceDenied, fail_job_generation
+        body=_body(handler)
+        if set(body)!={'request_id','token','version','failure_code'}:
+            raise ValueError('Invalid editorial failure report')
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise EditorialSourceDenied('External source authorization required')
+            try: _require_external(job)
+            except PermissionError as exc: raise EditorialSourceDenied('External source authorization revoked') from exc
+        receipt=fail_job_generation(path[1],body['request_id'],actor=editorial_actor or _actor(),
+            token=body['token'],version=body['version'],now=time.time(),failure_code=body['failure_code'],authorize=authorize)
+        return handler._json(200,receipt)
     if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-plan' and method=='POST':
         import time
         from .editorial_plan import parse_plan, MAX_PLAN_BYTES
-        from .editorial_requests import submit_job_plan
+        from .editorial_requests import EditorialSourceDenied, submit_job_plan
         if handler.headers.get_content_type() != 'application/json' or handler.headers.get('Transfer-Encoding'):
             raise ValueError('JSON with one Content-Length required')
         lengths=handler.headers.get_all('Content-Length',[])
@@ -247,8 +262,9 @@ def dispatch(handler, path):
         def authorize(job):
             snapshot=job.get('source_snapshot')
             if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
-                raise PermissionError('External source authorization required')
-            _require_external(job)
+                raise EditorialSourceDenied('External source authorization required')
+            try: _require_external(job)
+            except PermissionError as exc: raise EditorialSourceDenied('External source authorization revoked') from exc
         return handler._json(200,submit_job_plan(path[1],body['plan'],actor=editorial_actor or _actor(),token=body['token'],version=body['version'],now=time.time(),authorize=authorize))
     if len(path) == 3 and path[0] == 'deliveries' and method == 'GET':
         from .telegram_deliveries import lookup

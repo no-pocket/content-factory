@@ -133,6 +133,13 @@ autorizam `external`. Fallback local depende da política salva e da autorizaç�
 local vigente. Um plano válido sem candidatos é resultado editorial e não inicia
 fallback; uma nova análise depende de ação explícita.
 
+Após iniciar uma geração, o executor pode registrar uma falha técnica pela rota
+privada `editorial-failure`, protegida pela lease e pela credencial editorial.
+Os códigos distinguem, por exemplo, prazo excedido, saída grande, resposta
+incompleta, JSON inválido e executor indisponível. O recibo pode ser reenviado
+sem iniciar outra geração; a política do job decide se o worker tenta o modelo
+local. A falha não guarda o prompt ou a resposta bruta nos logs operacionais.
+
 O executor usa uma credencial distinta `CONTENT_FACTORY_EDITORIAL_TOKEN`,
 restrita às rotas de solicitações editoriais. Credenciais Content Factory não
 são repassadas ao processo do modelo; o executor ainda roda com as permissões do

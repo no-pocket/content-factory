@@ -80,7 +80,7 @@ class Handler(BaseHTTPRequestHandler):
             allowed = ((relative == ['editorial-requests'] and self.command == 'GET') or
                        (len(relative) == 3 and relative[0] == 'jobs' and
                         ((relative[2] == 'editorial-request' and self.command == 'GET') or
-                         (relative[2] in ('editorial-claim', 'editorial-start', 'editorial-plan') and self.command == 'POST'))))
+                         (relative[2] in ('editorial-claim', 'editorial-start', 'editorial-plan', 'editorial-failure') and self.command == 'POST'))))
             if not allowed:
                 raise PermissionError('Editorial worker credential cannot access this route')
         self.editorial_worker = editorial
@@ -217,7 +217,9 @@ class Handler(BaseHTTPRequestHandler):
         except FileNotFoundError:
             self._json(404, {'error': {'code': 'not_found', 'message': 'Job or artifact not found'}})
         except PermissionError as exc:
-            self._json(403, {'error': {'code': 'permission_required', 'message': str(exc)}})
+            from .editorial_requests import EditorialSourceDenied
+            code='editorial_source_denied' if isinstance(exc,EditorialSourceDenied) else 'permission_required'
+            self._json(403, {'error': {'code': code, 'message': str(exc)}})
         except (ValueError, TypeError, KeyError) as exc:
             self._json(422, {'error': {'code': 'invalid_request', 'message': str(exc)}})
         except RuntimeError as exc:

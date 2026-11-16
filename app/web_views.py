@@ -98,6 +98,9 @@ def _job_view(job):
                       'title_diagnostic':diagnostic((clip.get('timeline') or {}).get('editorial_title_diagnostics')),
                       'output_seconds':candidate_duration(clip), 'captions': diagnostic(clip.get('social_captions'))})
     settings = job.get('settings') or {}
+    request = job.get('editorial_request') or {}
+    plan = request.get('plan') or {}
+    expires = request.get('expires_at')
     return {'id': job['id'], 'name': job.get('video_title') or (job.get('youtube_metadata') or {}).get('title') or job['original_name'], 'who': job['creator'], 'lic': job['license_note'],
             'video_id': job.get('youtube_video_id') or (job.get('youtube_metadata') or {}).get('video_id'),
             'st': job['status'], 'lang': job.get('language', ''), 'eng': job.get('ranker_used') or settings.get('llm_backend', 'legado'),
@@ -107,9 +110,13 @@ def _job_view(job):
             'auto_rework_enabled':auto_rework_enabled(),
             'reworks':[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])],
             'review_status': editorial['review_status'], 'error': diagnostic(job.get('error')),
-            'editorial_result': diagnostic({'reason': (job.get('editorial_request') or {}).get('plan', {}).get('reason'),
+            'editorial_result': diagnostic({'reason': plan.get('reason'),
                                            'run_id': (job.get('processing_runs') or [{}])[-1].get('run_id'),
-                                           'failure_code': (job.get('editorial_request') or {}).get('failure_code'),
+                                           'failure_code': request.get('failure_code'), 'state':request.get('state'),
+                                           'deadline_ms':expires*1000 if type(expires) in (int,float) else None,
+                                           'requested_planner':settings.get('editorial_planner'),
+                                           'effective_planner':job.get('ranker_used'),
+                                           'planner':plan.get('planner'), 'transcription':job.get('transcript_model'),
                                            'fallback': job.get('editorial_planner_fallback')}),
             'events': diagnostic(job.get('ai_events', [])), 'activity': diagnostic(job.get('ai_activity'))}
 

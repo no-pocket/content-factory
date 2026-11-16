@@ -50,6 +50,80 @@ def test_persisted_claim_and_generation_are_atomic(setup):
         begin_job_generation(job['id'],rid,actor='test',token=lease['token'],version=lease['version'],now=12,authorize=lambda _:None)
 
 
+@pytest.mark.parametrize('fallback',[True,False])
+def test_technical_failure_is_fenced_idempotent_and_records_reason(setup,fallback):
+    import uuid
+    from app import store
+    from app.editorial_requests import claim_job,begin_job_generation,fail_job_generation
+    job=store.new_job(None,'fixture','owner','license');rid=str(uuid.uuid4())
+    run=str(uuid.uuid4())
+    job.update(status='WAITING_EDITORIAL_PLAN',processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],
+        editorial_request={'job_id':job['id'],'request_id':rid,'run_id':run,
+        'state':'REQUESTED','expires_at':100,'lease_version':0,'generation_started':False,'fallback_allowed':fallback})
+    store.save(job)
+    lease=claim_job(job['id'],rid,actor='test',now=10,seconds=20,authorize=lambda _:None)
+    begin_job_generation(job['id'],rid,actor='test',token=lease['token'],version=lease['version'],now=11,authorize=lambda _:None)
+    with pytest.raises(ValueError):
+        fail_job_generation(job['id'],rid,actor='test',token='wrong',version=lease['version'],now=12,
+                            failure_code='model_timeout',authorize=lambda _:None)
+    receipt=fail_job_generation(job['id'],rid,actor='test',token=lease['token'],version=lease['version'],now=12,
+                                failure_code='model_timeout',authorize=lambda _:None)
+    saved=store.load(job['id'])
+    assert receipt['state']=='TECHNICAL_FAILED' and saved['editorial_request']['failure_code']=='model_timeout'
+    assert saved['editorial_request'].get('fallback_pending',False) is fallback
+    assert saved['status']==('WAITING_EDITORIAL_PLAN' if fallback else 'FAILED')
+    assert saved['processing_runs'][-1]['state']==('RUNNING' if fallback else 'FAILED')
+    assert fail_job_generation(job['id'],rid,actor='test',token='expired',version=0,now=200,
+        failure_code='model_timeout',authorize=lambda _:(_ for _ in ()).throw(PermissionError()))==receipt
+    with pytest.raises(ValueError):
+        fail_job_generation(job['id'],rid,actor='test',token='expired',version=0,now=200,
+                            failure_code='invalid_json',authorize=lambda _:None)
+
+
+def test_scoped_failure_route_reconciles_one_fallback(setup,hermes_server,monkeypatch):
+    import time,uuid
+    from app import store,hermes_api
+    from app.editorial_requests import expire_job_request
+    from test_hermes_reprocess import Queue
+    monkeypatch.setattr(hermes_api,'_require_external',lambda _:None)
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN','synthetic-editorial-token-long-enough')
+    token='synthetic-editorial-token-long-enough';rid=str(uuid.uuid4())
+    job=store.new_job(None,'fixture','owner','license')
+    job.update(status='WAITING_EDITORIAL_PLAN',source_snapshot={'allowed_model_scopes':['external']},
+        editorial_request={'job_id':job['id'],'request_id':rid,'state':'REQUESTED','expires_at':time.time()+900,
+                           'lease_version':0,'generation_started':False,'fallback_allowed':True})
+    store.save(job);base='/v2/hermes/jobs/'+job['id']
+    lease=hermes_server(base+'/editorial-claim',{'request_id':rid},token=token)[1]
+    assert hermes_server(base+'/editorial-start',{'request_id':rid,'token':lease['token'],'version':lease['version']},token=token)[0]==200
+    body={'request_id':rid,'token':lease['token'],'version':lease['version'],'failure_code':'model_timeout'}
+    status,receipt=hermes_server(base+'/editorial-failure',body,token=token)
+    assert status==200 and receipt['state']=='TECHNICAL_FAILED'
+    assert hermes_server(base+'/editorial-failure',body,token=token)[1]==receipt
+    queue=Queue()
+    expire_job_request(job['id'],now=time.time(),queue=queue,authorize_local=lambda _:None,authorize_external=lambda _:True)
+    saved=store.load(job['id'])
+    assert saved['status']=='QUEUED' and saved['editorial_planner_fallback']=='model_timeout' and queue.ids==[job['id']]
+
+
+def test_revoked_source_failure_report_has_distinct_error_code(setup,hermes_server,monkeypatch):
+    import time,uuid
+    from app import store,hermes_api
+    monkeypatch.setattr(hermes_api,'_require_external',lambda _:None)
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN','synthetic-editorial-token-long-enough')
+    token='synthetic-editorial-token-long-enough';rid=str(uuid.uuid4())
+    job=store.new_job(None,'fixture','owner','license')
+    job.update(status='WAITING_EDITORIAL_PLAN',source_snapshot={'allowed_model_scopes':['external']},
+        editorial_request={'job_id':job['id'],'request_id':rid,'state':'REQUESTED','expires_at':time.time()+900,
+                           'lease_version':0,'generation_started':False,'fallback_allowed':True})
+    store.save(job);base='/v2/hermes/jobs/'+job['id']
+    lease=hermes_server(base+'/editorial-claim',{'request_id':rid},token=token)[1]
+    assert hermes_server(base+'/editorial-start',{'request_id':rid,'token':lease['token'],'version':lease['version']},token=token)[0]==200
+    monkeypatch.setattr(hermes_api,'_require_external',lambda _:(_ for _ in ()).throw(PermissionError('revoked')))
+    status,response=hermes_server(base+'/editorial-failure',{'request_id':rid,'token':lease['token'],
+        'version':lease['version'],'failure_code':'model_timeout'},token=token)
+    assert status==403 and response['error']['code']=='editorial_source_denied'
+
+
 def test_persisted_empty_outcome_and_receipt_replay(setup):
     import uuid
     from app import store
@@ -201,11 +275,14 @@ def test_worker_resumes_accepted_plan_without_new_run_or_model(setup,monkeypatch
     import hashlib,json,uuid
     from app import store,worker,hermes_api
     from app.editorial_plan import transcript_digest
+    from app.source_registry import get_source
+    from test_source_ingestion import CHANNEL
     source=tmp_path/'source.mp4';source.write_bytes(b'fixture')
     job=store.new_job(source,'fixture','owner','license',settings={'editorial_protocol':2,'editorial_planner':'hermes_first','duration_mode':'flexible'})
     tx={'language':'pt','segments':[{'start':0.,'end':10.,'text':'Fala.','words':[]}]}
     run=str(uuid.uuid4());plan={'outcome':'candidates_proposed','candidates':[{'proposal_id':'p','editorial_title':'Titulo','intent':'Motivo','segments':[{'source_in_ms':0,'source_out_ms':10000,'boundary_status':'requires_audio_review'}],'direction':{'pacing':'natural'},'risks':[]}]}
-    job.update(status='QUEUED',source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],editorial_request={'state':'ACCEPTED','resume_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx),'plan':plan})
+    snapshot={**get_source(CHANNEL),'allowed_model_scopes':['local','external']}
+    job.update(status='QUEUED',source_snapshot=snapshot,source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],editorial_request={'state':'ACCEPTED','resume_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx),'plan':plan})
     store.save(job);(store.JOBS/(job['id']+'.transcript.json')).write_text(json.dumps(tx),encoding='utf8')
     monkeypatch.setattr(worker,'JOBS',store.JOBS);monkeypatch.setattr(worker,'get_duration',lambda _:10.)
     monkeypatch.setattr(worker,'expects_audio',lambda _:True);monkeypatch.setattr(hermes_api,'_external_allowed',lambda _:True)
@@ -340,21 +417,33 @@ def test_immediate_local_fallback_checks_current_scope(setup, monkeypatch):
     with pytest.raises(PermissionError,match='Local model scope'):
         authorize_local_source({'source_snapshot':snapshot})
 
-def test_worker_resumes_expired_request_with_local_fallback(setup,monkeypatch,tmp_path):
+@pytest.mark.parametrize('failure_state',['EXPIRED','TECHNICAL_FAILED'])
+@pytest.mark.parametrize('revocation',['none','external','disabled'])
+def test_worker_resumes_expired_request_with_local_fallback(setup,monkeypatch,tmp_path,failure_state,revocation):
     import hashlib,json,uuid
-    from app import store,worker
+    from app import store,worker,hermes_api,source_registry
     from app.editorial_plan import transcript_digest
+    from app.source_registry import get_source
+    from test_source_ingestion import CHANNEL
     source=tmp_path/'source.mp4';source.write_bytes(b'fixture')
     job=store.new_job(source,'fixture','owner','license',settings={'editorial_protocol':2,'editorial_planner':'hermes_first','duration_mode':'flexible'})
     tx={'language':'pt','segments':[{'start':0.,'end':10.,'text':'Fala.','words':[]}]}; run=str(uuid.uuid4())
-    job.update(status='QUEUED',source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],editorial_request={'state':'EXPIRED','fallback_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx),'failure_kind':'request_expired'})
+    snapshot={**get_source(CHANNEL),'allowed_model_scopes':['local','external']}
+    job.update(status='QUEUED',run_started_at=1,source_snapshot=snapshot,source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],editorial_request={'state':failure_state,'fallback_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx),'failure_kind':'request_expired'})
     store.save(job);(store.JOBS/(job['id']+'.transcript.json')).write_text(json.dumps(tx),encoding='utf8')
     monkeypatch.setattr(worker,'JOBS',store.JOBS);monkeypatch.setattr(worker,'get_duration',lambda _:10.);monkeypatch.setattr(worker,'expects_audio',lambda _:True)
+    monkeypatch.setattr(hermes_api,'_external_allowed',lambda _:revocation!='external')
+    if revocation=='disabled':
+        current=get_source(CHANNEL)
+        monkeypatch.setattr(source_registry,'get_source',lambda _: {**current,'status':'disabled'})
     calls=[]
     monkeypatch.setattr(worker,'select_highlights',lambda *a,**kw:(calls.append('local') or [{'start':0.,'end':10.,'text':'Fala.','score':1,'reason':'teste'}]))
     def fake_render(job,*args,**kwargs):job['status']='NEEDS_REVIEW';store.save(job)
     monkeypatch.setattr(worker,'render_candidates',fake_render)
     worker.process(job['id']);saved=store.load(job['id'])
+    if revocation!='none':
+        assert calls==[] and saved['status']=='FAILED' and saved['editorial_request']['state']=='REVOKED'
+        return
     assert calls==['local'] and saved['status']=='NEEDS_REVIEW' and len(saved['processing_runs'])==1
     assert saved['editorial_planner_fallback']=='request_expired'
 
@@ -369,7 +458,7 @@ def test_cached_hermes_candidate_revalidates_rights_and_source(setup,monkeypatch
     tx={'language':'pt','segments':[{'start':0.,'end':10.,'text':'Fala.','words':[]}]};run=str(uuid.uuid4())
     job=store.new_job(source,'fixture','owner','license',settings={'editorial_protocol':2,'editorial_planner':'hermes_first'})
     from app.source_registry import get_source
-    job.update(status='QUEUED',source_snapshot=get_source(CHANNEL),source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),
+    job.update(status='QUEUED',source_snapshot={**get_source(CHANNEL),'allowed_model_scopes':['local','external']},source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),
         processing_runs=[{'run_id':run,'state':'RUNNING','started_at':1}],run_started_at=1,
         editorial_request={'state':'ACCEPTED','resume_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx)},
         candidates=[{'start':0.,'end':10.,'text':'Fala.','proposal_source':'hermes'}])
@@ -379,7 +468,9 @@ def test_cached_hermes_candidate_revalidates_rights_and_source(setup,monkeypatch
     if failure=='changed_source': source.write_bytes(b'changed')
     monkeypatch.setattr(worker,'render_candidates',lambda *a,**kw:pytest.fail('must not render after revocation'))
     worker.process(job['id'])
-    assert store.load(job['id'])['status']=='FAILED'
+    saved=store.load(job['id'])
+    assert saved['status']=='FAILED'
+    if failure=='revoked': assert saved['editorial_request']['state']=='REVOKED'
 
 
 def test_interrupted_editorial_run_is_recorded_when_resumed(setup,monkeypatch,tmp_path):
@@ -391,7 +482,7 @@ def test_interrupted_editorial_run_is_recorded_when_resumed(setup,monkeypatch,tm
     source=tmp_path/'source.mp4';source.write_bytes(b'fixture')
     tx={'language':'pt','segments':[{'start':0.,'end':10.,'text':'Fala.','words':[]}]};run=str(uuid.uuid4())
     job=store.new_job(source,'fixture','owner','license',settings={'editorial_protocol':2,'editorial_planner':'hermes_first'})
-    job.update(status='QUEUED',source_snapshot=get_source(CHANNEL),source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),
+    job.update(status='QUEUED',source_snapshot={**get_source(CHANNEL),'allowed_model_scopes':['local','external']},source_fingerprint=hashlib.sha256(b'fixture').hexdigest(),
         processing_runs=[{'run_id':run,'state':'INTERRUPTED','started_at':1}],run_started_at=1,
         editorial_request={'state':'ACCEPTED','resume_pending':True,'run_id':run,'source_fingerprint':hashlib.sha256(b'fixture').hexdigest(),'transcript_digest':transcript_digest(tx)},
         candidates=[{'start':0.,'end':10.,'text':'Fala.','proposal_source':'hermes'}])

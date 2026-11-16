@@ -3,6 +3,10 @@ import hmac
 import hashlib
 import math
 
+
+class EditorialSourceDenied(PermissionError):
+    """A previously authorized editorial source is no longer eligible."""
+
 def _time(value):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
         raise ValueError('invalid time')
@@ -85,6 +89,50 @@ def begin_job_generation(jid, request_id, *, actor, token, version, now, authori
         begin_generation(row,actor=actor,token=token,version=version,now=now)
         store.save(job)
 
+
+TECHNICAL_FAILURE_CODES = frozenset({'model_timeout','model_process_failed','output_too_large',
+    'incomplete_response','invalid_json','invalid_response','prompt_too_large','executor_unavailable','request_invalid'})
+
+
+def _finish_terminal_run(job, row, now):
+    runs=job.get('processing_runs') or []
+    if runs and runs[-1].get('run_id')==row.get('run_id') and runs[-1].get('state')=='RUNNING':
+        start=runs[-1].get('started_at',now)
+        interrupted=bool(runs[-1].get('resume_events'))
+        runs[-1].update(state='FAILED',finished_at=now,timing_complete=not interrupted,
+                        elapsed_includes_interruptions=interrupted,seconds=max(0,now-start))
+
+
+def fail_job_generation(jid, request_id, *, actor, token, version, now, failure_code, authorize):
+    """Record one fenced technical failure without saving untrusted model output."""
+    from . import store
+    if not isinstance(failure_code,str) or failure_code not in TECHNICAL_FAILURE_CODES:
+        raise ValueError('invalid technical failure code')
+    with store.job_lock(jid):
+        job=store.load(jid); row=job.get('editorial_request')
+        if not isinstance(row,dict) or row.get('request_id') != request_id:
+            raise ValueError('editorial request changed')
+        prior=row.get('failure_receipt')
+        if prior:
+            if prior['actor'] != actor or prior['failure_code'] != failure_code:
+                raise ValueError('conflicting failure report')
+            return dict(prior)
+        authorize(job)
+        row=_locked_request(job,request_id)
+        _authorize(row,actor,token,version,now)
+        if not row.get('generation_started'):
+            raise ValueError('generation not started')
+        receipt={'actor':actor,'request_id':request_id,'failure_code':failure_code,'state':'TECHNICAL_FAILED'}
+        row.update(state='TECHNICAL_FAILED',failure_kind=failure_code,failure_code=failure_code,
+                   failed_at=now,failure_receipt=receipt)
+        if row.get('fallback_allowed') is True:
+            row['fallback_pending']=True
+        else:
+            job.update(status='FAILED',error='Falha técnica no planejamento editorial; fallback desativado')
+            _finish_terminal_run(job,row,now)
+        store.save(job)
+        return dict(receipt)
+
 def submit_job_plan(jid, plan, *, actor, token, version, now, authorize):
     """Persist a validated response and receipt in one atomic job replacement."""
     import json
@@ -133,6 +181,7 @@ def submit_job_plan(jid, plan, *, actor, token, version, now, authorize):
                 row['fallback_pending']=True
             else:
                 job.update(status='FAILED',error='Plano editorial inválido; fallback desativado')
+                _finish_terminal_run(job,row,now)
             store.save(job)
             return dict(receipt)
         receipt=accept_submission(row,actor=actor,token=token,version=version,now=now,
@@ -259,7 +308,7 @@ def reconcile_editorial_requests(*, queue=None):
         row=job.get('editorial_request') or {}
         if row.get('state')=='ACCEPTED' and row.get('resume_pending') is True and job.get('status') in ('WAITING_EDITORIAL_PLAN','QUEUED'):
             reconcile_accepted_plan(job['id'],queue=queue)
-        elif row.get('state') in ('REQUESTED','CLAIMED','EXPIRED','INVALID') and job.get('status') in ('WAITING_EDITORIAL_PLAN','QUEUED'):
+        elif row.get('state') in ('REQUESTED','CLAIMED','EXPIRED','INVALID','TECHNICAL_FAILED') and job.get('status') in ('WAITING_EDITORIAL_PLAN','QUEUED'):
             expire_job_request(job['id'],now=time.time(),queue=queue,authorize_local=authorize_local_source,
                                authorize_external=_external_allowed)
 
@@ -291,10 +340,11 @@ def expire_job_request(jid, *, now, queue=None, authorize_local, authorize_exter
     from .source_ingestion import recover_import_enqueue
     with store.job_lock(jid):
         job=store.load(jid); row=job.get('editorial_request') or {}
-        if (row.get('state') in ('REQUESTED','CLAIMED','EXPIRED','INVALID') and
+        if (row.get('state') in ('REQUESTED','CLAIMED','EXPIRED','INVALID','TECHNICAL_FAILED') and
                 authorize_external is not None and not authorize_external(job)):
             row.update(state='REVOKED',failure_kind='source_authorization_revoked')
             job.update(status='FAILED',error='Autorização externa da fonte revogada')
+            _finish_terminal_run(job,row,now)
             store.save(job)
             return job
         if row.get('state') in ('REQUESTED','CLAIMED'):
@@ -308,19 +358,22 @@ def expire_job_request(jid, *, now, queue=None, authorize_local, authorize_exter
                 except (PermissionError,KeyError,ValueError):
                     row.update(state='REVOKED',failure_kind='source_authorization_revoked')
                     job.update(status='FAILED',error='Autorização da fonte indisponível')
+                    _finish_terminal_run(job,row,now)
                 else:
                     row['fallback_pending']=True
                     job['editorial_planner_fallback']=row['failure_kind']
             else:
                 job.update(status='FAILED',error='Planejamento editorial expirou; fallback desativado')
+                _finish_terminal_run(job,row,now)
             store.save(job)
-        if row.get('state') not in ('EXPIRED','INVALID') or row.get('fallback_pending') is not True:
+        if row.get('state') not in ('EXPIRED','INVALID','TECHNICAL_FAILED') or row.get('fallback_pending') is not True:
             return job
         try:
             authorize_local(job)
         except (PermissionError,KeyError,ValueError):
             row.update(state='REVOKED',failure_kind='source_authorization_revoked')
             job.update(status='FAILED',error='Autorização da fonte indisponível')
+            _finish_terminal_run(job,row,now)
             store.save(job)
             return job
         job['editorial_planner_fallback']=row.get('failure_kind','UNKNOWN')

@@ -452,3 +452,15 @@ def test_audio_boundary_confirmation_is_explicit_and_bound_to_artifact(web):
     updated=web.get('/api/jobs/'+job['id']).json()['cands'][0]
     assert updated['boundary_confirmed'] is True
     assert not store.load(job['id']).get('feedback_events')
+
+
+def test_waiting_editorial_view_exposes_deadline_and_safe_engine_details(web):
+    from app import store
+    job=make_job();job.update(status='WAITING_EDITORIAL_PLAN',ranker_used='hermes',
+        transcript_model={'name':'base','device':'cpu'},editorial_request={'state':'REQUESTED','expires_at':1700000000,
+        'lease_token_hash':'private-hash','plan':None})
+    store.save(job)
+    result=web.get('/api/jobs/'+job['id']).json()['editorial_result']
+    assert result['deadline_ms']==1700000000000 and result['state']=='REQUESTED'
+    assert result['effective_planner']=='hermes' and result['transcription']['name']=='base'
+    assert 'private-hash' not in str(result)

@@ -87,6 +87,13 @@ def record_ai_event(job: dict, event: str, details: dict) -> None:
     log.info('AI job=%s event=%s details=%s', job['id'], event, details)
 
 
+def _revoke_pending_editorial(job):
+    row=job.get('editorial_request')
+    if isinstance(row,dict) and ((row.get('state')=='ACCEPTED' and row.get('resume_pending') is True) or
+            (row.get('state') in ('EXPIRED','INVALID','TECHNICAL_FAILED') and row.get('fallback_pending') is True)):
+        row.update(state='REVOKED',failure_kind='source_authorization_revoked',fallback_pending=False,resume_pending=False)
+
+
 def process(jid: str) -> None:
     job = load(jid)
     if job["status"] != "QUEUED":
@@ -99,8 +106,12 @@ def process(jid: str) -> None:
         if job.get('source_snapshot'):
             from .source_ingestion import require_active_source
             from .source_registry import get_source
-            require_active_source(job['source_snapshot'])
-            require_active_source(get_source(job['source_snapshot']['channel_id']))
+            try:
+                require_active_source(job['source_snapshot'])
+                require_active_source(get_source(job['source_snapshot']['channel_id']))
+            except (PermissionError,KeyError):
+                _revoke_pending_editorial(job)
+                raise
         # Persisted settings are an immutable job intent, including old snapshots.
         if 'settings' not in job:
             job['settings'] = dict(settings)
@@ -108,7 +119,7 @@ def process(jid: str) -> None:
             raise ValueError('External model plan missing; heuristic selection is forbidden for external replay')
         job['qc_settings'] = normalize_qc(job.get('qc_settings'))
         editorial_resume = (job.get('editorial_request') or {}).get('state') == 'ACCEPTED' and (job.get('editorial_request') or {}).get('resume_pending') is True
-        fallback_resume = (job.get('editorial_request') or {}).get('state') in ('EXPIRED','INVALID') and (job.get('editorial_request') or {}).get('fallback_pending') is True
+        fallback_resume = (job.get('editorial_request') or {}).get('state') in ('EXPIRED','INVALID','TECHNICAL_FAILED') and (job.get('editorial_request') or {}).get('fallback_pending') is True
         if editorial_resume or fallback_resume:
             runs=job.get('processing_runs') or []
             row=job.get('editorial_request') or {}
@@ -184,14 +195,24 @@ def process(jid: str) -> None:
         if editorial_resume:
             from .editorial_requests import verify_frozen_inputs
             from .hermes_api import _external_allowed
-            if not _external_allowed(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]) or not _external_allowed(job):
+                _revoke_pending_editorial(job)
                 raise PermissionError('External source authorization revoked')
             verify_frozen_inputs(job,transcript,source)
         if fallback_resume:
             from .editorial_requests import verify_frozen_inputs
+            from .hermes_api import _external_allowed
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]) or not _external_allowed(job):
+                _revoke_pending_editorial(job)
+                raise PermissionError('External source authorization revoked before fallback')
             if job.get('source_snapshot'):
                 from .editorial_requests import authorize_local_source
-                authorize_local_source(job)
+                try: authorize_local_source(job)
+                except (PermissionError,KeyError):
+                    _revoke_pending_editorial(job)
+                    raise
             row=verify_frozen_inputs(job,transcript,source)
             job['editorial_planner_fallback']=row.get('failure_kind','UNKNOWN')
         if settings.get('retrieval_mode','off')!='off':
