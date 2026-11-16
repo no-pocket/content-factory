@@ -28,6 +28,22 @@ def setup(tmp_path, monkeypatch):
 def metadata(url):
     return dict(id='g8Q1UxPJulc', channel_id=CHANNEL, title='Vídeo', language='pt', live_status='not_live')
 
+
+@pytest.mark.parametrize('language,allowed,accepted', [
+    ('pt-BR', ['pt'], True), ('PT-br', ['pt'], True),
+    ('pt-BR', ['pt-br'], True), ('pt', ['pt-BR'], False),
+    ('pt-PT', ['pt-BR'], False), ('en-US', ['pt'], False),
+    ('pt-invalid!', ['pt'], False), (None, ['pt'], False),
+])
+def test_language_authorization_respects_regional_variants(setup, language, allowed, accepted):
+    source = {**registry.get_source(CHANNEL), 'allowed_languages': allowed}
+    item = {**metadata(URL), 'language': language}
+    if accepted:
+        assert ingestion.verify_source_metadata(item, 'g8Q1UxPJulc', source, {})['language'] == language
+    else:
+        with pytest.raises(PermissionError, match='language'):
+            ingestion.verify_source_metadata(item, 'g8Q1UxPJulc', source, {})
+
 def test_verified_metadata_and_concurrent_dedup(setup):
     q = Queue()
     def submit(_): return ingestion.ingest_youtube(setup, queue=q, metadata_fetcher=metadata)

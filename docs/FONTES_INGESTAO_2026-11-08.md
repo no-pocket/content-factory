@@ -12,6 +12,10 @@ autorização, confirmações de direitos/plataforma e políticas de idioma, tip
 local/externo. Hermes lê resumos, sem evidência privada de autorização; não pode ativar
 fontes pela sua credencial limitada. Cadastros começam pendentes.
 
+Uma autorização por idioma principal, como `pt`, inclui variantes regionais como
+`pt-BR`. Uma autorização específica, como `pt-BR`, não autoriza `pt-PT` nem um
+idioma ausente; a variante original informada pelo YouTube fica registrada.
+
 O cliente oferece sources, ingest e status. Importação explícita confirma metadados
 reais do vídeo/canal, valida a fonte ativa e políticas, deduplica o ID do vídeo e salva
 proveniência no primeiro JSON antes da fila. Retry recupera QUEUED/QUEUE_FAILED por

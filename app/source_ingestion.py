@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 from . import service, store, source_registry
 from .job_settings import normalize_job_settings
@@ -87,7 +88,11 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
         raise PermissionError('Metadata channel does not match authorized source')
     require_active_source(source)
     language = metadata.get('language')
-    if not language or language not in source['allowed_languages']:
+    # A primary language grants its regional variants; a regional grant stays narrow.
+    valid_language = isinstance(language, str) and re.fullmatch(r'[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*', language)
+    normalized = language.lower() if valid_language else ''
+    allowed = [value.lower() for value in source['allowed_languages'] if isinstance(value, str)]
+    if not normalized or not any(normalized == value or ('-' not in value and normalized.startswith(value + '-')) for value in allowed):
         raise PermissionError('Metadata language is missing or not authorized')
     live = metadata.get('live_status')
     if metadata.get('is_live') or live in {'is_live','is_upcoming','post_live'}:
