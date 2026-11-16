@@ -16,6 +16,12 @@ Uma autorização por idioma principal, como `pt`, inclui variantes regionais co
 `pt-BR`. Uma autorização específica, como `pt-BR`, não autoriza `pt-PT` nem um
 idioma ausente; a variante original informada pelo YouTube fica registrada.
 
+Para uma nova tentativa editorial explícita vinculada a um job anterior,
+`app.editorial_attempt.create_attempt` exige UUID de solicitação, job original
+ocioso, autorização atual externa, metadados verificados e mídia/transcrição em
+cache. A operação cria um job filho idempotente com o plano Hermes e mantém os
+candidatos e ajustes originais; não aprova nem publica conteúdo.
+
 O cliente oferece sources, ingest e status. Importação explícita confirma metadados
 reais do vídeo/canal, valida a fonte ativa e políticas, deduplica o ID do vídeo e salva
 proveniência no primeiro JSON antes da fila. Retry recupera QUEUED/QUEUE_FAILED por
