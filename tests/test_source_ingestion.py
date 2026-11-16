@@ -28,6 +28,22 @@ def setup(tmp_path, monkeypatch):
 def metadata(url):
     return dict(id='g8Q1UxPJulc', channel_id=CHANNEL, title='Vídeo', language='pt', live_status='not_live')
 
+
+@pytest.mark.parametrize('language,allowed,accepted', [
+    ('pt-BR', ['pt'], True), ('PT-br', ['pt'], True),
+    ('pt-BR', ['pt-br'], True), ('pt', ['pt-BR'], False),
+    ('pt-PT', ['pt-BR'], False), ('en-US', ['pt'], False),
+    ('pt-invalid!', ['pt'], False), (None, ['pt'], False),
+])
+def test_language_authorization_respects_regional_variants(setup, language, allowed, accepted):
+    source = {**registry.get_source(CHANNEL), 'allowed_languages': allowed}
+    item = {**metadata(URL), 'language': language}
+    if accepted:
+        assert ingestion.verify_source_metadata(item, 'g8Q1UxPJulc', source, {})['language'] == language
+    else:
+        with pytest.raises(PermissionError, match='language'):
+            ingestion.verify_source_metadata(item, 'g8Q1UxPJulc', source, {})
+
 def test_verified_metadata_and_concurrent_dedup(setup):
     q = Queue()
     def submit(_): return ingestion.ingest_youtube(setup, queue=q, metadata_fetcher=metadata)
@@ -126,6 +142,16 @@ def test_snapshot_and_local_model_policy(setup):
     external={k:'external' for k in ('ranker_mode','director_mode','llm_backend','llm_model')}
     with pytest.raises(PermissionError,match='Model scope'):
         ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',job['source_snapshot'],external)
+
+
+def test_hermes_planner_records_external_scope_only_when_allowed(setup):
+    source=registry.get_source(CHANNEL)
+    settings={'editorial_planner':'hermes_first'}
+    result=ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',source,settings)
+    assert result['model_scope']=='local'
+    source={**source,'allowed_model_scopes':['local','external']}
+    result=ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',source,settings)
+    assert result['model_scope']=='external'
 
 def test_process_crash_after_save_recovers_without_worker_restart(setup, monkeypatch):
     original = ingestion.service.enqueue

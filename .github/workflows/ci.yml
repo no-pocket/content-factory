@@ -11,6 +11,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare Remotion runtime
+        run: |
+          npm --prefix renderer ci --no-audit --no-fund
+          cd renderer && npx remotion browser ensure
+          echo "REMOTION_DIR=$GITHUB_WORKSPACE/renderer" >> "$GITHUB_ENV"
+          echo "RENDER_PUBLIC_DIR=$GITHUB_WORKSPACE/renderer/public/jobs" >> "$GITHUB_ENV"
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pip install -r requirements.txt -r requirements.web.lock
       - run: python -m pytest -q

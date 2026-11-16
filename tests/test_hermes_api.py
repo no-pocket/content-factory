@@ -37,6 +37,36 @@ def test_hermes_token_is_scoped_and_candidate_has_no_paths(v2job,hermes_server):
     assert hermes_server(route,token='synthetic-general-token-long-enough')[0]==401
 
 
+def test_editorial_worker_token_has_only_editorial_routes(v2job, hermes_server, monkeypatch):
+    token = 'synthetic-editorial-worker-token-long-enough'
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN', token)
+    assert hermes_server('/v2/hermes/editorial-requests', token=token)[0] == 200
+    assert hermes_server('/v2/hermes/sources', token=token)[0] == 403
+    assert hermes_server('/v1/jobs', token=token)[0] == 401
+    route = f"/v2/hermes/jobs/{v2job['id']}/candidates/{v2job['candidates'][0]['candidate_id']}/reviews"
+    assert hermes_server(route, {}, token=token)[0] == 403
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN', 'synthetic-hermes-token-long-enough')
+    assert hermes_server('/v2/hermes/editorial-requests', token=token)[0] == 503
+
+
+def test_explicit_attempt_route_binds_trusted_actor_and_owner_instruction(v2job, hermes_server, monkeypatch):
+    from app import editorial_attempt, hermes_api
+    calls=[]
+    def create(parent_id, request_id, **kwargs):
+        calls.append((parent_id,request_id,kwargs))
+        return v2job
+    monkeypatch.setattr(editorial_attempt,'create_attempt',create)
+    monkeypatch.setattr(hermes_api,'_pipeline',lambda job:{'id':job['id']})
+    path='/v2/hermes/jobs/'+v2job['id']+'/editorial-attempt'
+    assert hermes_server(path,{'owner_message':'Tente novamente','editorial_attempt':{'request_id':'request'}})[0]==200
+    assert calls[0][2]['reserved_actor']=='telegram:123456'
+    assert calls[0][2]['owner_message']=='Tente novamente'
+    assert hermes_server(path,{'editorial_attempt':{'request_id':'request'}})[0]==422
+    worker='synthetic-editorial-worker-token-long-enough'
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN',worker)
+    assert hermes_server(path,{'owner_message':'Tente novamente','editorial_attempt':{'request_id':'request'}},token=worker)[0]==403
+
+
 def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(v2job, hermes_server, monkeypatch, tmp_path):
     monkeypatch.setattr(store, 'ROOT', tmp_path)
     jid = v2job['id']
@@ -51,6 +81,17 @@ def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(
     assert payload['candidates'][0]['renders']['mp4'].startswith('/v2/hermes/jobs/')
     assert '/#revisao?job=' in payload['application_url']
     assert str(store.OUTPUT) not in json.dumps(payload)
+
+
+def test_pipeline_reports_editorial_no_candidates_without_claiming_processing(v2job, hermes_server):
+    job=v2job
+    job.update(status='EDITORIAL_NO_CANDIDATES',candidates=[],editorial_request={'state':'NO_CANDIDATES',
+        'plan':{'reason':'A fonte não contém boas ideias.'}})
+    store.save(job)
+    status,result=hermes_server('/v2/hermes/jobs/'+job['id'])
+    assert status==200 and result['editorial']['reason']=='A fonte não contém boas ideias.'
+    assert result['pipeline']['next']=='editorial_no_candidates'
+    assert 'processing' not in result['pipeline']['missing'] and result['reprocess_available']
 
 
 def test_hermes_can_save_caption_as_suggestion_without_approval(v2job, hermes_server):

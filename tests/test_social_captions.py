@@ -3,6 +3,17 @@ import json
 from app import social_captions
 
 
+def test_original_caption_can_summarize_cut_with_emoji():
+    clip = {'text': 'A Rockstar revelou imagens do mapa de Vice City.', 'reason': 'Novidades do mapa'}
+    reply = {'response': json.dumps({'caption': '🌆 Novas imagens do mapa de Vice City!'}), 'done_reason': 'stop'}
+    def infer(prompt, settings):
+        assert 'Novidades do mapa' in prompt
+        return reply
+    result = social_captions.generate(clip, {'llm_backend': 'ollama'}, 'pt', infer=infer)
+    assert result['instagram']['origin'] == 'ollama'
+    assert result['instagram']['text'] == '🌆 Novas imagens do mapa de Vice City!'
+
+
 def test_model_output_is_source_anchored_and_varies_by_destination():
     def model(prompt, settings):
         return {'response': json.dumps({'quote': 'O jogo vai chegar em 2027.'}), 'done_reason': 'stop'}

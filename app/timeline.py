@@ -65,12 +65,38 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
         raise ValueError("Clip duration outside permitted bounds")
     if not assembly:
         words = normalized_words(segments, start, end)
+    # ASR word timestamps alone do not establish alignment confidence. Until
+    # confidence can be verified, Hermes plans use unhighlighted segment cues.
+    phrase_captions = clip.get('proposal_source') == 'hermes' and not assembly
+    partial_segments = 0
+    if phrase_captions:
+        words = []
+        for segment in segments:
+            a=max(start, as_float(segment.get('start'), -1))
+            b=min(end, as_float(segment.get('end'), -1))
+            text=str(segment.get('text') or '').strip()
+            if b>a and text:
+                if as_float(segment.get('start'), -1) < start or as_float(segment.get('end'), -1) > end:
+                    partial_segments += 1
+                    continue
+                words.append({'start':round(a-start,3), 'end':round(b-start,3), 'text':text})
     edit = edit if isinstance(edit, dict) else {}
     assets = assets or {}
     text = str(clip.get("text", ""))
     from .editorial_context import validate_title
     title_check = validate_title(edit.get('hook', ''), {'text': text})
     hook = title_check['normalized'] if title_check['valid'] else ''
+    title_diagnostic = None
+    if clip.get('proposal_source') == 'hermes':
+        proposed=clip.get('title')
+        if (isinstance(proposed,str) and 1 <= len(proposed.strip()) <= 80 and len(proposed.split()) <= 12
+                and any(c.isalpha() for c in proposed) and not any(ord(c)<32 for c in proposed)):
+            hook=proposed.strip()
+            if not title_check['valid']:
+                title_diagnostic={'reason':title_check.get('reason','unverified'),'proposal_preserved':True}
+        else:
+            hook=''
+            title_diagnostic={'reason':'title_exceeds_render_limits','proposal_preserved':True}
     if editorial_title is not None:
         if (not isinstance(editorial_title, str) or not 1 <= len(editorial_title.strip()) <= 80
                 or len(editorial_title.split()) > 12 or not any(c.isalpha() for c in editorial_title)
@@ -118,9 +144,14 @@ def build_timeline(clip: dict, segments: list[dict], *, edit: dict | None = None
                       "style": "compact_editorial_v1", "origin": "human" if editorial_title is not None else "model"}] if hook else [],
             "effects": fx, "broll": broll,
         },
-        "caption_style": "bold_karaoke_v1",
+        "caption_style": "phrase_v1" if phrase_captions else "bold_karaoke_v1",
         "finishing": {"tail_seconds": 0.35, "fade_seconds": 0.25},
     }
+    if phrase_captions:
+        timeline['word_timing_diagnostics']={'reason':'word_alignment_not_verified', 'timing':'segment',
+                                              'partial_segments_omitted':partial_segments}
+    if title_diagnostic:
+        timeline['editorial_title_diagnostics']=title_diagnostic
     if mode == 'flexible':
         timeline['duration_mode'] = mode
     if clip.get('framing'):

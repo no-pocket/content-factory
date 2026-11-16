@@ -2,6 +2,15 @@
 
 ## Ajustes na interface
 
+`CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT=true` seleciona `hermes_first` como
+padrão para novos jobs na interface e em ingestões pelo Hermes. O valor padrão
+da instalação é `false`; escolhas explícitas e snapshots antigos prevalecem.
+Hermes exige protocolo editorial 2 e uma fonte registrada autorizada para
+`external` no snapshot e no cadastro atual. `editorial_fallback_local` controla
+o fallback técnico; o escopo local também precisa estar autorizado. Uploads e
+URLs sem cadastro não concedem acesso externo. A credencial de polling
+`CONTENT_FACTORY_EDITORIAL_TOKEN` é distinta das credenciais web e Hermes.
+
 Novos jobs podem escolher **Duração da história → Flexível (até 180 segundos)**.
 `settings.duration_mode="flexible"` permite uma janela configurável entre 8 e 180 s
 (padrões 8/40/180 para mínimo/referência/máximo). O alvo é orientação: procure a

@@ -123,26 +123,29 @@ def _pipeline(job):
         return {**result, 'pipeline': {'ready': False, 'missing': ['external_source_authorization']}}
     group = next((g for g in list_groups() if any(j['id'] == jid for j in g['jobs'])), None)
     settings = job.get('settings') or {}
-    result['parent_id']=job.get('source_parent_job') if job.get('editorial_rework') else None
+    result['parent_id']=job.get('source_parent_job')
     from .editorial_rework import enabled
     result['auto_rework_enabled']=enabled()
     result['reworks']=[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])]
     runs = job.get('processing_runs', [])
     result['latest_run_id'] = runs[-1].get('run_id') if runs else None
-    result['reprocess_available'] = job['status'] == 'FAILED' and not job.get('candidates')
+    result['reprocess_available'] = job['status'] in ('FAILED','EDITORIAL_NO_CANDIDATES') and not job.get('candidates')
+    editorial=job.get('editorial_request') or {}
+    result['editorial']={'state':editorial.get('state'), 'reason':(editorial.get('plan') or {}).get('reason'),
+                         'failure_code':editorial.get('failure_code'), 'fallback':job.get('editorial_planner_fallback')}
     if job['status'] in ('FAILED', 'PARTIAL_FAILED'):
         from collections import Counter
         events = [e for e in job.get('ai_events', []) if e.get('at', 0) >= (runs[-1].get('started_at', 0) if runs else 0)]
         rejected = Counter()
         for event in events:
             rejected.update(event.get('details', {}).get('rejections', {}))
-        empty = str(job.get('error', '')).startswith('No usable speech windows found')
+        empty = job.get('failure_code') == 'NO_USABLE_CANDIDATES' or str(job.get('error', '')).startswith('No usable speech windows found')
         result['failure'] = {'code': 'NO_USABLE_CANDIDATES' if empty else 'PROCESSING_FAILED',
             'message': 'Nenhum corte passou nas validações; isso não significa ausência de fala.' if empty else 'Falha de processamento; consulte o diagnóstico na aplicação privada.',
             'proposal_rejections': dict(rejected),
             'incomplete_responses': sum(e['event'] == 'proposal_chunk_failed' and 'length' in e.get('details', {}).get('reason', '') for e in events)}
     transcript_exists = (store.JOBS / (jid + '.transcript.json')).is_file()
-    idle = job['status'] in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED'}
+    idle = job['status'] in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED', 'EDITORIAL_NO_CANDIDATES'}
     candidates = []
     for index, clip in enumerate(job.get('candidates', [])):
         cid = clip.get('candidate_id') or candidate_key(jid, index)
@@ -169,13 +172,101 @@ def _pipeline(job):
                   transcript={'available': transcript_exists, 'language': job.get('language'),
                               'endpoint': '/v2/hermes/jobs/' + jid + '/transcript'},
                   candidates=candidates, pipeline={'ready': not missing, 'missing': missing,
-                    'next': 'inspect_transcript_and_renders' if not missing else 'diagnose_failure' if job['status'] in ('FAILED', 'PARTIAL_FAILED', 'QUEUE_FAILED') else 'wait'},
+                    'next': 'editorial_no_candidates' if job['status']=='EDITORIAL_NO_CANDIDATES' else 'inspect_transcript_and_renders' if not missing else 'diagnose_failure' if job['status'] in ('FAILED', 'PARTIAL_FAILED', 'QUEUE_FAILED') else 'wait'},
                   application_url=os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/#revisao?' + urlencode({'job': jid}))
     return result
 
 
 def dispatch(handler, path):
     method = handler.command
+    editorial_actor = 'service:hermes-editorial-runner' if getattr(handler, 'editorial_worker', False) else None
+    if path == ['editorial-requests'] and method == 'GET':
+        import time
+        actor = editorial_actor or _actor()
+        rows=[]
+        for job in store.all_jobs():
+            snapshot=job.get('source_snapshot')
+            req=job.get('editorial_request')
+            if (job.get('status') != 'WAITING_EDITORIAL_PLAN' or not isinstance(snapshot,dict)
+                    or (job.get('editorial_reserved_actor') and job['editorial_reserved_actor'] != actor)
+                    or 'external' not in snapshot.get('allowed_model_scopes',[]) or not _external_allowed(job)
+                    or not isinstance(req,dict) or req.get('state') not in ('REQUESTED','CLAIMED')
+                    or req.get('generation_started') or req.get('expires_at',0) <= time.time()
+                    or (req['state']=='CLAIMED' and req.get('lease_until',0)>time.time())):
+                continue
+            rows.append({'job_id':job['id'],'request_id':req['request_id'],'expires_at':req['expires_at']})
+            if len(rows)>=100: break
+        return handler._json(200, {'requests':rows})
+    if len(path)==3 and path[0]=='jobs' and path[2] in ('editorial-claim','editorial-start') and method=='POST':
+        import time
+        from .editorial_requests import claim_job, begin_job_generation
+        body=_body(handler)
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise PermissionError('External source authorization required')
+            _require_external(job)
+        if path[2]=='editorial-claim':
+            if set(body) != {'request_id'}: raise ValueError('Invalid claim')
+            # A 600-second model budget needs room for process shutdown and submission.
+            result=claim_job(path[1],body['request_id'],actor=editorial_actor or _actor(),now=time.time(),seconds=750,authorize=authorize)
+        else:
+            if set(body) != {'request_id','token','version'}: raise ValueError('Invalid start')
+            begin_job_generation(path[1],body['request_id'],actor=editorial_actor or _actor(),token=body['token'],version=body['version'],now=time.time(),authorize=authorize)
+            result={'started':True}
+        return handler._json(200,result)
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-request' and method=='GET':
+        from .editorial_plan import transcript_digest, segment_id
+        editorial_actor or _actor()
+        with store.job_lock(path[1]):
+            job=store.load(path[1]); snapshot=job.get('source_snapshot'); req=job.get('editorial_request')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise PermissionError('External source authorization required')
+            _require_external(job)
+            if job.get('status') != 'WAITING_EDITORIAL_PLAN' or not isinstance(req,dict) or req.get('state') not in ('REQUESTED','CLAIMED'):
+                raise ValueError('Editorial request unavailable')
+            raw=(store.JOBS/(path[1]+'.transcript.json')).read_bytes()
+            if len(raw)>4*1024*1024: raise ValueError('Transcript too large')
+            tx=json.loads(raw.decode('utf8'))
+            if transcript_digest(tx) != req.get('transcript_digest'): raise ValueError('Transcript changed')
+            segments=[{'segment_id':segment_id(i),**{k:part.get(k) for k in ('start','end','text','words')}} for i,part in enumerate(tx['segments'])]
+            keys=('request_id','editorial_attempt_id','job_id','run_id','source_fingerprint','duration_ms','transcript_digest','min_seconds','max_seconds','expires_at','layout_presets','subtitle_presets')
+            return handler._json(200,{'request':{k:req.get(k) for k in keys},'transcript':{'language':tx.get('language'),'segments':segments}})
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-failure' and method=='POST':
+        import time
+        from .editorial_requests import EditorialSourceDenied, fail_job_generation
+        body=_body(handler)
+        if set(body)!={'request_id','token','version','failure_code'}:
+            raise ValueError('Invalid editorial failure report')
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise EditorialSourceDenied('External source authorization required')
+            try: _require_external(job)
+            except PermissionError as exc: raise EditorialSourceDenied('External source authorization revoked') from exc
+        receipt=fail_job_generation(path[1],body['request_id'],actor=editorial_actor or _actor(),
+            token=body['token'],version=body['version'],now=time.time(),failure_code=body['failure_code'],authorize=authorize)
+        return handler._json(200,receipt)
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-plan' and method=='POST':
+        import time
+        from .editorial_plan import parse_plan, MAX_PLAN_BYTES
+        from .editorial_requests import EditorialSourceDenied, submit_job_plan
+        if handler.headers.get_content_type() != 'application/json' or handler.headers.get('Transfer-Encoding'):
+            raise ValueError('JSON with one Content-Length required')
+        lengths=handler.headers.get_all('Content-Length',[])
+        if len(lengths)!=1 or not 0 < int(lengths[0]) <= MAX_PLAN_BYTES:
+            raise ValueError('Editorial body size invalid')
+        raw=handler.rfile.read(int(lengths[0]))
+        if len(raw)!=int(lengths[0]): raise ValueError('Incomplete editorial body')
+        body=parse_plan(raw)
+        if set(body)!={'token','version','plan'}: raise ValueError('Invalid editorial submission')
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise EditorialSourceDenied('External source authorization required')
+            try: _require_external(job)
+            except PermissionError as exc: raise EditorialSourceDenied('External source authorization revoked') from exc
+        return handler._json(200,submit_job_plan(path[1],body['plan'],actor=editorial_actor or _actor(),token=body['token'],version=body['version'],now=time.time(),authorize=authorize))
     if len(path) == 3 and path[0] == 'deliveries' and method == 'GET':
         from .telegram_deliveries import lookup
         item = lookup(path[1], int(path[2]))
@@ -199,9 +290,11 @@ def dispatch(handler, path):
         if not isinstance(settings, dict) or settings.get('editorial_protocol', 2) != 2:
             raise ValueError('Hermes ingestion requires editorial_protocol=2')
         defaults = {'duration_mode': 'flexible', 'min_seconds': 8, 'target_seconds': 40, 'max_seconds': 180}
+        planner_default = ({'editorial_planner': 'hermes_first'}
+                           if os.getenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT', '').lower() == 'true' else {})
         # Explicit classic uses its existing normalized limits; never inherit the flexible ceiling.
         request['settings'] = {**(defaults if settings.get('duration_mode', 'flexible') == 'flexible' else {}),
-                               'auto_pace':True, **settings, 'editorial_protocol': 2}
+                               'auto_pace':True, **planner_default, **settings, 'editorial_protocol': 2}
         request.update(owner_message=body['owner_message'], actor_id=_actor())
         result = ingest_youtube(request)
         return handler._json(200 if result['duplicate'] else 201,
@@ -216,6 +309,14 @@ def dispatch(handler, path):
         body = _body(handler)
         request = _intent(body, 'reprocess')
         result = service.reprocess_failed_job(path[1], request, owner_message=body['owner_message'], actor_id=_actor())
+        return handler._json(200, _pipeline(result))
+    if len(path) == 3 and path[0] == 'jobs' and path[2] == 'editorial-attempt' and method == 'POST':
+        from .editorial_attempt import create_attempt
+        body = _body(handler)
+        request = _intent(body, 'editorial_attempt')
+        if set(request) != {'request_id'}:
+            raise ValueError('request_id required')
+        result = create_attempt(path[1], request['request_id'], reserved_actor=_actor(), owner_message=body['owner_message'])
         return handler._json(200, _pipeline(result))
     if len(path) == 3 and path[0] == 'jobs' and path[2] == 'transcript' and method == 'GET':
         job = store.load(path[1])

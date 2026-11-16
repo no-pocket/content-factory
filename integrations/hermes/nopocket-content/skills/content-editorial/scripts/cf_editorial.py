@@ -20,7 +20,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def settings():
     # Gateway terminal tools need not inherit custom keys from a routed profile.
     # Read only this installed skill's profile, never cwd or global HERMES_HOME.
-    keys=('CONTENT_FACTORY_HERMES_URL','CONTENT_FACTORY_HERMES_TOKEN','CONTENT_FACTORY_MEDIA_CACHE')
+    keys=('CONTENT_FACTORY_HERMES_URL','CONTENT_FACTORY_HERMES_TOKEN','CONTENT_FACTORY_EDITORIAL_TOKEN','CONTENT_FACTORY_MEDIA_CACHE')
     values={}
     profile_env=Path(__file__).resolve().parents[3]/'.env'
     if profile_env.is_file():
@@ -35,13 +35,13 @@ def settings():
     return values
 
 
-def config():
+def config(token_key='CONTENT_FACTORY_HERMES_TOKEN'):
     values=settings()
     url=values.get('CONTENT_FACTORY_HERMES_URL','http://127.0.0.1:18510').rstrip('/')
     parsed=urllib.parse.urlsplit(url)
     if parsed.scheme not in ('http','https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/'):
         raise ValueError('Invalid private API base URL')
-    token=values.get('CONTENT_FACTORY_HERMES_TOKEN','')
+    token=values.get(token_key,'')
     if len(token)<24:raise ValueError('Private Hermes credential not configured')
     return url,token
 
@@ -56,9 +56,13 @@ def route(args):
         if not re.fullmatch(r'-?[0-9]{1,20}',args.chat_id) or args.message_id < 1:raise ValueError('Invalid message identity')
         return '/deliveries/'+args.chat_id+'/'+str(args.message_id)
     if args.command=='sources':return '/sources'
+    if args.command=='editorial-requests':return '/editorial-requests'
+    if args.command in ('editorial-request','editorial-claim','editorial-start','editorial-plan'):
+        return '/jobs/'+identifier(args.job)+'/'+args.command
     if args.command=='ingest':return '/ingest'
     if args.command=='status':return '/jobs/'+identifier(args.job)
     if args.command=='reprocess':return '/jobs/'+identifier(args.job)+'/reprocess'
+    if args.command=='editorial-attempt':return '/jobs/'+identifier(args.job)+'/editorial-attempt'
     if args.command=='transcript':return '/jobs/'+identifier(args.job)+'/transcript'
     if args.command=='groups':return '/groups'
     if args.command in ('group','select'):
@@ -78,9 +82,9 @@ def route(args):
 def run(args):
     url,token=config();path=route(args)
     payload=None
-    if args.command in ('review','select','note','ingest','record-delivery','caption','reprocess'):
+    if args.command in ('review','select','note','ingest','record-delivery','caption','reprocess','editorial-attempt','editorial-claim','editorial-start','editorial-plan'):
         source=Path(args.payload_file)
-        if source.stat().st_size>65536:raise ValueError('Action payload too large')
+        if source.stat().st_size>(262144 if args.command=='editorial-plan' else 65536):raise ValueError('Action payload too large')
         raw=json.loads(source.read_text(encoding='utf-8-sig'))
         if not isinstance(raw,dict):raise ValueError('Action payload must be an object')
         payload=json.dumps(raw,ensure_ascii=False).encode()
@@ -129,10 +133,15 @@ def main():
     sub=parser.add_subparsers(dest='command',required=True)
     sub.add_parser('groups')
     sub.add_parser('sources')
+    sub.add_parser('editorial-requests')
+    for name in ('editorial-request','editorial-claim','editorial-start','editorial-plan'):
+        p=sub.add_parser(name);p.add_argument('--job',required=True)
+        if name!='editorial-request':p.add_argument('--payload-file',required=True)
     p=sub.add_parser('delivery');p.add_argument('--chat-id',required=True);p.add_argument('--message-id',required=True,type=int)
     p=sub.add_parser('ingest');p.add_argument('--payload-file',required=True)
     p=sub.add_parser('status');p.add_argument('--job',required=True)
     p=sub.add_parser('reprocess');p.add_argument('--job',required=True);p.add_argument('--payload-file',required=True)
+    p=sub.add_parser('editorial-attempt');p.add_argument('--job',required=True);p.add_argument('--payload-file',required=True)
     p=sub.add_parser('transcript');p.add_argument('--job',required=True)
     for name in ('group','select'):
         p=sub.add_parser(name);p.add_argument('--group',required=True)

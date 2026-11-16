@@ -259,7 +259,7 @@ def reprocess_failed_job(jid: str, request: dict, *, owner_message: str, actor_i
             if previous['request_hash'] != fingerprint:
                 raise Conflict('Request ID reused with different content')
         else:
-            if job['status'] != 'FAILED' or job.get('candidates'):
+            if job['status'] not in ('FAILED', 'EDITORIAL_NO_CANDIDATES') or job.get('candidates'):
                 raise Conflict('Only FAILED jobs without candidates may be reprocessed; use candidate retry for existing results')
             from .queueing import PROCESSING
             if (queue or store.rconn()).lpos(PROCESSING, jid) is not None:
@@ -271,6 +271,11 @@ def reprocess_failed_job(jid: str, request: dict, *, owner_message: str, actor_i
             receipts[request['request_id']] = {'request_hash': fingerprint, 'previous_run_id': latest,
                 'previous_error': job.get('error'), 'owner_message': owner_message, 'actor_id': actor_id,
                 'requested_at': time.time()}
+            if job.get('editorial_request') is not None:
+                row = job.get('editorial_request')
+                if not isinstance(row, dict) or (job['status'] == 'EDITORIAL_NO_CANDIDATES' and row.get('state') != 'NO_CANDIDATES'):
+                    raise Conflict('Editorial result changed; reload job')
+                job.setdefault('editorial_request_history', []).append(job.pop('editorial_request'))
             job.update(status='QUEUED', error=None)
             store.save(job)
     # Reuse atomic queue reconciliation outside job_lock, including lost replies.
@@ -476,3 +481,38 @@ def _record_review_candidate_v2(jid: str, candidate_id: str, request: dict, *, c
         job.setdefault('review_receipts', {})[request['request_id']] = {'hash_version':2,'request_hash': request_hash, 'result': result}
         store.save(job)
         return result
+
+
+def audio_boundary_confirmed(clip: dict) -> bool:
+    if not clip.get('boundary_review_required'):
+        return True
+    return any(event.get('artifact_id') == clip.get('artifact_id')
+               and event.get('candidate_version') == clip.get('candidate_version')
+               and event.get('render_revision') == clip.get('render_revision')
+               and event.get('boundary') == 'both'
+               for event in clip.get('boundary_confirmations', []))
+
+
+def confirm_audio_boundary(jid: str, candidate_id: str, *, expected_artifact_id: str, actor_id: str, boundary: str) -> dict:
+    from .artifacts import artifact_manifest, digest
+    from .editorial_contracts import candidate_key
+    if boundary != 'both' or not isinstance(actor_id,str) or not actor_id.strip() or len(actor_id)>200:
+        raise ValueError('Invalid boundary confirmation')
+    with store.job_lock(jid):
+        job=store.load(jid)
+        if job.get('status') not in {'NEEDS_REVIEW','PARTIAL_FAILED','FAILED','APPROVED','REJECTED'}:
+            raise Conflict('Job must be idle')
+        index=next((i for i,c in enumerate(job.get('candidates',[])) if (c.get('candidate_id') or candidate_key(jid,i))==candidate_id),None)
+        if index is None:
+            raise ValueError('Unknown candidate ID')
+        clip=job['candidates'][index]
+        if not clip.get('boundary_review_required'):
+            raise ValueError('Boundary confirmation not required')
+        if expected_artifact_id != clip.get('artifact_id') or expected_artifact_id != 'sha256:'+digest(artifact_manifest(job,index)):
+            raise Conflict('Stale or changed artifact')
+        event={'job_id':jid,'candidate_id':candidate_id,'candidate_version':clip.get('candidate_version'),
+               'render_revision':clip.get('render_revision'),'artifact_id':expected_artifact_id,
+               'boundary':boundary,'source_start':clip['start'],'source_end':clip['end'],'actor_id':actor_id,'confirmed_at':time.time()}
+        clip.setdefault('boundary_confirmations',[]).append(event)
+        store.save(job)
+        return event

@@ -6,6 +6,7 @@ import os
 import re
 import time
 import uuid
+from urllib.parse import urlsplit
 from . import store
 
 CHANNEL_ID = re.compile(r'UC[A-Za-z0-9_-]{22}\Z')
@@ -14,6 +15,35 @@ def validate_channel_id(value):
     if not isinstance(value, str) or not CHANNEL_ID.fullmatch(value):
         raise ValueError('channel_id requires canonical UC + 22 characters')
     return value
+
+
+def lookup_youtube_handle(handle):
+    from yt_dlp import YoutubeDL
+    try:
+        with YoutubeDL({'quiet':True, 'no_warnings':True, 'extract_flat':True,
+                        'skip_download':True, 'playlist_items':'1', 'socket_timeout':15,
+                        'retries':1, 'js_runtimes':{'deno':{}}}) as ydl:
+            info = ydl.extract_info('https://www.youtube.com/' + handle, download=False)
+        return validate_channel_id(info.get('channel_id') or info.get('id'))
+    except Exception as exc:
+        raise ValueError('Não foi possível identificar o canal do YouTube pelo link') from exc
+
+
+def resolve_channel(value):
+    if not isinstance(value, str) or len(value) > 300:
+        raise ValueError('Informe um ID ou link de canal do YouTube válido')
+    value = value.strip()
+    if CHANNEL_ID.fullmatch(value):
+        return value
+    parsed = urlsplit(value)
+    if parsed.scheme != 'https' or parsed.netloc.lower() not in {'youtube.com','www.youtube.com','m.youtube.com'}:
+        raise ValueError('Informe um link de canal do YouTube válido')
+    path = parsed.path.rstrip('/')
+    if path.startswith('/channel/'):
+        return validate_channel_id(path.removeprefix('/channel/'))
+    if not re.fullmatch(r'/@[A-Za-z0-9_.-]{3,30}', path):
+        raise ValueError('Informe um link de canal do YouTube válido')
+    return lookup_youtube_handle(path[1:])
 
 def _path():
     return store.ROOT / 'sources.json'

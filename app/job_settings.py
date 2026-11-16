@@ -2,6 +2,8 @@
 import json
 
 DEFAULTS = {
+    'editorial_planner': 'local',
+    'editorial_fallback_local': True,
     'auto_pace': False,
     'outro_asset_id': None,
     'editorial_protocol': 1,
@@ -53,6 +55,12 @@ def normalize_job_settings(overrides: dict | None = None) -> dict:
     if unknown:
         raise ValueError(f'Unknown settings: {", ".join(sorted(unknown))}')
     settings = {**DEFAULTS, **overrides}
+    if type(settings['editorial_fallback_local']) is not bool:
+        raise ValueError('editorial_fallback_local must be boolean')
+    if settings['editorial_planner'] not in ('local', 'hermes_first'):
+        raise ValueError('Unsupported editorial planner')
+    if settings['editorial_planner'] == 'hermes_first' and settings['editorial_protocol'] != 2:
+        raise ValueError('Hermes editorial planner requires editorial_protocol=2')
     if type(settings['auto_pace']) is not bool:
         raise ValueError('auto_pace must be boolean')
     if 'render_fallback_ffmpeg' in settings and type(settings['render_fallback_ffmpeg']) is not bool:

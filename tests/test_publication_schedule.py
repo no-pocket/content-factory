@@ -123,3 +123,22 @@ def test_future_publication_waits_until_due_and_then_confirms(v2job, tmp_path, m
     result = agenda.execute(item['id'], send, now=100)
     assert result['state'] == 'PUBLISHED' and result['remote_id'] == '987'
     assert agenda.due_items(now=101) == []
+
+def test_uncertain_retry_requires_confirmation_and_preserves_history(v2job, tmp_path, monkeypatch):
+    from app import publication_schedule as agenda
+    monkeypatch.setattr(agenda, 'ROOT', tmp_path)
+    job = approved(v2job)
+    item = agenda.schedule(job['id'], job['candidates'][0]['candidate_id'], 'instagram', title='Teste', caption='', scheduled_at=1, page_id='123', instagram_id='456')
+    def fail(draft, job, destination, progress):
+        progress('PROCESSING', '987')
+        raise TimeoutError('private details')
+    result = agenda.execute(item['id'], fail, now=2)
+    assert result['failure_stage'] == 'PROCESSING'
+    assert result['failure_kind'] == 'timeout'
+    with pytest.raises(ValueError):
+        agenda.retry(item['id'], confirmed_not_published=False)
+    retried = agenda.retry(item['id'], confirmed_not_published=True)
+    assert retried['state'] == 'SCHEDULED'
+    assert retried['attempt_history'][-1]['remote_container_id'] == '987'
+    with pytest.raises(ValueError):
+        agenda.retry(item['id'], confirmed_not_published=True)

@@ -115,7 +115,7 @@ def recover_interrupted() -> None:
         for path in ROOT.glob('*.json'):
             item = json.loads(path.read_text(encoding='utf-8'))
             if item['state'] in ('SENDING', 'PROCESSING', 'PUBLISHING'):
-                item.update(state='UNCERTAIN', error='Serviço interrompido; reconciliação remota necessária')
+                item.update(failure_stage=item['state'], failure_kind='interrupted', state='UNCERTAIN', error='Serviço interrompido; reconciliação remota necessária')
                 _save(item)
 
 
@@ -182,8 +182,28 @@ def execute(identifier: str, transport, *, now: float | None = None) -> dict:
         item.update(state='BLOCKED', error=str(exc))
     except (service.Conflict, ValueError, FileNotFoundError):
         item.update(state='BLOCKED', error='Aprovação, QC ou arquivo não estão válidos')
-    except Exception:
+    except Exception as exc:
+        cause = exc.__cause__ or exc
+        item['failure_stage'] = item['state']
+        item['failure_kind'] = 'timeout' if isinstance(cause, TimeoutError) else 'transport'
         item.update(state='UNCERTAIN', error='Resultado não confirmado; reconciliação necessária')
     with store.file_lock(ROOT / 'schedule.lock'):
         _save(item)
     return item
+
+
+def retry(identifier: str, *, confirmed_not_published: bool) -> dict:
+    """Explicitly retry only after the operator reconciles the remote result."""
+    if confirmed_not_published is not True:
+        raise ValueError('Confirme que a publica\u00e7\u00e3o n\u00e3o ocorreu')
+    with store.file_lock(ROOT / 'schedule.lock'):
+        item = json.loads(_path(identifier).read_text(encoding='utf-8'))
+        if item['state'] not in ('UNCERTAIN', 'BLOCKED'):
+            raise ValueError('Somente publica\u00e7\u00f5es incertas ou bloqueadas podem ser repetidas')
+        history = item.setdefault('attempt_history', [])
+        history.append({k: item.get(k) for k in ('state', 'error', 'remote_container_id', 'failure_stage', 'failure_kind')})
+        for key in ('error', 'remote_container_id', 'failure_stage', 'failure_kind'):
+            item.pop(key, None)
+        item.update(state='SCHEDULED', scheduled_at=time.time())
+        _save(item)
+        return item

@@ -89,6 +89,111 @@ def test_youtube_lookup_keeps_title_and_rights_separate_and_deduplicates_video_i
     assert saved['license_note'] == 'Referência de autorização'
 
 
+def test_registered_youtube_ui_defaults_to_authorized_hermes_snapshot(web, monkeypatch):
+    from app import source_registry, store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal registrado','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local','external']})
+    assert web.get('/api/settings').json()['defaults']['editorial_planner']=='hermes_first'
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'qc_settings':{'max_attempts':1}}
+    result=web.post('/api/jobs',json=payload)
+    assert result.status_code==201, result.text
+    saved=store.load(result.json()['id'])
+    assert saved['settings']['editorial_planner']=='hermes_first'
+    assert saved['source_snapshot']['channel_id']=='UC'+'a'*22
+    assert 'external' in saved['source_snapshot']['allowed_model_scopes']
+    assert saved['creator']=='Criador' and saved['license_note']=='Autorização'
+    assert saved['qc_settings']['max_attempts']==1
+
+
+def test_ui_explicit_local_overrides_hermes_default(web, monkeypatch):
+    from app import store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':'local'}}
+    response=web.post('/api/jobs',json=payload)
+    assert response.status_code==201
+    assert store.load(response.json()['id'])['settings']['editorial_planner']=='local'
+
+
+def test_registered_local_only_ui_source_keeps_local_scope(web, monkeypatch):
+    from app import source_registry, store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal local','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local']})
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True})
+    assert response.status_code==201, response.text
+    saved=store.load(response.json()['id'])
+    assert saved['source_snapshot']['allowed_model_scopes']==['local']
+    from app.hermes_api import _external_allowed
+    assert not _external_allowed(saved)
+
+
+@pytest.mark.parametrize('planner',['local','hermes_first'])
+def test_ui_does_not_bypass_registered_source_revocation(web, planner):
+    from app import source_registry
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal desativado','status':'disabled'})
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':planner}}
+    assert web.post('/api/jobs',json=payload).status_code==403
+
+
+def test_ui_rejects_assembly_with_hermes_instead_of_discarding_it(web):
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':'hermes_first'},
+             'assembly_plan':{'schema_version':'3.0'}}
+    assert web.post('/api/jobs',json=payload).status_code==422
+
+
+def test_legacy_ui_protocol_preference_does_not_acquire_hermes_implicitly(web, monkeypatch):
+    from app import store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True,
+        'settings':{'editorial_protocol':1}})
+    assert response.status_code==201, response.text
+    assert store.load(response.json()['id'])['settings']['editorial_planner']=='local'
+
+
+def test_registered_source_preserves_manual_assembly_in_local_mode(web):
+    from app import source_registry, store
+    from test_assembly import plan
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local']})
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True,
+        'settings':{'editorial_planner':'local','timeline_v3':True},'assembly_plan':plan()})
+    assert response.status_code==201, response.text
+    saved=store.load(response.json()['id'])
+    assert len(saved['assembly_plan']['segments'])==2
+    assert saved['source_snapshot']['channel_id']=='UC'+'a'*22
+
+
+def test_unregistered_ui_creation_holds_source_registry_lock(web,monkeypatch):
+    from contextlib import contextmanager
+    from app import store, service
+    original_lock=store.file_lock;original_create=service.create_job;held=set()
+    @contextmanager
+    def tracked_lock(path):
+        with original_lock(path):
+            held.add(path.name)
+            try: yield
+            finally: held.remove(path.name)
+    def guarded_create(*args,**kwargs):
+        assert {'source-ingestion.lock','sources.lock'} <= held
+        return original_create(*args,**kwargs)
+    monkeypatch.setattr(store,'file_lock',tracked_lock)
+    monkeypatch.setattr(service,'create_job',guarded_create)
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True})
+    assert response.status_code==201, response.text
+
+
 def test_upload_rights_snapshot_and_no_paths(web, monkeypatch):
     from app import store
     data = {'creator': 'test', 'license_note': 'grant', 'rights_confirmed': False,
@@ -169,6 +274,18 @@ def test_source_revision_conflict_and_no_job_created(web):
     assert web.put(route, json={'r': source, 'expectedRev': 0}).status_code == 200
     assert web.put(route, json={'r': source, 'expectedRev': 0}).status_code == 409
     assert store.all_jobs() == []
+
+
+def test_resolve_youtube_channel_link(web, monkeypatch):
+    from app import source_registry
+    monkeypatch.setattr(source_registry, 'lookup_youtube_handle', lambda handle: 'UC' + 'a' * 22, raising=False)
+    response = web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/@davyjonesgta6'})
+    assert response.status_code == 200
+    assert response.json()['id'] == 'UC' + 'a' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://www.youtube.com/@davyjonesgta6?si=share'}).json()['id'] == 'UC' + 'a' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/channel/UC' + 'b' * 22}).json()['id'] == 'UC' + 'b' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com.evil.test/@davy'}).status_code == 422
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/watch?v=dQw4w9WgXcQ'}).status_code == 422
 
 
 def test_media_range_head_paths_and_sanitization(web):
@@ -335,3 +452,27 @@ def test_confirmed_publication_link_only_accepts_provider_https(link, expected):
             'draft': {'provider': 'instagram', 'title': 'test', 'job_id': 'j', 'candidate_id': 'c', 'artifact_id': 'a'}}
     assert item_view(item)['permalink'] == expected
 
+
+def test_audio_boundary_confirmation_is_explicit_and_bound_to_artifact(web):
+    from app import store
+    job=make_job();job['candidates'][0]['boundary_review_required']=True;store.save(job)
+    cid=job['candidates'][0]['candidate_id'];base=f"/api/jobs/{job['id']}/candidates/{cid}"
+    row=web.get('/api/jobs/'+job['id']).json()['cands'][0]
+    assert row['boundary_review_required'] and not row['boundary_confirmed']
+    assert web.post(base+'/confirm-boundary',json={'artifact':'invalid'}).status_code==409
+    assert web.post(base+'/confirm-boundary',json={'artifact':row['artifact']}).status_code==200
+    updated=web.get('/api/jobs/'+job['id']).json()['cands'][0]
+    assert updated['boundary_confirmed'] is True
+    assert not store.load(job['id']).get('feedback_events')
+
+
+def test_waiting_editorial_view_exposes_deadline_and_safe_engine_details(web):
+    from app import store
+    job=make_job();job.update(status='WAITING_EDITORIAL_PLAN',ranker_used='hermes',
+        transcript_model={'name':'base','device':'cpu'},editorial_request={'state':'REQUESTED','expires_at':1700000000,
+        'lease_token_hash':'private-hash','plan':None})
+    store.save(job)
+    result=web.get('/api/jobs/'+job['id']).json()['editorial_result']
+    assert result['deadline_ms']==1700000000000 and result['state']=='REQUESTED'
+    assert result['effective_planner']=='hermes' and result['transcription']['name']=='base'
+    assert 'private-hash' not in str(result)

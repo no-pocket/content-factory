@@ -2,7 +2,8 @@
 
 PENDING = 'clips:queue'
 PROCESSING = 'clips:processing'
-TERMINAL = {'FAILED', 'QUEUE_FAILED', 'PARTIAL_FAILED', 'NEEDS_REVIEW', 'APPROVED', 'REJECTED'}
+WAITING = {'WAITING_EDITORIAL_PLAN'}
+TERMINAL = {'EDITORIAL_NO_CANDIDATES', 'FAILED', 'QUEUE_FAILED', 'PARTIAL_FAILED', 'NEEDS_REVIEW', 'APPROVED', 'REJECTED'}
 
 
 def close_interrupted_run(job: dict) -> None:
@@ -33,7 +34,7 @@ def recover_inflight(redis_client, load_job, save_job) -> int:
         except (OSError, ValueError, KeyError):
             redis_client.lrem(PROCESSING, 1, jid)
             continue
-        if job.get('status') not in TERMINAL:
+        if job.get('status') not in TERMINAL | WAITING:
             close_interrupted_run(job)
             job['status'] = 'QUEUED'
             job['error'] = None

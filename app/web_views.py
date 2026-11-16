@@ -91,10 +91,16 @@ def _job_view(job):
                       'edits': row.get('edit_requests', []), 'director': clip.get('director_used', 'legado'),
                       'renderer': clip.get('renderer_used', 'legado'), 'attempts': clip.get('attempts', 0),
                       'diagnostic': diagnostic(clip.get('qc')), 'story': diagnostic(clip.get('story_assessment')),
+                      'boundary_review_required': bool(clip.get('boundary_review_required')),
+                      'boundary_confirmed': service.audio_boundary_confirmed(clip),
                       'assembly': diagnostic(clip.get('assembly')), 'pace': diagnostic(clip.get('pace')),
                       'word_timing':diagnostic((clip.get('timeline') or {}).get('word_timing_diagnostics')),
+                      'title_diagnostic':diagnostic((clip.get('timeline') or {}).get('editorial_title_diagnostics')),
                       'output_seconds':candidate_duration(clip), 'captions': diagnostic(clip.get('social_captions'))})
     settings = job.get('settings') or {}
+    request = job.get('editorial_request') or {}
+    plan = request.get('plan') or {}
+    expires = request.get('expires_at')
     return {'id': job['id'], 'name': job.get('video_title') or (job.get('youtube_metadata') or {}).get('title') or job['original_name'], 'who': job['creator'], 'lic': job['license_note'],
             'video_id': job.get('youtube_video_id') or (job.get('youtube_metadata') or {}).get('video_id'),
             'st': job['status'], 'lang': job.get('language', ''), 'eng': job.get('ranker_used') or settings.get('llm_backend', 'legado'),
@@ -104,6 +110,14 @@ def _job_view(job):
             'auto_rework_enabled':auto_rework_enabled(),
             'reworks':[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])],
             'review_status': editorial['review_status'], 'error': diagnostic(job.get('error')),
+            'editorial_result': diagnostic({'reason': plan.get('reason'),
+                                           'run_id': (job.get('processing_runs') or [{}])[-1].get('run_id'),
+                                           'failure_code': request.get('failure_code'), 'state':request.get('state'),
+                                           'deadline_ms':expires*1000 if type(expires) in (int,float) else None,
+                                           'requested_planner':settings.get('editorial_planner'),
+                                           'effective_planner':job.get('ranker_used'),
+                                           'planner':plan.get('planner'), 'transcription':job.get('transcript_model'),
+                                           'fallback': job.get('editorial_planner_fallback')}),
             'events': diagnostic(job.get('ai_events', [])), 'activity': diagnostic(job.get('ai_activity'))}
 
 
@@ -121,7 +135,7 @@ def item_view(r):
     return {'id': r['id'], 'at': r['scheduled_at'] * 1000, 'pv': d['provider'], 'st': r['state'], 't': d['title'],
             'job_id': d['job_id'], 'candidate_id': d['candidate_id'], 'artifact': d['artifact_id'],
             'caption': d.get('description', ''), 'timezone': r.get('timezone', 'America/Sao_Paulo'),
-            'error': diagnostic(r.get('error')), 'remote_id': r.get('remote_id'), 'permalink': public_link}
+            'error': diagnostic(r.get('error')), 'remote_id': r.get('remote_id'), 'remote_container_id': r.get('remote_container_id'), 'failure_stage': r.get('failure_stage'), 'failure_kind': r.get('failure_kind'), 'permalink': public_link}
 
 
 def metrics_view(jobs):

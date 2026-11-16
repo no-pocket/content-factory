@@ -127,6 +127,8 @@ def youtube_enabled():
 def settings():
     defaults = {**DEFAULTS, 'auto_pace':True, 'editorial_protocol': 2, 'llm_backend': 'kepler_gpu',
                 'render_fallback_ffmpeg': os.getenv('RENDER_FALLBACK_FFMPEG', 'true').lower() == 'true'}
+    if os.getenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT', '').lower() == 'true':
+        defaults['editorial_planner']='hermes_first'
     return {'defaults': defaults, 'ranges': RANGES, 'qc_defaults': QC_DEFAULTS,
             'whisper_models': sorted(WHISPER_MODELS), 'dimensions': list(DIMENSIONS), 'reasons': list(REASONS),
             'youtube_enabled': youtube_enabled(), 'max_upload_bytes': MAX_UPLOAD, 'release': VERSION}
@@ -224,11 +226,15 @@ async def add_job(request: Request):
             raise PermissionError('Download YouTube desabilitado ou origem duplicada')
         overrides = data.get('settings') or {}
         effective = {**settings()['defaults'], **overrides}
+        if overrides.get('editorial_protocol') == 1 and 'editorial_planner' not in overrides:
+            effective['editorial_planner']='local'
         if effective['duration_mode'] == 'flexible':
             for k, v in (('min_seconds', 8), ('max_seconds', 180)):
                 if k not in overrides:
                     effective[k] = v
         data['settings'] = normalize_job_settings(effective)
+        if data['settings']['editorial_planner']=='hermes_first' and data.get('assembly_plan') is not None:
+            raise ValueError('Montagem manual requer planejamento local; selecione o modo local')
         if data.get('source_url'):
             from .source_ingestion import public_metadata, find_existing_youtube, recover_import_enqueue
             if data.get('rights_confirmed') is not True or data.get('platform_permission') is not True:
@@ -237,14 +243,32 @@ async def add_job(request: Request):
             data['source_url'] = metadata['source_url']
             def create_url_job():
                 with store.file_lock(store.ROOT / 'source-ingestion.lock'):
-                    existing = find_existing_youtube(metadata['video_id'])
-                    if existing:
-                        if existing['status'] in ('QUEUED', 'QUEUE_FAILED'):
-                            existing = recover_import_enqueue(existing['id'])
-                        return existing, True
-                    provenance = {'youtube_metadata': metadata, 'video_title': metadata['title'], 'original_name': metadata['title']}
-                    return service.create_job(data, source_provenance=provenance), False
-            job, duplicate = await run_in_threadpool(create_url_job)
+                    with store.file_lock(store.ROOT / 'sources.lock'):
+                        try:
+                            source_registry.get_source(metadata['channel_id'])
+                        except KeyError:
+                            # Keep the existence check and manual creation atomic
+                            # against registration/revocation of this channel.
+                            existing = find_existing_youtube(metadata['video_id'])
+                            if existing:
+                                if existing['status'] in ('QUEUED', 'QUEUE_FAILED'):
+                                    existing = recover_import_enqueue(existing['id'])
+                                return existing, True
+                            provenance = {'youtube_metadata': metadata, 'video_title': metadata['title'], 'original_name': metadata['title']}
+                            return service.create_job(data, source_provenance=provenance), False
+                        return None
+            manual = await run_in_threadpool(create_url_job)
+            if manual is None:
+                # This function reacquires the same locks and revalidates source
+                # rights and metadata; never nest the file locks.
+                from .source_ingestion import ingest_youtube
+                details={key:data[key] for key in ('creator','license_note','video_title','qc_settings','assembly_plan') if key in data}
+                result = await run_in_threadpool(ingest_youtube, {
+                    'source_url':data['source_url'], 'source_id':metadata['channel_id'],
+                    'settings':data['settings']}, job_details=details)
+                return JSONResponse({**job_view(result['job']), 'duplicate':result['duplicate']},
+                                    status_code=200 if result['duplicate'] else 201)
+            job, duplicate = manual
             return JSONResponse({**job_view(job), 'duplicate': duplicate}, status_code=200 if duplicate else 201)
         job = await run_in_threadpool(service.create_job, data, upload=file.file if file else None, filename=file.filename if file else None)
         return job_view(job)
@@ -323,6 +347,8 @@ def job_action(jid: str, action: str, body: dict):
         job = service.verify_existing(jid)
     elif action == 'retry-enqueue':
         job = service.retry_enqueue(jid)
+    elif action == 'retry-editorial':
+        job = service.reprocess_failed_job(jid, body, owner_message='Solicitada nova análise editorial.', actor_id='browser:owner')
     elif action == 'reject':
         job = service.reject_job(jid, body.get('reason'), origin='api')
     else:
@@ -333,6 +359,11 @@ def job_action(jid: str, action: str, body: dict):
 @app.post('/api/jobs/{jid}/candidates/{cid}/{action}')
 def candidate_action(jid: str, cid: str, action: str, body: dict):
     job, index = identity(jid, cid)
+    if action == 'confirm-boundary':
+        if set(body) != {'artifact'} or not isinstance(body['artifact'], str):
+            raise ValueError('Identidade do render obrigatória')
+        service.confirm_audio_boundary(jid, cid, expected_artifact_id=body['artifact'], actor_id='local-owner', boundary='both')
+        return job_view(store.load(jid))
     if action == 'retry':
         return job_view(service.retry_candidate(jid, index))
     if action == 'captions':
@@ -412,6 +443,13 @@ def media(jid: str, cid: str, kind: str, artifact: str | None = None, download: 
     mime = {'mp4': 'video/mp4', 'webm': 'video/webm', 'timeline': 'application/json'}[kind]
     return FileResponse(path, media_type=mime, filename=path.name if download or kind == 'timeline' else None,
                         content_disposition_type='attachment' if download or kind == 'timeline' else 'inline')
+
+
+@app.post('/api/sources/resolve')
+def resolve_source(body: dict):
+    if set(body) != {'channel'}:
+        raise ValueError('Informe o canal')
+    return {'id': source_registry.resolve_channel(body['channel'])}
 
 
 @app.put('/api/sources/{sid}')
@@ -520,3 +558,10 @@ def cancel(pid: str, body: dict):
         if 'pending' in str(exc):
             raise service.Conflict('O envio já começou; não pode ser cancelado') from exc
         raise
+
+
+@app.post('/api/publications/{pid}/retry')
+def retry_publication(pid: str, body: dict):
+    if set(body) != {'confirmed_not_published'} or body['confirmed_not_published'] is not True:
+        raise ValueError('Confirma\u00e7\u00e3o obrigat\u00f3ria')
+    return item_view(agenda.retry(pid, confirmed_not_published=True))

@@ -115,6 +115,47 @@ Se o Pi retornar `URLError`, verificar a tarefa Windows existente
 Confirmar conectividade autenticada e consultar o ID do vídeo para evitar duplicação.
 Não imprimir tokens nem reiniciar o worker durante processamento.
 
+### Planejamento editorial assíncrono
+
+O código da integração oferece `editorial_planner=hermes_first` por job. A API
+do Telegram e a interface web aceitam `CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT=true`
+para aplicar esse padrão apenas a novos jobs; o padrão da configuração é `false`.
+Na interface, URLs de canais registrados passam pela ingestão autorizada e
+congelam o cadastro da fonte; uploads e URLs sem cadastro não concedem acesso
+externo e seguem a política local ou falham se o fallback estiver desativado.
+Para canais registrados isso também vale no modo local: cadastro desativado,
+idioma não autorizado ou metadados insuficientes bloqueiam a ingestão, em vez
+de contornar a política pelo formulário manual. Montagem manual requer a escolha
+explícita de planejamento local.
+Uma escolha explícita `local` prevalece e jobs existentes mantêm seu snapshot.
+A transcrição só é entregue ao planejador quando o snapshot e o cadastro atual
+autorizam `external`. Fallback local depende da política salva e da autorização
+local vigente. Um plano válido sem candidatos é resultado editorial e não inicia
+fallback; uma nova análise depende de ação explícita.
+
+Uma nova rodada explicitamente solicitada pelo tópico usa `editorial-attempt`
+com instrução literal e UUID idempotente. O job filho é reservado ao ator do
+tópico antes de entrar na fila; o executor automático não o lista nem pode
+adquirir sua lease. A reserva expira após duas horas e não ativa fallback local.
+O tópico deve adquirir a lease, iniciar a geração e enviar o plano versionado.
+
+Após iniciar uma geração, o executor pode registrar uma falha técnica pela rota
+privada `editorial-failure`, protegida pela lease e pela credencial editorial.
+Os códigos distinguem, por exemplo, prazo excedido, saída grande, resposta
+incompleta, JSON inválido e executor indisponível. O recibo pode ser reenviado
+sem iniciar outra geração; a política do job decide se o worker tenta o modelo
+local. A falha não guarda o prompt ou a resposta bruta nos logs operacionais.
+
+O executor usa uma credencial distinta `CONTENT_FACTORY_EDITORIAL_TOKEN`,
+restrita às rotas de solicitações editoriais. Credenciais Content Factory não
+são repassadas ao processo do modelo; o executor ainda roda com as permissões do
+usuário do Pi e não constitui isolamento de sistema operacional. O modelo é invocado em perfil temporário privado com
+toolset limitado; o perfil e o banco temporário são removidos na saída normal.
+Interrupção abrupta pode deixar um diretório `.cf-editorial-invocation-*` com
+dados sensíveis: verifique processos e origem antes da remoção. A retenção pelo
+provedor externo é independente dessa limpeza. O serviço de exemplo acompanha o
+repositório, mas sua presença não indica que esteja instalado ou ativo.
+
 Documentação oficial consultada em07/11/2026: [perfis](https://hermes-agent.nousresearch.com/docs/user-guide/profiles),
 [Telegram/tópicos](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram),
 [skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).

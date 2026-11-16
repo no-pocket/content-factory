@@ -49,6 +49,28 @@ def test_hermes_ingest_explicit_instruction_actor_and_duplicate(hermes_server, m
     assert status == 200
     assert 'PRIVATE TRANSCRIPT' not in str(duplicate)
 
+
+def test_hermes_ingest_opt_in_default_preserves_explicit_local(hermes_server, monkeypatch, tmp_path):
+    from app import store
+    monkeypatch.setattr(store, 'ROOT', tmp_path)
+    monkeypatch.setattr(store, 'JOBS', tmp_path)
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT', 'true')
+    job = store.new_job(None, 'Title', 'Creator', 'Authorization')
+    calls = []
+    monkeypatch.setitem(sys.modules, 'app.source_ingestion', SimpleNamespace(
+        ingest_youtube=lambda request: calls.append(request) or {'job': job, 'duplicate': False}))
+    action = {'source_url': 'https://youtu.be/abcdefghijk'}
+    body = {'owner_message': 'Importe este vídeo.', 'ingest': action}
+    assert hermes_server('/v2/hermes/ingest', body)[0] == 201
+    assert calls[-1]['settings']['editorial_planner'] == 'hermes_first'
+    body['ingest'] = {**action, 'settings': {'editorial_planner': 'local'}}
+    assert hermes_server('/v2/hermes/ingest', body)[0] == 201
+    assert calls[-1]['settings']['editorial_planner'] == 'local'
+    monkeypatch.delenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT')
+    body['ingest'] = action
+    assert hermes_server('/v2/hermes/ingest', body)[0] == 201
+    assert 'editorial_planner' not in calls[-1]['settings']
+
 def test_local_only_job_cannot_escape_through_hermes(v2job, hermes_server, monkeypatch, tmp_path):
     from app import store
     monkeypatch.setattr(store, 'ROOT', tmp_path)

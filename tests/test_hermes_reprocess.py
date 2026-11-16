@@ -37,6 +37,29 @@ def test_reprocess_is_idempotent_preserves_snapshot_and_records_failure(setup):
         service.reprocess_failed_job(job['id'], action, owner_message='Outra instrução.', actor_id='telegram:123', queue=q)
 
 
+def test_explicit_new_attempt_preserves_no_candidates_result(setup):
+    job = failed_job()
+    previous = {'state': 'NO_CANDIDATES', 'request_id': str(uuid.uuid4()),
+                'plan': {'outcome': 'no_suitable_candidates', 'reason': 'Sem trechos adequados'}}
+    job.update(status='EDITORIAL_NO_CANDIDATES', error=None, editorial_request=previous)
+    store.save(job)
+    q = Queue(); action = request(job)
+    for _ in range(2):
+        service.reprocess_failed_job(job['id'], action, owner_message='Analisar novamente.', actor_id='browser:owner', queue=q)
+    saved = store.load(job['id'])
+    assert saved['status'] == 'QUEUED' and q.ids == [job['id']]
+    assert saved['editorial_request_history'] == [previous]
+    assert 'editorial_request' not in saved
+
+
+def test_failed_editorial_retry_archives_previous_attempt(setup):
+    job=failed_job(); previous={'state':'INVALID','request_id':str(uuid.uuid4())}
+    job['editorial_request']=previous; store.save(job)
+    service.reprocess_failed_job(job['id'],request(job),owner_message='Nova tentativa.',actor_id='browser:owner',queue=Queue())
+    saved=store.load(job['id'])
+    assert saved['editorial_request_history']==[previous] and 'editorial_request' not in saved
+
+
 def test_reprocess_lost_queue_reply_recovers_and_never_retries_twice(setup):
     class LostReply(Queue):
         def eval(self, *args):
@@ -100,3 +123,9 @@ def test_hermes_reprocess_cannot_bypass_local_scope(setup, hermes_server, monkey
     body = {'owner_message':'Reprocesse.', 'reprocess':request(job)}
     assert hermes_server('/v2/hermes/jobs/'+job['id']+'/reprocess', body)[0] == 403
     assert not q.ids and store.load(job['id'])['status'] == 'FAILED'
+
+def test_empty_selection_reports_incomplete_model_response():
+    from app.worker import empty_candidate_failure
+    job = {'ai_events':[{'event':'proposal_chunk_failed','details':{'reason':'Model response ended with length'}}]}
+    assert 'resposta incompleta' in empty_candidate_failure(job).lower()
+    assert 'fala' not in empty_candidate_failure(job).lower()

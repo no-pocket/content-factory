@@ -18,6 +18,7 @@ services:
     image: content-factory-web-api:latest
     environment:
       CONTENT_FACTORY_AUTO_REWORK: ${CONTENT_FACTORY_AUTO_REWORK:-true}
+      CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT: ${CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT:-false}
       REDIS_URL: redis://redis:6379/0
       DATA_DIR: /data
       OLLAMA_URL: http://ollama:11434

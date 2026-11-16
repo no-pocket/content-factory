@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import time
 from . import service, store, source_registry
 from .job_settings import normalize_job_settings
@@ -87,7 +88,11 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
         raise PermissionError('Metadata channel does not match authorized source')
     require_active_source(source)
     language = metadata.get('language')
-    if not language or language not in source['allowed_languages']:
+    # A primary language grants its regional variants; a regional grant stays narrow.
+    valid_language = isinstance(language, str) and re.fullmatch(r'[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*', language)
+    normalized = language.lower() if valid_language else ''
+    allowed = [value.lower() for value in source['allowed_languages'] if isinstance(value, str)]
+    if not normalized or not any(normalized == value or ('-' not in value and normalized.startswith(value + '-')) for value in allowed):
         raise PermissionError('Metadata language is missing or not authorized')
     live = metadata.get('live_status')
     if metadata.get('is_live') or live in {'is_live','is_upcoming','post_live'}:
@@ -101,17 +106,22 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
         kind = 'video'
     if (kind and kind not in kinds) or (kind is None and not {'video','short'}.issubset(kinds)):
         raise PermissionError('Video kind missing, ambiguous or not authorized')
-    model_scope = 'external' if any(settings.get(k) == 'external' for k in ('ranker_mode','director_mode','llm_backend','llm_model')) else 'local'
+    hermes_allowed = settings.get('editorial_planner') == 'hermes_first' and 'external' in source['allowed_model_scopes']
+    model_scope = 'external' if hermes_allowed or any(settings.get(k) == 'external' for k in ('ranker_mode','director_mode','llm_backend','llm_model')) else 'local'
     if model_scope not in source['allowed_model_scopes']:
         raise PermissionError('Model scope is not authorized')
     return {'video_id':video_id,'channel_id':source['channel_id'],'title':str(metadata.get('title') or video_id)[:4000],
             'language':language,'video_kind':kind or 'video_or_short','model_scope':model_scope,
             'live_status':live,'duration':metadata.get('duration')}
 
-def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
+def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_details=None) -> dict:
     fields = {'source_url','source_id','settings','owner_message','actor_id'}
     if not isinstance(payload,dict) or set(payload)-fields:
         raise ValueError('Unknown ingestion fields')
+    if job_details is None:
+        job_details={}
+    if not isinstance(job_details,dict) or set(job_details)-{'creator','license_note','video_title','qc_settings','assembly_plan'}:
+        raise ValueError('Invalid trusted job details')
     if os.getenv('ENABLE_YOUTUBE_DOWNLOAD','true').lower() != 'true':
         raise PermissionError('YouTube ingestion is disabled in this installation')
     url = normalize_youtube_url(payload.get('source_url',''))
@@ -144,7 +154,7 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
                 raise ValueError('Invalid ingestion context')
             job = service.create_job({'source_url':url,'creator':source['name'],
                 'license_note':source['authorization_reference'],'rights_confirmed':True,
-                'platform_permission':True,'settings':settings},queue=queue,
+                'platform_permission':True,'settings':settings,**job_details},queue=queue,
                 source_provenance={'source_id':channel_id,'source_snapshot':source,
                     'youtube_video_id':video_id,'video_title':verified['title'],'original_name':verified['title'],
                     'youtube_metadata':verified,'ingestion_context':context,'metadata_verified_at':time.time()})

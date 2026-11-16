@@ -18,6 +18,23 @@ from .telemetry import measure_stage, job_metric_context
 REVIEWABLE = {'VALID', 'WARNING'}
 
 
+def annotate_caption_qc(qc, clip):
+    timeline=clip['timeline']
+    diagnostics=timeline.get('word_timing_diagnostics') or {}
+    if diagnostics.get('partial_segments_omitted') or (clip.get('proposal_source')=='hermes' and not timeline['layers']['captions']):
+        qc['caption_warning']='caption_coverage_incomplete'
+        if qc['state']=='VALID': qc['state']='WARNING'
+    return qc
+
+
+def candidate_direction(clip, assets, *, mode, model, llm_backend, auto_pace, on_event=None, local_director=None):
+    if clip.get('proposal_source') == 'hermes':
+        from .editorial_requests import hermes_direction
+        return hermes_direction(clip), 'hermes'
+    return (local_director or direct_edit)(clip, assets, on_event=on_event, mode=mode, model=model,
+                                            llm_backend=llm_backend, auto_pace=auto_pace)
+
+
 def _validate_duration(clip: dict, settings: dict) -> None:
     """A cached timeline cannot elevate the saved duration opt-in or window."""
     import math
@@ -111,7 +128,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                     validate_story_boundary({'source_start': clip['start'], 'source_end': clip['end']}, clip['editorial_context'], tolerance=tolerance)
                     if tolerance > 1e-6:
                         clip['boundary_compatibility'] = {'centisecond_rounding_tolerance_seconds':tolerance}
-                    if story['closure'] == 'INCOMPLETE':
+                    if story['closure'] == 'INCOMPLETE' and clip.get('proposal_source') != 'hermes':
                         raise ValueError('Editorial story incomplete: no validated payoff within selected duration; choose another interval')
                 if 'timeline' not in clip:
                     job['status'] = 'DIRECTING'
@@ -121,7 +138,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                         save(job)
                     with measure_stage(clip['stage_metrics'],'DIRECTOR',metric_context,
                                        requested={'mode':settings['director_mode'],'model':settings['llm_model'],'backend':settings['llm_backend']}) as metric:
-                        hints, director_used = direct_edit(clip, assets, on_event=event,
+                        hints, director_used = candidate_direction(clip, assets, on_event=event,
                                                            mode=settings['director_mode'],
                                                            model=settings['llm_model'],
                                                            llm_backend=settings['llm_backend'],auto_pace=settings.get('auto_pace',False))
@@ -130,7 +147,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                             metric['fallback_reason']=job.get('editing_activity',{}).get('reason','UNKNOWN')
                     if clip.get('editorial_context'):
                         clip['story_assessment'] = assess_story(clip['editorial_context'], {}, hints.get('story'))
-                        if clip['story_assessment']['closure'] == 'INCOMPLETE':
+                        if clip['story_assessment']['closure'] == 'INCOMPLETE' and clip.get('proposal_source') != 'hermes':
                             raise ValueError('Editorial model found incomplete closure; a new validated boundary is required')
                     from .pacing import apply_candidate_pacing, retime_hints
                     rate=apply_candidate_pacing(clip,segments,job.get('duration'),settings,preference=hints.get('pace','auto'))
@@ -152,6 +169,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                                          **({'fallback_ffmpeg': settings['render_fallback_ffmpeg']} if 'render_fallback_ffmpeg' in settings else {}))
                 with measure_stage(clip['stage_metrics'],'QC',metric_context,requested='mp4_webm_full_decode',resolved='ffmpeg_ffprobe') as metric:
                     qc = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                    annotate_caption_qc(qc,clip)
                     metric['qc_state']=qc['state']
                 clip.update(qc=qc, state=qc['state'], renderer_used=renderer,
                             file=str(target), timeline_file=str(target.with_suffix('.timeline.json')),
@@ -180,6 +198,9 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
     job['error'] = None if job['status'] == 'NEEDS_REVIEW' else 'One or more candidates failed technical verification'
     job.pop('retry_candidate', None)
     if job.get('processing_runs') and job['processing_runs'][-1].get('state') == 'RUNNING':
-        job['processing_runs'][-1].update(finished_at=time.time(), state='COMPLETED', timing_complete=True,
-                                         seconds=round(time.time() - job['run_started_at'], 3))
+        run=job['processing_runs'][-1]
+        interrupted=bool(run.get('resume_events'))
+        run.update(finished_at=time.time(), state='COMPLETED', timing_complete=not interrupted,
+                   elapsed_includes_interruptions=interrupted,
+                   seconds=round(time.time() - job['run_started_at'], 3))
     save(job)
