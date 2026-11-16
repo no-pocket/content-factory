@@ -3,7 +3,7 @@ import type {Schema,Settings as Values} from './types'
 import {Field,Head} from './ui'
 import {toast,useS} from './store'
 const key='cf:processing-defaults:v1'
-export function preferences(schema:Schema):Values{try{return {...schema.defaults,...JSON.parse(localStorage.getItem(key)??'{}')}}catch{return {...schema.defaults}}}
+export function preferences(schema:Schema):Values{try{const saved=JSON.parse(localStorage.getItem(key)??'{}');const values={...schema.defaults,...saved};if(saved.editorial_protocol===1&&!Object.hasOwn(saved,'editorial_planner'))values.editorial_planner='local';return values}catch{return {...schema.defaults}}}
 const labels:Record<string,string>={auto_pace:'Ajustar fala lenta (até 1,15×, preservando o tom)',editorial_protocol:'Protocolo editorial',clip_count:'Quantidade de candidatos',duration_mode:'Duração da história',target_seconds:'Duração de referência (s)',min_seconds:'Duração mínima (s)',max_seconds:'Duração máxima (s)',proposal_max_chunks:'Máximo de blocos Qwen',shortlist:'Candidatos para classificação',ollama_timeout:'Prazo por consulta Qwen (s)',whisper_model:'Modelo Whisper',whisper_beam_size:'Beam size Whisper',ranker_mode:'Seleção dos destaques',llm_backend:'Backend Qwen',llm_model:'Modelo Qwen',director_mode:'Direção da edição',render_engine:'Motor de render',render_quality:'Qualidade de render',render_fallback_ffmpeg:'Permitir fallback FFmpeg (apenas standard)',timeline_v3:'Montagem multitrecho v3 (requer protocolo 2)',framing_preset:'Conteúdo visual',framing_roi:'ROI manual (JSON ou vazio)',framing_windows:'Intervalos de página/tweet (ex.: 12.5-18;40-47)',retrieval_mode:'Exemplos editoriais',retrieval_dataset_id:'ID do dataset de exemplos',outro_asset_id:'Encerramento licenciado opcional'}
 const choices:Record<string,[string|number,string][]>= {
   editorial_planner:[['local','Modelo local'],['hermes_first','Hermes quando autorizado']],
@@ -25,7 +25,7 @@ export function SettingsFields({schema,value,onChange}:{schema:Schema;value:Valu
     if(range)return <Field key={k} l={labels[k]??k}><input type="number" min={flex?8:range[0]} max={flex?180:range[1]} required value={Number(v)} onChange={e=>set(k,e.target.valueAsNumber)}/></Field>
     const text=typeof v==='string'?v:v==null?'':JSON.stringify(v)
     return <Field key={k} l={labels[k]??k}><input value={text} maxLength={k==='framing_windows'?2000:1000} onChange={e=>set(k,e.target.value||null)}/></Field>
-  })}</div>
+  })}{value.editorial_planner==='hermes_first'&&<p className="hint">Hermes requer canal cadastrado com autorização externa. Uploads e URLs sem cadastro usam o fallback local permitido ou registram falha se ele estiver desativado.</p>}</div>
 }
 export function Settings({schema}:{schema:Schema}){
   const [value,set]=useState(()=>preferences(schema))

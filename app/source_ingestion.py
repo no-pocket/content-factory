@@ -109,10 +109,14 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
             'language':language,'video_kind':kind or 'video_or_short','model_scope':model_scope,
             'live_status':live,'duration':metadata.get('duration')}
 
-def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
+def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_details=None) -> dict:
     fields = {'source_url','source_id','settings','owner_message','actor_id'}
     if not isinstance(payload,dict) or set(payload)-fields:
         raise ValueError('Unknown ingestion fields')
+    if job_details is None:
+        job_details={}
+    if not isinstance(job_details,dict) or set(job_details)-{'creator','license_note','video_title','qc_settings','assembly_plan'}:
+        raise ValueError('Invalid trusted job details')
     if os.getenv('ENABLE_YOUTUBE_DOWNLOAD','true').lower() != 'true':
         raise PermissionError('YouTube ingestion is disabled in this installation')
     url = normalize_youtube_url(payload.get('source_url',''))
@@ -145,7 +149,7 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None) -> dict:
                 raise ValueError('Invalid ingestion context')
             job = service.create_job({'source_url':url,'creator':source['name'],
                 'license_note':source['authorization_reference'],'rights_confirmed':True,
-                'platform_permission':True,'settings':settings},queue=queue,
+                'platform_permission':True,'settings':settings,**job_details},queue=queue,
                 source_provenance={'source_id':channel_id,'source_snapshot':source,
                     'youtube_video_id':video_id,'video_title':verified['title'],'original_name':verified['title'],
                     'youtube_metadata':verified,'ingestion_context':context,'metadata_verified_at':time.time()})

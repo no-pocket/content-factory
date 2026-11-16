@@ -17,6 +17,8 @@ continua com os contratos e Bearers existentes, sem usar a credencial web.
 | GET `/api/settings` | Defaults, ranges, modelos, dimensões, direitos/limites de ingestão |
 | GET `/api/jobs/{job_id}` | Job e projeção editorial atual |
 | POST `/api/jobs` | JSON para YouTube; multipart `metadata` JSON + `file` para upload |
+| POST `/api/jobs/{job_id}/retry-editorial` | Nova análise explícita de resultado editorial sem candidatos, com `request_id` e `expected_run_id` |
+| POST `/api/jobs/{job_id}/candidates/{candidate_id}/confirm-boundary` | Confirmação humana do início e final do render identificado por `artifact`; não aprova o candidato |
 | POST `/api/youtube/metadata` | `{source_url}` individual: título, criador, ID canônico e duração públicos; não cria job |
 | POST `/api/jobs/{job_id}/candidates/{candidate_id}/review` | `{seen:{artifact,n,revision},p:{dec,comment,reasons,adjust,rating,grade},request_id}` |
 | GET/HEAD `/api/jobs/{job_id}/candidates/{candidate_id}/media/{kind}` | MP4/WebM/timeline; `artifact` congela identidade; `download=true` para baixar; vídeos aceitam Range |

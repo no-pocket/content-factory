@@ -105,9 +105,10 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline, com
 const PopBanner: React.FC<{ text: string; compact: boolean; safe?: Region }> = ({ text, compact, safe }) => {
   const frame = useCurrentFrame();
   const scale = interpolate(frame, [0, 4, 8], [0.55, 1.14, 1], { extrapolateRight: 'clamp' });
+  const fontSize = compact ? (text.length > 55 ? 25 : text.length > 35 ? 30 : 38) : 55;
   return (
     <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: safe ? safe.y * 1280 : compact ? 95 : 130, pointerEvents: 'none' }}>
-      <div style={{ maxWidth: compact ? '82%' : '85%', fontWeight: 950, fontSize: compact ? 38 : 55, lineHeight: 1.1, padding: '15px 20px', textAlign: 'center', color: '#fff', textTransform: 'uppercase', background: 'rgba(12,16,26,0.74)', borderBottom: '5px solid #f5dc45', borderRadius: 12, transform: `scale(${scale})`, textShadow: '1px 3px #050505', ...(compact ? {display:'-webkit-box', WebkitBoxOrient:'vertical' as const, WebkitLineClamp:3, overflow:'hidden', overflowWrap:'anywhere' as const} : {}) }}>{text}</div>
+      <div style={{ maxWidth: compact ? '82%' : '85%', fontWeight: 950, fontSize, lineHeight: 1.1, padding: '15px 20px', textAlign: 'center', color: '#fff', textTransform: 'uppercase', background: 'rgba(12,16,26,0.74)', borderBottom: '5px solid #f5dc45', borderRadius: 12, transform: `scale(${scale})`, textShadow: '1px 3px #050505', ...(compact ? {overflowWrap:'anywhere' as const} : {}) }}>{text}</div>
     </AbsoluteFill>
   );
 };

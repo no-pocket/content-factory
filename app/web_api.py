@@ -127,6 +127,8 @@ def youtube_enabled():
 def settings():
     defaults = {**DEFAULTS, 'auto_pace':True, 'editorial_protocol': 2, 'llm_backend': 'kepler_gpu',
                 'render_fallback_ffmpeg': os.getenv('RENDER_FALLBACK_FFMPEG', 'true').lower() == 'true'}
+    if os.getenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT', '').lower() == 'true':
+        defaults['editorial_planner']='hermes_first'
     return {'defaults': defaults, 'ranges': RANGES, 'qc_defaults': QC_DEFAULTS,
             'whisper_models': sorted(WHISPER_MODELS), 'dimensions': list(DIMENSIONS), 'reasons': list(REASONS),
             'youtube_enabled': youtube_enabled(), 'max_upload_bytes': MAX_UPLOAD, 'release': VERSION}
@@ -224,11 +226,15 @@ async def add_job(request: Request):
             raise PermissionError('Download YouTube desabilitado ou origem duplicada')
         overrides = data.get('settings') or {}
         effective = {**settings()['defaults'], **overrides}
+        if overrides.get('editorial_protocol') == 1 and 'editorial_planner' not in overrides:
+            effective['editorial_planner']='local'
         if effective['duration_mode'] == 'flexible':
             for k, v in (('min_seconds', 8), ('max_seconds', 180)):
                 if k not in overrides:
                     effective[k] = v
         data['settings'] = normalize_job_settings(effective)
+        if data['settings']['editorial_planner']=='hermes_first' and data.get('assembly_plan') is not None:
+            raise ValueError('Montagem manual requer planejamento local; selecione o modo local')
         if data.get('source_url'):
             from .source_ingestion import public_metadata, find_existing_youtube, recover_import_enqueue
             if data.get('rights_confirmed') is not True or data.get('platform_permission') is not True:
@@ -237,14 +243,32 @@ async def add_job(request: Request):
             data['source_url'] = metadata['source_url']
             def create_url_job():
                 with store.file_lock(store.ROOT / 'source-ingestion.lock'):
-                    existing = find_existing_youtube(metadata['video_id'])
-                    if existing:
-                        if existing['status'] in ('QUEUED', 'QUEUE_FAILED'):
-                            existing = recover_import_enqueue(existing['id'])
-                        return existing, True
-                    provenance = {'youtube_metadata': metadata, 'video_title': metadata['title'], 'original_name': metadata['title']}
-                    return service.create_job(data, source_provenance=provenance), False
-            job, duplicate = await run_in_threadpool(create_url_job)
+                    with store.file_lock(store.ROOT / 'sources.lock'):
+                        try:
+                            source_registry.get_source(metadata['channel_id'])
+                        except KeyError:
+                            # Keep the existence check and manual creation atomic
+                            # against registration/revocation of this channel.
+                            existing = find_existing_youtube(metadata['video_id'])
+                            if existing:
+                                if existing['status'] in ('QUEUED', 'QUEUE_FAILED'):
+                                    existing = recover_import_enqueue(existing['id'])
+                                return existing, True
+                            provenance = {'youtube_metadata': metadata, 'video_title': metadata['title'], 'original_name': metadata['title']}
+                            return service.create_job(data, source_provenance=provenance), False
+                        return None
+            manual = await run_in_threadpool(create_url_job)
+            if manual is None:
+                # This function reacquires the same locks and revalidates source
+                # rights and metadata; never nest the file locks.
+                from .source_ingestion import ingest_youtube
+                details={key:data[key] for key in ('creator','license_note','video_title','qc_settings','assembly_plan') if key in data}
+                result = await run_in_threadpool(ingest_youtube, {
+                    'source_url':data['source_url'], 'source_id':metadata['channel_id'],
+                    'settings':data['settings']}, job_details=details)
+                return JSONResponse({**job_view(result['job']), 'duplicate':result['duplicate']},
+                                    status_code=200 if result['duplicate'] else 201)
+            job, duplicate = manual
             return JSONResponse({**job_view(job), 'duplicate': duplicate}, status_code=200 if duplicate else 201)
         job = await run_in_threadpool(service.create_job, data, upload=file.file if file else None, filename=file.filename if file else None)
         return job_view(job)

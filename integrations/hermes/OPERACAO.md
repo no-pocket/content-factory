@@ -118,8 +118,15 @@ Não imprimir tokens nem reiniciar o worker durante processamento.
 ### Planejamento editorial assíncrono
 
 O código da integração oferece `editorial_planner=hermes_first` por job. A API
-do Telegram aceita `CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT=true` para aplicar
-esse padrão apenas a novas ingestões; o padrão da configuração é `false`.
+do Telegram e a interface web aceitam `CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT=true`
+para aplicar esse padrão apenas a novos jobs; o padrão da configuração é `false`.
+Na interface, URLs de canais registrados passam pela ingestão autorizada e
+congelam o cadastro da fonte; uploads e URLs sem cadastro não concedem acesso
+externo e seguem a política local ou falham se o fallback estiver desativado.
+Para canais registrados isso também vale no modo local: cadastro desativado,
+idioma não autorizado ou metadados insuficientes bloqueiam a ingestão, em vez
+de contornar a política pelo formulário manual. Montagem manual requer a escolha
+explícita de planejamento local.
 Uma escolha explícita `local` prevalece e jobs existentes mantêm seu snapshot.
 A transcrição só é entregue ao planejador quando o snapshot e o cadastro atual
 autorizam `external`. Fallback local depende da política salva e da autorização

@@ -89,6 +89,111 @@ def test_youtube_lookup_keeps_title_and_rights_separate_and_deduplicates_video_i
     assert saved['license_note'] == 'Referência de autorização'
 
 
+def test_registered_youtube_ui_defaults_to_authorized_hermes_snapshot(web, monkeypatch):
+    from app import source_registry, store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal registrado','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local','external']})
+    assert web.get('/api/settings').json()['defaults']['editorial_planner']=='hermes_first'
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'qc_settings':{'max_attempts':1}}
+    result=web.post('/api/jobs',json=payload)
+    assert result.status_code==201, result.text
+    saved=store.load(result.json()['id'])
+    assert saved['settings']['editorial_planner']=='hermes_first'
+    assert saved['source_snapshot']['channel_id']=='UC'+'a'*22
+    assert 'external' in saved['source_snapshot']['allowed_model_scopes']
+    assert saved['creator']=='Criador' and saved['license_note']=='Autorização'
+    assert saved['qc_settings']['max_attempts']==1
+
+
+def test_ui_explicit_local_overrides_hermes_default(web, monkeypatch):
+    from app import store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':'local'}}
+    response=web.post('/api/jobs',json=payload)
+    assert response.status_code==201
+    assert store.load(response.json()['id'])['settings']['editorial_planner']=='local'
+
+
+def test_registered_local_only_ui_source_keeps_local_scope(web, monkeypatch):
+    from app import source_registry, store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal local','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local']})
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True})
+    assert response.status_code==201, response.text
+    saved=store.load(response.json()['id'])
+    assert saved['source_snapshot']['allowed_model_scopes']==['local']
+    from app.hermes_api import _external_allowed
+    assert not _external_allowed(saved)
+
+
+@pytest.mark.parametrize('planner',['local','hermes_first'])
+def test_ui_does_not_bypass_registered_source_revocation(web, planner):
+    from app import source_registry
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal desativado','status':'disabled'})
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':planner}}
+    assert web.post('/api/jobs',json=payload).status_code==403
+
+
+def test_ui_rejects_assembly_with_hermes_instead_of_discarding_it(web):
+    payload={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador','license_note':'Autorização',
+             'rights_confirmed':True,'platform_permission':True,'settings':{'editorial_planner':'hermes_first'},
+             'assembly_plan':{'schema_version':'3.0'}}
+    assert web.post('/api/jobs',json=payload).status_code==422
+
+
+def test_legacy_ui_protocol_preference_does_not_acquire_hermes_implicitly(web, monkeypatch):
+    from app import store
+    monkeypatch.setenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT','true')
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True,
+        'settings':{'editorial_protocol':1}})
+    assert response.status_code==201, response.text
+    assert store.load(response.json()['id'])['settings']['editorial_planner']=='local'
+
+
+def test_registered_source_preserves_manual_assembly_in_local_mode(web):
+    from app import source_registry, store
+    from test_assembly import plan
+    source_registry.upsert_source({'channel_id':'UC'+'a'*22,'name':'Canal','status':'active',
+        'rights_confirmed':True,'platform_permission':True,'authorization_reference':'Autorização',
+        'allowed_languages':['pt'],'allowed_video_kinds':['video','short'],'allowed_model_scopes':['local']})
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True,
+        'settings':{'editorial_planner':'local','timeline_v3':True},'assembly_plan':plan()})
+    assert response.status_code==201, response.text
+    saved=store.load(response.json()['id'])
+    assert len(saved['assembly_plan']['segments'])==2
+    assert saved['source_snapshot']['channel_id']=='UC'+'a'*22
+
+
+def test_unregistered_ui_creation_holds_source_registry_lock(web,monkeypatch):
+    from contextlib import contextmanager
+    from app import store, service
+    original_lock=store.file_lock;original_create=service.create_job;held=set()
+    @contextmanager
+    def tracked_lock(path):
+        with original_lock(path):
+            held.add(path.name)
+            try: yield
+            finally: held.remove(path.name)
+    def guarded_create(*args,**kwargs):
+        assert {'source-ingestion.lock','sources.lock'} <= held
+        return original_create(*args,**kwargs)
+    monkeypatch.setattr(store,'file_lock',tracked_lock)
+    monkeypatch.setattr(service,'create_job',guarded_create)
+    response=web.post('/api/jobs',json={'source_url':'https://youtu.be/dQw4w9WgXcQ','creator':'Criador',
+        'license_note':'Autorização','rights_confirmed':True,'platform_permission':True})
+    assert response.status_code==201, response.text
+
+
 def test_upload_rights_snapshot_and_no_paths(web, monkeypatch):
     from app import store
     data = {'creator': 'test', 'license_note': 'grant', 'rights_confirmed': False,

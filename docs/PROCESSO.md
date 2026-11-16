@@ -8,6 +8,15 @@ Upload local copia o arquivo para `data/input/`. URL do YouTube é normalizada e
 
 ## 2. Fila e transcrição
 
+Com `hermes_first` e direitos externos válidos, o worker persiste a transcrição
+e uma solicitação editorial versionada, entra em `WAITING_EDITORIAL_PLAN` e
+libera a fila. O serviço no Pi devolve proposta sujeita a validação objetiva;
+o worker retoma com os mesmos identificadores e gera os artefatos para revisão.
+`EDITORIAL_NO_CANDIDATES` é um resultado editorial válido, não um erro nem
+gatilho de fallback. Falhas técnicas podem usar fallback local conforme o
+snapshot; revogação de direitos interrompe o fluxo. Aprovação, seleção e
+publicação continuam dependentes de ações humanas separadas.
+
 A UI enfileira o ID em `clips:queue`. O worker move o ID para `clips:processing` antes de executar e o remove quando o job chega a um estado terminal. Se o worker parar, a inicialização reenvia jobs não terminais da lista de processamento. Esta recuperação assume um único worker; não existe lease distribuído para vários workers.
 
 `faster-whisper` extrai segmentos e palavras com tempos. O worker guarda a transcrição em `data/work/<id>.transcript.json`. Modelo, beam size e outras escolhas vêm do snapshot do job, com limites em `app/job_settings.py`.
