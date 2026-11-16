@@ -27,6 +27,13 @@ class Connection:
 instances = []
 
 
+def test_upload_session_offset_is_read_only_and_authenticated(monkeypatch):
+    instances.clear(); monkeypatch.setattr(meta_http.http.client, 'HTTPSConnection', Connection)
+    meta_http.MetaHTTP('v27.0')('GET','upload/123','secret')
+    assert ('request','GET','/ig-api-upload/v27.0/123') in instances[-1].calls
+    assert ('header','Authorization','OAuth secret') in instances[-1].calls
+
+
 def test_http_client_uses_only_meta_hosts_and_auth_header(monkeypatch):
     instances.clear()
     monkeypatch.setattr(meta_http.http.client, 'HTTPSConnection', Connection)

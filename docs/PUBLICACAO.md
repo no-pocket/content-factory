@@ -29,6 +29,13 @@ altere somente agendamentos que ainda não começaram. O serviço suporta um ún
 executor; não usar múltiplos workers de publicação. Verifique vídeo, destino,
 legenda e direitos antes de confirmar a publicação.
 
+No upload do Instagram, após uma falha de conexão, o executor consulta a sessão
+existente. Ele tenta enviar uma única vez mais apenas se a Meta informar offset
+zero e container `IN_PROGRESS`; em qualquer outro caso mantém o resultado
+incerto para reconciliação. Falhas novas registram um código técnico sem incluir
+mensagens ou credenciais remotas. A agenda tenta MP4 se a prévia WebM falhar e
+oferece um link para abrir o arquivo mestre.
+
 ## Rascunhos locais
 
 As sugestões de legenda são criadas a partir das palavras da timeline renderizada

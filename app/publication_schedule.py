@@ -17,6 +17,22 @@ class PreflightError(RuntimeError):
     """A local or read-only prerequisite failed before any remote mutation."""
 
 
+def _failure_detail(exc):
+    import http.client
+    import re
+    import ssl
+    from .meta_http import MetaHTTPError
+    if isinstance(exc, TimeoutError): return 'timeout'
+    if isinstance(exc, ssl.SSLError): return 'tls_error'
+    if isinstance(exc, http.client.RemoteDisconnected): return 'remote_disconnected'
+    if isinstance(exc, ConnectionResetError): return 'connection_reset'
+    if isinstance(exc, BrokenPipeError): return 'connection_interrupted'
+    if isinstance(exc, MetaHTTPError):
+        match = re.fullmatch(r'Meta request failed \(HTTP ([1-5][0-9]{2})\)', str(exc))
+        return 'meta_http_' + match.group(1) if match else 'meta_response_error'
+    return 'unknown_transport'
+
+
 def _path(identifier: str) -> Path:
     parsed = uuid.UUID(identifier)
     if str(parsed) != identifier:
@@ -186,6 +202,7 @@ def execute(identifier: str, transport, *, now: float | None = None) -> dict:
         cause = exc.__cause__ or exc
         item['failure_stage'] = item['state']
         item['failure_kind'] = 'timeout' if isinstance(cause, TimeoutError) else 'transport'
+        item['failure_detail'] = _failure_detail(cause)
         item.update(state='UNCERTAIN', error='Resultado não confirmado; reconciliação necessária')
     with store.file_lock(ROOT / 'schedule.lock'):
         _save(item)
@@ -201,8 +218,8 @@ def retry(identifier: str, *, confirmed_not_published: bool) -> dict:
         if item['state'] not in ('UNCERTAIN', 'BLOCKED'):
             raise ValueError('Somente publica\u00e7\u00f5es incertas ou bloqueadas podem ser repetidas')
         history = item.setdefault('attempt_history', [])
-        history.append({k: item.get(k) for k in ('state', 'error', 'remote_container_id', 'failure_stage', 'failure_kind')})
-        for key in ('error', 'remote_container_id', 'failure_stage', 'failure_kind'):
+        history.append({k: item.get(k) for k in ('state', 'error', 'remote_container_id', 'failure_stage', 'failure_kind', 'failure_detail')})
+        for key in ('error', 'remote_container_id', 'failure_stage', 'failure_kind', 'failure_detail'):
             item.pop(key, None)
         item.update(state='SCHEDULED', scheduled_at=time.time())
         _save(item)

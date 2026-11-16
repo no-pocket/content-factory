@@ -135,7 +135,7 @@ def item_view(r):
     return {'id': r['id'], 'at': r['scheduled_at'] * 1000, 'pv': d['provider'], 'st': r['state'], 't': d['title'],
             'job_id': d['job_id'], 'candidate_id': d['candidate_id'], 'artifact': d['artifact_id'],
             'caption': d.get('description', ''), 'timezone': r.get('timezone', 'America/Sao_Paulo'),
-            'error': diagnostic(r.get('error')), 'remote_id': r.get('remote_id'), 'remote_container_id': r.get('remote_container_id'), 'failure_stage': r.get('failure_stage'), 'failure_kind': r.get('failure_kind'), 'permalink': public_link}
+            'error': diagnostic(r.get('error')), 'remote_id': r.get('remote_id'), 'remote_container_id': r.get('remote_container_id'), 'failure_stage': r.get('failure_stage'), 'failure_kind': r.get('failure_kind'), 'failure_detail': r.get('failure_detail'), 'permalink': public_link}
 
 
 def metrics_view(jobs):
