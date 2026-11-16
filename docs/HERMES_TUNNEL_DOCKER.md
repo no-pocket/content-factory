@@ -20,8 +20,12 @@ Para uma instalação nova:
    pública do servidor verificada em `data/hermes-tunnel/known_hosts`, usando
    como nome o valor configurado em `HERMES_TUNNEL_HOSTKEY_ALIAS`.
 2. Cadastre apenas a chave pública dedicada no servidor SSH remoto. Restrinja-a
-   com `restrict,port-forwarding,permitopen="none",permitlisten="127.0.0.1:PORTA"`,
-   substituindo `PORTA` pela porta escolhida. Preserve as demais chaves existentes.
+   com `restrict,port-forwarding,permitlisten="127.0.0.1:PORTA"`,
+   substituindo `PORTA` pela porta escolhida. Essa configuração permite
+   encaminhamentos locais pela chave e limita a escuta reversa ao loopback e à
+   porta escolhida. Preserve as demais chaves existentes. Não use
+   `permitopen="none"` em `authorized_keys`: não é um destino válido nesse formato
+   e pode impedir a autenticação da chave.
 3. Em `.env`, configure `HERMES_TUNNEL_HOST`, `HERMES_TUNNEL_USER`,
    `HERMES_TUNNEL_HOSTKEY_ALIAS` e `HERMES_TUNNEL_REMOTE_PORT`. Nenhum desses
    valores, nem os arquivos em `data/hermes-tunnel/`, deve ser incluído no Git.
