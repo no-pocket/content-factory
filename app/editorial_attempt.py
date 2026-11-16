@@ -13,9 +13,11 @@ from . import source_ingestion, source_registry, store
 from .job_settings import normalize_job_settings
 
 
-def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None):
+def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None, reserved_actor=None, owner_message=None):
     if str(uuid.UUID(request_id)) != request_id:
         raise ValueError('Canonical request UUID required')
+    if reserved_actor is not None and (not isinstance(reserved_actor,str) or not reserved_actor.startswith('telegram:') or not isinstance(owner_message,str) or not owner_message.strip() or len(owner_message)>4000):
+        raise ValueError('Reserved attempts require actor and owner instruction')
     with store.job_lock(parent_id):
         parent = store.load(parent_id)
         if parent.get('source_type') != 'youtube' or not parent.get('source_url'):
@@ -29,7 +31,7 @@ def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None):
         with store.file_lock(store.ROOT / 'sources.lock'):
             source = source_registry.get_source(metadata.get('channel_id'))
             settings = normalize_job_settings({**parent['settings'], 'editorial_planner':'hermes_first',
-                                               'editorial_protocol':2})
+                                               'editorial_protocol':2, **({'editorial_fallback_local':False} if reserved_actor else {})})
             verified = source_ingestion.verify_source_metadata(metadata, video_id, source, settings)
             if verified['model_scope'] != 'external':
                 raise PermissionError('External editorial scope is required')
@@ -50,6 +52,8 @@ def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None):
                 child = store.load(child_id)
                 if child.get('source_parent_job') != parent_id or child.get('editorial_attempt_request_id') != request_id:
                     raise ValueError('Attempt identity collision')
+                if child.get('editorial_reserved_actor') != reserved_actor or child.get('editorial_attempt_owner_message') != owner_message:
+                    raise ValueError('Attempt request reused with different intent')
             else:
                 fields = ('schema_version','settings_version','source','source_type','source_url','original_name',
                           'creator','video_title','license_note','platform_permission','qc_settings',
@@ -61,7 +65,8 @@ def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None):
                     child['editorial_versions']['component_snapshot_id'] = child['component_snapshot']['snapshot_id']
                 verified['source_url'] = url
                 child.update(id=child_id, source_parent_job=parent_id, editorial_attempt_request_id=request_id,
-                    editorial_attempt_actor='local_operator',
+                    editorial_attempt_actor=reserved_actor or 'local_operator', editorial_reserved_actor=reserved_actor,
+                    editorial_attempt_owner_message=owner_message,
                     source_id=source['channel_id'], source_snapshot=source, youtube_video_id=video_id,
                     youtube_metadata=verified, metadata_verified_at=time.time(), source_fingerprint=fingerprint,
                     settings=settings, editorial_protocol=2, status='QUEUED', candidates=[], approved=[],

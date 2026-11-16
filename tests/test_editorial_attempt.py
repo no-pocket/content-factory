@@ -50,3 +50,21 @@ def test_attempt_refuses_running_parent(setup):
     parent = source_ingestion.ingest_youtube(setup, queue=Queue(), metadata_fetcher=metadata)['job']
     with pytest.raises(ValueError, match='idle'):
         create_attempt(parent['id'], str(uuid.uuid4()), queue=Queue(), metadata_fetcher=metadata)
+
+
+def test_reserved_attempt_is_bound_to_owner_and_disables_fallback(setup):
+    from app.editorial_attempt import create_attempt
+    source_registry.upsert_source(dict(channel_id=CHANNEL, name='Canal', status='active',
+        rights_confirmed=True, platform_permission=True, authorization_reference='Owner',
+        allowed_languages=['pt'], allowed_video_kinds=['video', 'short'],
+        allowed_model_scopes=['local', 'external']))
+    q=Queue(); parent=source_ingestion.ingest_youtube(setup,queue=q,metadata_fetcher=metadata)['job']
+    media=store.INPUT/'reserved.mp4'; media.write_bytes(b'video')
+    parent.update(source=str(media),status='NEEDS_REVIEW',source_fingerprint=hashlib.sha256(b'video').hexdigest()); store.save(parent)
+    (store.JOBS/(parent['id']+'.transcript.json')).write_text(json.dumps({'language':'pt','segments':[]}))
+    rid=str(uuid.uuid4())
+    child=create_attempt(parent['id'],rid,queue=q,metadata_fetcher=metadata,reserved_actor='telegram:123',owner_message='Nova rodada')
+    assert child['editorial_reserved_actor']=='telegram:123'
+    assert child['settings']['editorial_fallback_local'] is False
+    with pytest.raises(ValueError,match='different intent'):
+        create_attempt(parent['id'],rid,queue=q,metadata_fetcher=metadata,reserved_actor='telegram:456',owner_message='Nova rodada')

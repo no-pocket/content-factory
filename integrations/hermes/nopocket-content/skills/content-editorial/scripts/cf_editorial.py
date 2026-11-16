@@ -62,6 +62,7 @@ def route(args):
     if args.command=='ingest':return '/ingest'
     if args.command=='status':return '/jobs/'+identifier(args.job)
     if args.command=='reprocess':return '/jobs/'+identifier(args.job)+'/reprocess'
+    if args.command=='editorial-attempt':return '/jobs/'+identifier(args.job)+'/editorial-attempt'
     if args.command=='transcript':return '/jobs/'+identifier(args.job)+'/transcript'
     if args.command=='groups':return '/groups'
     if args.command in ('group','select'):
@@ -81,7 +82,7 @@ def route(args):
 def run(args):
     url,token=config();path=route(args)
     payload=None
-    if args.command in ('review','select','note','ingest','record-delivery','caption','reprocess','editorial-claim','editorial-start','editorial-plan'):
+    if args.command in ('review','select','note','ingest','record-delivery','caption','reprocess','editorial-attempt','editorial-claim','editorial-start','editorial-plan'):
         source=Path(args.payload_file)
         if source.stat().st_size>(262144 if args.command=='editorial-plan' else 65536):raise ValueError('Action payload too large')
         raw=json.loads(source.read_text(encoding='utf-8-sig'))
@@ -140,6 +141,7 @@ def main():
     p=sub.add_parser('ingest');p.add_argument('--payload-file',required=True)
     p=sub.add_parser('status');p.add_argument('--job',required=True)
     p=sub.add_parser('reprocess');p.add_argument('--job',required=True);p.add_argument('--payload-file',required=True)
+    p=sub.add_parser('editorial-attempt');p.add_argument('--job',required=True);p.add_argument('--payload-file',required=True)
     p=sub.add_parser('transcript');p.add_argument('--job',required=True)
     for name in ('group','select'):
         p=sub.add_parser(name);p.add_argument('--group',required=True)

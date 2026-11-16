@@ -73,6 +73,9 @@ def claim_job(jid, request_id, *, actor, now, seconds, authorize):
     with store.job_lock(jid):
         job=store.load(jid)
         authorize(job)
+        reserved = job.get('editorial_reserved_actor')
+        if reserved and reserved != actor:
+            raise PermissionError('Editorial request is reserved for another actor')
         row=_locked_request(job, request_id)
         token=secrets.token_urlsafe(32)
         claim(row,actor=actor,token=token,now=now,seconds=seconds)
@@ -236,7 +239,7 @@ def start_editorial_if_eligible(job, transcript, duration, settings, *, now, aut
         if settings.get('editorial_fallback_local',True) is not True:
             raise PermissionError('External source authorization unavailable; local fallback disabled')
         return False
-    prepare_waiting_request(job,transcript,duration,settings,now=now,timeout=900)
+    prepare_waiting_request(job,transcript,duration,settings,now=now,timeout=7200 if job.get('editorial_reserved_actor') else 900)
     return True
 
 def materialize_candidates(plan, transcript):

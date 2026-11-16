@@ -123,7 +123,7 @@ def _pipeline(job):
         return {**result, 'pipeline': {'ready': False, 'missing': ['external_source_authorization']}}
     group = next((g for g in list_groups() if any(j['id'] == jid for j in g['jobs'])), None)
     settings = job.get('settings') or {}
-    result['parent_id']=job.get('source_parent_job') if job.get('editorial_rework') else None
+    result['parent_id']=job.get('source_parent_job')
     from .editorial_rework import enabled
     result['auto_rework_enabled']=enabled()
     result['reworks']=[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])]
@@ -182,12 +182,13 @@ def dispatch(handler, path):
     editorial_actor = 'service:hermes-editorial-runner' if getattr(handler, 'editorial_worker', False) else None
     if path == ['editorial-requests'] and method == 'GET':
         import time
-        editorial_actor or _actor()
+        actor = editorial_actor or _actor()
         rows=[]
         for job in store.all_jobs():
             snapshot=job.get('source_snapshot')
             req=job.get('editorial_request')
             if (job.get('status') != 'WAITING_EDITORIAL_PLAN' or not isinstance(snapshot,dict)
+                    or (job.get('editorial_reserved_actor') and job['editorial_reserved_actor'] != actor)
                     or 'external' not in snapshot.get('allowed_model_scopes',[]) or not _external_allowed(job)
                     or not isinstance(req,dict) or req.get('state') not in ('REQUESTED','CLAIMED')
                     or req.get('generation_started') or req.get('expires_at',0) <= time.time()
@@ -308,6 +309,14 @@ def dispatch(handler, path):
         body = _body(handler)
         request = _intent(body, 'reprocess')
         result = service.reprocess_failed_job(path[1], request, owner_message=body['owner_message'], actor_id=_actor())
+        return handler._json(200, _pipeline(result))
+    if len(path) == 3 and path[0] == 'jobs' and path[2] == 'editorial-attempt' and method == 'POST':
+        from .editorial_attempt import create_attempt
+        body = _body(handler)
+        request = _intent(body, 'editorial_attempt')
+        if set(request) != {'request_id'}:
+            raise ValueError('request_id required')
+        result = create_attempt(path[1], request['request_id'], reserved_actor=_actor(), owner_message=body['owner_message'])
         return handler._json(200, _pipeline(result))
     if len(path) == 3 and path[0] == 'jobs' and path[2] == 'transcript' and method == 'GET':
         job = store.load(path[1])

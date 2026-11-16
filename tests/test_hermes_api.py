@@ -49,6 +49,24 @@ def test_editorial_worker_token_has_only_editorial_routes(v2job, hermes_server, 
     assert hermes_server('/v2/hermes/editorial-requests', token=token)[0] == 503
 
 
+def test_explicit_attempt_route_binds_trusted_actor_and_owner_instruction(v2job, hermes_server, monkeypatch):
+    from app import editorial_attempt, hermes_api
+    calls=[]
+    def create(parent_id, request_id, **kwargs):
+        calls.append((parent_id,request_id,kwargs))
+        return v2job
+    monkeypatch.setattr(editorial_attempt,'create_attempt',create)
+    monkeypatch.setattr(hermes_api,'_pipeline',lambda job:{'id':job['id']})
+    path='/v2/hermes/jobs/'+v2job['id']+'/editorial-attempt'
+    assert hermes_server(path,{'owner_message':'Tente novamente','editorial_attempt':{'request_id':'request'}})[0]==200
+    assert calls[0][2]['reserved_actor']=='telegram:123456'
+    assert calls[0][2]['owner_message']=='Tente novamente'
+    assert hermes_server(path,{'editorial_attempt':{'request_id':'request'}})[0]==422
+    worker='synthetic-editorial-worker-token-long-enough'
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN',worker)
+    assert hermes_server(path,{'owner_message':'Tente novamente','editorial_attempt':{'request_id':'request'}},token=worker)[0]==403
+
+
 def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(v2job, hermes_server, monkeypatch, tmp_path):
     monkeypatch.setattr(store, 'ROOT', tmp_path)
     jid = v2job['id']

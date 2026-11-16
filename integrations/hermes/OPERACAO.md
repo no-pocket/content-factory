@@ -133,6 +133,12 @@ autorizam `external`. Fallback local depende da política salva e da autorizaç�
 local vigente. Um plano válido sem candidatos é resultado editorial e não inicia
 fallback; uma nova análise depende de ação explícita.
 
+Uma nova rodada explicitamente solicitada pelo tópico usa `editorial-attempt`
+com instrução literal e UUID idempotente. O job filho é reservado ao ator do
+tópico antes de entrar na fila; o executor automático não o lista nem pode
+adquirir sua lease. A reserva expira após duas horas e não ativa fallback local.
+O tópico deve adquirir a lease, iniciar a geração e enviar o plano versionado.
+
 Após iniciar uma geração, o executor pode registrar uma falha técnica pela rota
 privada `editorial-failure`, protegida pela lease e pela credencial editorial.
 Os códigos distinguem, por exemplo, prazo excedido, saída grande, resposta

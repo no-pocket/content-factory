@@ -50,6 +50,21 @@ def test_persisted_claim_and_generation_are_atomic(setup):
         begin_job_generation(job['id'],rid,actor='test',token=lease['token'],version=lease['version'],now=12,authorize=lambda _:None)
 
 
+def test_reserved_request_cannot_be_claimed_by_automatic_runner(setup):
+    import uuid
+    from app import store
+    from app.editorial_requests import claim_job
+    job=store.new_job(None,'fixture','owner','license'); rid=str(uuid.uuid4())
+    job.update(status='WAITING_EDITORIAL_PLAN', editorial_reserved_actor='telegram:123',
+        editorial_request={'request_id':rid,'state':'REQUESTED','expires_at':100,'lease_version':0,'generation_started':False})
+    store.save(job)
+    with pytest.raises(PermissionError):
+        claim_job(job['id'],rid,actor='service:hermes-editorial-runner',now=10,seconds=10,authorize=lambda _:None)
+    assert store.load(job['id'])['editorial_request']['state']=='REQUESTED'
+    result=claim_job(job['id'],rid,actor='telegram:123',now=10,seconds=10,authorize=lambda _:None)
+    assert result['version']==1
+
+
 @pytest.mark.parametrize('fallback',[True,False])
 def test_technical_failure_is_fenced_idempotent_and_records_reason(setup,fallback):
     import uuid
@@ -196,6 +211,25 @@ def test_editorial_request_can_be_claimed_and_started(setup, hermes_server, monk
     assert status==200 and lease['token']
     status,_=hermes_server('/v2/hermes/jobs/'+job['id']+'/editorial-start',{'request_id':rid,'token':lease['token'],'version':lease['version']})
     assert status==200 and store.load(job['id'])['editorial_request']['generation_started'] is True
+
+
+def test_reserved_request_is_hidden_and_denied_to_automatic_runner(setup, hermes_server, monkeypatch):
+    import uuid,time
+    from app import store,hermes_api
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN','synthetic-editorial-worker-token-long-enough')
+    monkeypatch.setattr(hermes_api,'_external_allowed',lambda _:True)
+    monkeypatch.setattr(hermes_api,'_require_external',lambda _:None)
+    job=store.new_job(None,'fixture','owner','license'); rid=str(uuid.uuid4())
+    job.update(source_snapshot={'allowed_model_scopes':['external']},status='WAITING_EDITORIAL_PLAN',
+        editorial_reserved_actor='telegram:123456',editorial_request={'job_id':job['id'],'request_id':rid,
+        'state':'REQUESTED','expires_at':time.time()+600,'lease_version':0,'generation_started':False})
+    store.save(job)
+    worker='synthetic-editorial-worker-token-long-enough'
+    assert all(x['job_id']!=job['id'] for x in hermes_server('/v2/hermes/editorial-requests',token=worker)[1]['requests'])
+    assert any(x['job_id']==job['id'] for x in hermes_server('/v2/hermes/editorial-requests')[1]['requests'])
+    path='/v2/hermes/jobs/'+job['id']+'/editorial-claim'
+    assert hermes_server(path,{'request_id':rid},token=worker)[0]==403
+    assert hermes_server(path,{'request_id':rid})[0]==200
 
 def test_editorial_list_and_claim_deny_local_only_source(setup,hermes_server):
     import uuid,time
