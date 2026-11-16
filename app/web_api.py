@@ -445,6 +445,13 @@ def media(jid: str, cid: str, kind: str, artifact: str | None = None, download: 
                         content_disposition_type='attachment' if download or kind == 'timeline' else 'inline')
 
 
+@app.post('/api/sources/resolve')
+def resolve_source(body: dict):
+    if set(body) != {'channel'}:
+        raise ValueError('Informe o canal')
+    return {'id': source_registry.resolve_channel(body['channel'])}
+
+
 @app.put('/api/sources/{sid}')
 def save_source(sid: str, body: dict):
     r = body['r']

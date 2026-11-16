@@ -12,6 +12,10 @@ autorização, confirmações de direitos/plataforma e políticas de idioma, tip
 local/externo. Hermes lê resumos, sem evidência privada de autorização; não pode ativar
 fontes pela sua credencial limitada. Cadastros começam pendentes.
 
+No cadastro de canal, aceite o ID canônico ou um link do YouTube no formato
+`https://youtube.com/@canal` ou `https://youtube.com/channel/UC...`. O link é
+resolvido para o ID antes de salvar; confirmações de direitos continuam exigidas.
+
 Uma autorização por idioma principal, como `pt`, inclui variantes regionais como
 `pt-BR`. Uma autorização específica, como `pt-BR`, não autoriza `pt-PT` nem um
 idioma ausente; a variante original informada pelo YouTube fica registrada.

@@ -1,12 +1,12 @@
 import {useState} from 'react'
-import {useS,saveSource,addAsset,toast,message} from './store'
+import {useS,saveSource,addAsset,toast,message,api,DEMO} from './store'
 import type {Source} from './types'
 import {Head,Field,Seg,Tag} from './ui'
 const empty:Source={id:'',name:'',status:'pending',ref:'',rights:false,platform:false,langs:'pt',kinds:['video'],scopes:['local'],rev:0}
 function SourceForm({source}:{source:Source}){
   const [r,set]=useState({...source}),[busy,setBusy]=useState(false),[error,setError]=useState('')
-  async function save(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{await saveSource(r,r.rev);set({...r,rev:r.rev+1});toast('Fonte salva. Cadastro não inicia jobs nem monitoramento.')}catch(e){setError(message(e))}finally{setBusy(false)}}
-  return <form className="cand" onSubmit={save}><div className="two"><Field l="ID canônico do canal (UC + 22 caracteres)"><input required pattern="UC[A-Za-z0-9_-]{22}" readOnly={source.rev>0||r.rev>0} value={r.id} onChange={e=>set({...r,id:e.target.value})}/></Field><Field l="Nome do canal"><input required maxLength={4000} value={r.name} onChange={e=>set({...r,name:e.target.value})}/></Field>
+  async function save(e:React.FormEvent){e.preventDefault();setBusy(true);setError('');try{const id=r.rev===0&&!DEMO?(await api<{id:string}>('/sources/resolve',{method:'POST',body:JSON.stringify({channel:r.id})})).id:r.id;const resolved={...r,id};await saveSource(resolved,r.rev);set({...resolved,rev:r.rev+1});toast('Fonte salva. Cadastro não inicia jobs nem monitoramento.')}catch(e){setError(message(e))}finally{setBusy(false)}}
+  return <form className="cand" onSubmit={save}><div className="two"><Field l="Link ou ID do canal do YouTube"><input required maxLength={300} placeholder="https://youtube.com/@canal" readOnly={source.rev>0||r.rev>0} value={r.id} onChange={e=>set({...r,id:e.target.value})}/></Field><Field l="Nome do canal"><input required maxLength={4000} value={r.name} onChange={e=>set({...r,name:e.target.value})}/></Field>
     <Field l="Status"><select value={r.status} onChange={e=>set({...r,status:e.target.value as Source['status']})}><option value="pending">Pendente</option><option value="active">Ativo</option><option value="disabled">Desabilitado</option></select></Field><Field l="Idiomas permitidos, separados por vírgula"><input value={r.langs} onChange={e=>set({...r,langs:e.target.value.replaceAll(' ','')})}/></Field></div>
     <Field l="Referência e escopo da autorização"><textarea required={r.status==='active'} maxLength={4000} value={r.ref} onChange={e=>set({...r,ref:e.target.value})}/></Field>
     <label className="ck"><input type="checkbox" checked={r.rights} onChange={e=>set({...r,rights:e.target.checked})}/>Direitos de edição e usos declarados pelo titular</label><label className="ck"><input type="checkbox" checked={r.platform} onChange={e=>set({...r,platform:e.target.checked})}/>Permissão aplicável da plataforma</label>

@@ -276,6 +276,18 @@ def test_source_revision_conflict_and_no_job_created(web):
     assert store.all_jobs() == []
 
 
+def test_resolve_youtube_channel_link(web, monkeypatch):
+    from app import source_registry
+    monkeypatch.setattr(source_registry, 'lookup_youtube_handle', lambda handle: 'UC' + 'a' * 22, raising=False)
+    response = web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/@davyjonesgta6'})
+    assert response.status_code == 200
+    assert response.json()['id'] == 'UC' + 'a' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://www.youtube.com/@davyjonesgta6?si=share'}).json()['id'] == 'UC' + 'a' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/channel/UC' + 'b' * 22}).json()['id'] == 'UC' + 'b' * 22
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com.evil.test/@davy'}).status_code == 422
+    assert web.post('/api/sources/resolve', json={'channel': 'https://youtube.com/watch?v=dQw4w9WgXcQ'}).status_code == 422
+
+
 def test_media_range_head_paths_and_sanitization(web):
     from app import store
     job = make_job()
