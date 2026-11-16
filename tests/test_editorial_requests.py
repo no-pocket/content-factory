@@ -237,14 +237,10 @@ def test_accepted_plan_becomes_source_anchored_candidates():
     assert clips[0]['editorial_plan']['proposal_id']=='p1'
     assert clips[0]['boundary_review_required'] is True
 
-def test_audio_boundary_requires_human_confirmation_for_current_render(v2job):
+def test_audio_boundary_warning_does_not_block_approval(v2job):
     from app import service, store
     from test_editorial_service_v2 import review_request
     job=v2job;cid=job['candidates'][0]['candidate_id'];job['candidates'][0]['boundary_review_required']=True;store.save(job)
-    with pytest.raises(service.Conflict,match='boundary'):
-        service.review_candidate_v2(job['id'],cid,review_request(job))
-    confirmation=service.confirm_audio_boundary(job['id'],cid,expected_artifact_id=job['candidates'][0]['artifact_id'],actor_id='owner',boundary='both')
-    assert confirmation['boundary']=='both' and confirmation['artifact_id']==job['candidates'][0]['artifact_id']
     assert service.review_candidate_v2(job['id'],cid,review_request(job))['event']['decision']=='APPROVED'
 
 def test_accepted_request_reconciles_once_after_lost_queue_reply(setup):
@@ -347,15 +343,16 @@ def test_hermes_editorial_title_is_not_dropped_by_subjective_heuristic():
     assert timeline['layers']['text'][0]['text']==title
 
 
-def test_legacy_approval_also_requires_boundary_confirmation(setup):
+def test_legacy_approval_does_not_require_boundary_confirmation(setup, monkeypatch):
     from app import service, store
     job=store.new_job(None,'synthetic','owner','grant')
     job.update(status='NEEDS_REVIEW',candidates=[{'state':'VALID','boundary_review_required':True}])
     store.save(job)
-    with pytest.raises(service.Conflict, match='borda'):
-        service.review_candidate(job['id'],0,'APPROVED','teste',expected_revision=0)
-    with pytest.raises(service.Conflict, match='borda'):
-        service.review_job(job['id'],[{'candidate':0,'decision':'APPROVED','reason':'teste','adjustments':'','rework':False}],expected_revision=0)
+    monkeypatch.setattr(service, 'verify_reviewable', lambda job, index: True)
+    service.review_candidate(job['id'],0,'APPROVED','teste',expected_revision=0)
+    other=store.new_job(None,'synthetic','owner','grant')
+    other.update(status='NEEDS_REVIEW',candidates=[{'state':'VALID','boundary_review_required':True,'start':0,'end':10}]); store.save(other)
+    service.review_job(other['id'],[{'candidate':0,'decision':'APPROVED','reason':'teste','adjustments':'','rework':False}],expected_revision=0)
 
 def test_expired_editorial_request_schedules_only_one_local_fallback(setup):
     import uuid

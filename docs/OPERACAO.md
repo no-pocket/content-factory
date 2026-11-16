@@ -2,6 +2,9 @@
 
 O Content Factory recebe um vídeo autorizado, produz candidatos de cortes e aguarda revisão humana. A interface fica em <http://localhost:8501/> e mostra a versão no topo. Este guia usa PowerShell na raiz do repositório. A atualização da [fila de revisão e Telegram](REVISAO_FILA_2026-11-08.md) descreve a entrada em pendentes, salvamento em formulário e avanço ao concluir o job.
 
+A aprovação não exige um botão separado para confirmar as bordas no áudio. Os
+alertas e metadados editoriais permanecem disponíveis para a revisão do corte.
+
 ## Iniciar nesta workstation
 
 Para a instalação já construída, com GPU K4200 e volumes existentes:

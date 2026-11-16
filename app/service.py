@@ -126,8 +126,6 @@ def review_job(jid: str, decisions: list, *, expected_revision: int) -> dict:
         if len(set(indices)) != len(indices) or set(indices) != valid:
             raise Conflict('Review must cover exactly the technically valid candidates')
         for d in clean:
-            if d['decision'] == 'APPROVED' and not audio_boundary_confirmed(job['candidates'][d['candidate']]):
-                raise Conflict('Confirme a borda no áudio antes de aprovar')
             if d['decision'] == 'APPROVED' and not verify_reviewable(job, d['candidate']):
                 raise Conflict('Artifact failed verification; request candidate QC/retry')
         event = {'revision': revision + 1, 'at': time.time(), 'decisions': clean,
@@ -180,8 +178,6 @@ def review_candidate(jid: str, index: int, decision: str, reason: str, *, expect
                 raise Conflict('Candidate history changed; reload job')
         value = validate_decision({'candidate': index, 'decision': decision, 'reason': reason,
                                    'rework': rework, 'adjustments': adjustments, **(ratings or {})}, len(job['candidates']))
-        if decision == 'APPROVED' and not audio_boundary_confirmed(job['candidates'][index]):
-            raise Conflict('Confirme a borda no áudio antes de aprovar')
         if decision == 'APPROVED' and not verify_reviewable(job, index):
             raise Conflict('Artifact must pass QC before approval')
         merged = current_decisions(job)
@@ -451,8 +447,6 @@ def _record_review_candidate_v2(jid: str, candidate_id: str, request: dict, *, c
         actual = 'sha256:' + digest(artifact_manifest(job, index))
         if not expected or expected != clip.get('artifact_id') or expected != actual:
             raise Conflict('Stale or changed artifact; reload and verify render')
-        if request['decision'] in {'APPROVED', 'APPROVED_WITH_ADJUSTMENTS'} and not audio_boundary_confirmed(clip):
-            raise Conflict('Audio boundary requires explicit human confirmation')
         if request['decision'] in {'APPROVED', 'APPROVED_WITH_ADJUSTMENTS'} and not verify_reviewable(job, index):
             raise Conflict('Artifact must pass QC before approval')
         previous = get_editorial_view(job)['candidates'][index]['current_event']
