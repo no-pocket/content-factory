@@ -129,7 +129,10 @@ def _pipeline(job):
     result['reworks']=[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])]
     runs = job.get('processing_runs', [])
     result['latest_run_id'] = runs[-1].get('run_id') if runs else None
-    result['reprocess_available'] = job['status'] == 'FAILED' and not job.get('candidates')
+    result['reprocess_available'] = job['status'] in ('FAILED','EDITORIAL_NO_CANDIDATES') and not job.get('candidates')
+    editorial=job.get('editorial_request') or {}
+    result['editorial']={'state':editorial.get('state'), 'reason':(editorial.get('plan') or {}).get('reason'),
+                         'failure_code':editorial.get('failure_code'), 'fallback':job.get('editorial_planner_fallback')}
     if job['status'] in ('FAILED', 'PARTIAL_FAILED'):
         from collections import Counter
         events = [e for e in job.get('ai_events', []) if e.get('at', 0) >= (runs[-1].get('started_at', 0) if runs else 0)]
@@ -142,7 +145,7 @@ def _pipeline(job):
             'proposal_rejections': dict(rejected),
             'incomplete_responses': sum(e['event'] == 'proposal_chunk_failed' and 'length' in e.get('details', {}).get('reason', '') for e in events)}
     transcript_exists = (store.JOBS / (jid + '.transcript.json')).is_file()
-    idle = job['status'] in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED'}
+    idle = job['status'] in {'NEEDS_REVIEW', 'PARTIAL_FAILED', 'FAILED', 'APPROVED', 'REJECTED', 'EDITORIAL_NO_CANDIDATES'}
     candidates = []
     for index, clip in enumerate(job.get('candidates', [])):
         cid = clip.get('candidate_id') or candidate_key(jid, index)
@@ -169,7 +172,7 @@ def _pipeline(job):
                   transcript={'available': transcript_exists, 'language': job.get('language'),
                               'endpoint': '/v2/hermes/jobs/' + jid + '/transcript'},
                   candidates=candidates, pipeline={'ready': not missing, 'missing': missing,
-                    'next': 'inspect_transcript_and_renders' if not missing else 'diagnose_failure' if job['status'] in ('FAILED', 'PARTIAL_FAILED', 'QUEUE_FAILED') else 'wait'},
+                    'next': 'editorial_no_candidates' if job['status']=='EDITORIAL_NO_CANDIDATES' else 'inspect_transcript_and_renders' if not missing else 'diagnose_failure' if job['status'] in ('FAILED', 'PARTIAL_FAILED', 'QUEUE_FAILED') else 'wait'},
                   application_url=os.getenv('CONTENT_FACTORY_PUBLIC_URL', 'http://localhost:8501').rstrip('/') + '/#revisao?' + urlencode({'job': jid}))
     return result
 

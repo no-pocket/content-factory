@@ -65,6 +65,17 @@ def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(
     assert str(store.OUTPUT) not in json.dumps(payload)
 
 
+def test_pipeline_reports_editorial_no_candidates_without_claiming_processing(v2job, hermes_server):
+    job=v2job
+    job.update(status='EDITORIAL_NO_CANDIDATES',candidates=[],editorial_request={'state':'NO_CANDIDATES',
+        'plan':{'reason':'A fonte não contém boas ideias.'}})
+    store.save(job)
+    status,result=hermes_server('/v2/hermes/jobs/'+job['id'])
+    assert status==200 and result['editorial']['reason']=='A fonte não contém boas ideias.'
+    assert result['pipeline']['next']=='editorial_no_candidates'
+    assert 'processing' not in result['pipeline']['missing'] and result['reprocess_available']
+
+
 def test_hermes_can_save_caption_as_suggestion_without_approval(v2job, hermes_server):
     import uuid
     job=v2job; clip=job['candidates'][0]
