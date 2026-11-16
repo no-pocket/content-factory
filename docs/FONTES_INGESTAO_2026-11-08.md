@@ -10,7 +10,9 @@ Canais ficam em data/sources.json, distintos dos grupos editoriais de vídeos j�
 processados. Cadastro local/admin registra ID canônico, nome, situação, referência de
 autorização, confirmações de direitos/plataforma e políticas de idioma, tipo e escopo
 local/externo. Hermes lê resumos, sem evidência privada de autorização; não pode ativar
-fontes pela sua credencial limitada. Cadastros começam pendentes.
+fontes pela sua credencial limitada. Na interface, novos cadastros começam ativos,
+com modelos locais e externos e tipos de vídeo habilitados; salvar exige confirmar
+os direitos e a permissão da plataforma. Status e políticas continuam ajustáveis.
 
 No cadastro de canal, aceite o ID canônico ou um link do YouTube no formato
 `https://youtube.com/@canal` ou `https://youtube.com/channel/UC...`. O link é
