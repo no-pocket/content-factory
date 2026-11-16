@@ -29,6 +29,15 @@ def render_settings_controls(st, *, preferred: dict | None = None, key_prefix: s
     initial = {**DEFAULTS, **(preferred or {})}
     result = {}
     for key in DEFAULTS:
+        if key == 'editorial_planner':
+            options = ['local', 'hermes_first']
+            result[key] = st.selectbox('Planejamento editorial', options, index=options.index(initial[key]),
+                format_func={'local':'Modelo local', 'hermes_first':'Hermes quando autorizado'}.__getitem__, key=key_prefix+key)
+            continue
+        if key == 'editorial_fallback_local':
+            result[key] = st.selectbox('Permitir fallback editorial local', [False, True],
+                                       index=int(initial[key]), key=key_prefix+key)
+            continue
         if key == 'auto_pace':
             result[key] = st.selectbox('Ajuste leve de fala lenta', [False,True],index=int(initial[key]),key=key_prefix+key)
             continue

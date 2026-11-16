@@ -127,6 +127,16 @@ def test_snapshot_and_local_model_policy(setup):
     with pytest.raises(PermissionError,match='Model scope'):
         ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',job['source_snapshot'],external)
 
+
+def test_hermes_planner_records_external_scope_only_when_allowed(setup):
+    source=registry.get_source(CHANNEL)
+    settings={'editorial_planner':'hermes_first'}
+    result=ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',source,settings)
+    assert result['model_scope']=='local'
+    source={**source,'allowed_model_scopes':['local','external']}
+    result=ingestion.verify_source_metadata(metadata(URL),'g8Q1UxPJulc',source,settings)
+    assert result['model_scope']=='external'
+
 def test_process_crash_after_save_recovers_without_worker_restart(setup, monkeypatch):
     original = ingestion.service.enqueue
     def crash(*a,**k): raise SystemExit('process stopped before queue write')

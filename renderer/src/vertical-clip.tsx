@@ -10,6 +10,7 @@ type Region = { x: number; y: number; width: number; height: number };
 type Framing = { mode: 'contain' | 'cover'; caption_safe_area: Region; title_safe_area: Region };
 export type Timeline = {
   schema_version: string; duration: number; width: number; height: number; fps: number;
+  caption_style?: string;
   framing_resolved?: Framing;
   framing_schedule?: { start: number; end: number; framing_resolved?: Framing }[];
   segments?: { output_start: number; duration: number; frame_count: number; framing_resolved?: Framing }[];
@@ -43,7 +44,7 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline, com
   const frame = composeFinishing ? Math.min(outputFrame, sourceFrames - 1) : outputFrame;
   const time = frame / 30;
   const root = `jobs/${jobId}/${clipNo}/`;
-  const groups = groupWords(timeline.layers.captions);
+  const groups = timeline.caption_style === 'phrase_v1' ? timeline.layers.captions.map(c => [c]) : groupWords(timeline.layers.captions);
   const active = groups.find((g, index) => g[0].start <= time && time < Math.min(
     g[g.length - 1].end + 0.10, groups[index + 1]?.[0].start ?? Infinity, g[0].output_segment_end ?? Infinity));
   const effect = timeline.layers.effects.find((e) => e.type === 'punch_zoom' && e.at <= time && time < e.at + e.duration &&
@@ -82,7 +83,7 @@ export const VerticalClip: React.FC<ClipProps> = ({ jobId, clipNo, timeline, com
           ...(safe ? {left: safe.x * timeline.width, top: safe.y * timeline.height, width: safe.width * timeline.width, height: safe.height * timeline.height} : {padding: '0 44px 230px'}), pointerEvents: 'none' }}>
           <div style={{ textAlign: 'center', textTransform: 'uppercase', fontWeight: 950, letterSpacing: -0.8, fontSize: 49, lineHeight: 1.16, textShadow: '0 4px 5px #000, 2px 2px 0 #000, -2px 2px 0 #000' }}>
             {active.map((w, i) => {
-              const isCurrent = time >= w.start && time < w.end;
+              const isCurrent = timeline.caption_style !== 'phrase_v1' && time >= w.start && time < w.end;
               const pop = isCurrent ? interpolate(time - w.start, [0, .08, .18], [1, 1.17, 1], { extrapolateRight: 'clamp' }) : 1;
               return <span key={`${i}-${w.start}`} style={{ display: 'inline-block', color: isCurrent ? yellow : white, transform: `scale(${pop})`, marginRight: 12 }}>{w.text}</span>;
             })}

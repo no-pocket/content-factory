@@ -4,6 +4,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY index.html tsconfig.json vite.config.ts ./
 COPY src ./src
+COPY public ./public
 ARG VITE_DEMO=false
 ENV VITE_DEMO=${VITE_DEMO}
 RUN npm run build

@@ -48,7 +48,7 @@
       }
     },
     "caption_style": {
-      "const": "bold_karaoke_v1"
+      "enum": ["bold_karaoke_v1", "phrase_v1"]
     },
     "layers": {
       "type": "object",
@@ -95,7 +95,7 @@
             "properties": {
               "text": {
                 "type": "string",
-                "maxLength": 64
+                "maxLength": 4000
               },
               "start": {
                 "type": "number",

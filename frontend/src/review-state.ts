@@ -1,5 +1,5 @@
-export const canReviewJob=(state:string)=>['NEEDS_REVIEW','PARTIAL_FAILED','FAILED','APPROVED','REJECTED'].includes(state)
-export const needsReview=(job:{st:string;cands:{dec:string}[]})=>canReviewJob(job.st)&&job.cands.some(c=>c.dec==='PENDING')
+export const canReviewJob=(state:string)=>['NEEDS_REVIEW','PARTIAL_FAILED','FAILED','APPROVED','REJECTED','EDITORIAL_NO_CANDIDATES'].includes(state)
+export const needsReview=(job:{st:string;cands:{dec:string}[]})=>job.st==='EDITORIAL_NO_CANDIDATES'||(canReviewJob(job.st)&&job.cands.some(c=>c.dec==='PENDING'))
 export const publicationKey=(job:string,candidate:string,artifact:string|null)=>[job,candidate,artifact].join(':')
 
 export function syncReviewDraft<T extends {seen:unknown;requestId:string}>(draft:T,seen:T['seen'],requestId:string):T{return {...draft,seen,requestId}}

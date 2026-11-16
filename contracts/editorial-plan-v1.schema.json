@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hermes editorial plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "submission_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "editorial_attempt_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_fingerprint": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "source_fingerprint",
+        "duration_ms"
+      ]
+    },
+    "transcript": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "canonicalization": {
+          "const": "cf-transcript-v1"
+        },
+        "language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timebase": {
+          "const": "source_ms"
+        }
+      },
+      "required": [
+        "digest",
+        "canonicalization",
+        "language",
+        "timebase"
+      ]
+    },
+    "planner": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "engine": {
+          "const": "hermes"
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S"
+        },
+        "prompt_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S"
+        },
+        "invocation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "engine",
+        "provider",
+        "model",
+        "prompt_version",
+        "invocation_id"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "candidates_proposed",
+        "no_suitable_candidates"
+      ]
+    },
+    "candidates": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "editorial_title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "pattern": "\\S"
+          },
+          "intent": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "pattern": "\\S"
+          },
+          "segments": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "source_in_ms": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "source_out_ms": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "start_anchor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "segment_id": {
+                      "type": "string",
+                      "pattern": "^seg-[0-9]{6}$"
+                    },
+                    "quote": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000,
+                      "pattern": "\\S"
+                    }
+                  },
+                  "required": [
+                    "segment_id",
+                    "quote"
+                  ]
+                },
+                "end_anchor": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "segment_id": {
+                      "type": "string",
+                      "pattern": "^seg-[0-9]{6}$"
+                    },
+                    "quote": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000,
+                      "pattern": "\\S"
+                    }
+                  },
+                  "required": [
+                    "segment_id",
+                    "quote"
+                  ]
+                },
+                "boundary_status": {
+                  "const": "requires_audio_review"
+                }
+              },
+              "required": [
+                "source_in_ms",
+                "source_out_ms",
+                "start_anchor",
+                "end_anchor",
+                "boundary_status"
+              ]
+            }
+          },
+          "direction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "layout_preset_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+                "pattern": "\\S"
+              },
+              "subtitle_preset_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+                "pattern": "\\S"
+              },
+              "pacing": {
+                "const": "natural"
+              },
+              "word_highlight": {
+                "const": "only_if_word_timing_reliable"
+              }
+            },
+            "required": [
+              "layout_preset_id",
+              "subtitle_preset_id",
+              "pacing",
+              "word_highlight"
+            ]
+          },
+          "risks": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000,
+                  "pattern": "\\S"
+                },
+                "detail": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000,
+                  "pattern": "\\S"
+                }
+              },
+              "required": [
+                "type",
+                "detail"
+              ]
+            }
+          }
+        },
+        "required": [
+          "proposal_id",
+          "editorial_title",
+          "intent",
+          "segments",
+          "direction",
+          "risks"
+        ]
+      }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "\\S"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "submission_id",
+    "editorial_attempt_id",
+    "job_id",
+    "run_id",
+    "source",
+    "transcript",
+    "planner",
+    "outcome",
+    "candidates"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "outcome": {
+          "const": "no_suitable_candidates"
+        },
+        "candidates": {
+          "maxItems": 0
+        }
+      },
+      "required": [
+        "reason"
+      ]
+    },
+    {
+      "properties": {
+        "outcome": {
+          "const": "candidates_proposed"
+        },
+        "candidates": {
+          "minItems": 1
+        }
+      },
+      "not": {
+        "required": [
+          "reason"
+        ]
+      }
+    }
+  ]
+}

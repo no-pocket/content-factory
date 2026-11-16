@@ -115,6 +115,27 @@ Se o Pi retornar `URLError`, verificar a tarefa Windows existente
 Confirmar conectividade autenticada e consultar o ID do vídeo para evitar duplicação.
 Não imprimir tokens nem reiniciar o worker durante processamento.
 
+### Planejamento editorial assíncrono
+
+O código da integração oferece `editorial_planner=hermes_first` por job. A API
+do Telegram aceita `CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT=true` para aplicar
+esse padrão apenas a novas ingestões; o padrão da configuração é `false`.
+Uma escolha explícita `local` prevalece e jobs existentes mantêm seu snapshot.
+A transcrição só é entregue ao planejador quando o snapshot e o cadastro atual
+autorizam `external`. Fallback local depende da política salva e da autorização
+local vigente. Um plano válido sem candidatos é resultado editorial e não inicia
+fallback; uma nova análise depende de ação explícita.
+
+O executor usa uma credencial distinta `CONTENT_FACTORY_EDITORIAL_TOKEN`,
+restrita às rotas de solicitações editoriais. Credenciais Content Factory não
+são repassadas ao processo do modelo; o executor ainda roda com as permissões do
+usuário do Pi e não constitui isolamento de sistema operacional. O modelo é invocado em perfil temporário privado com
+toolset limitado; o perfil e o banco temporário são removidos na saída normal.
+Interrupção abrupta pode deixar um diretório `.cf-editorial-invocation-*` com
+dados sensíveis: verifique processos e origem antes da remoção. A retenção pelo
+provedor externo é independente dessa limpeza. O serviço de exemplo acompanha o
+repositório, mas sua presença não indica que esteja instalado ou ativo.
+
 Documentação oficial consultada em07/11/2026: [perfis](https://hermes-agent.nousresearch.com/docs/user-guide/profiles),
 [Telegram/tópicos](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram),
 [skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).

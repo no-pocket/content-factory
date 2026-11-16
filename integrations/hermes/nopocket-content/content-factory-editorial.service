@@ -1,0 +1,17 @@
+[Unit]
+Description=Content Factory Hermes editorial planner
+After=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/content-factory/editorial.env
+ExecStart=/usr/bin/python3 /srv/nopocket/data/hermes/profiles/nopocket-content/skills/content-editorial/scripts/editorial_runner.py --profile-home /srv/nopocket/data/hermes/profiles/nopocket-content --hermes-executable /home/machado/.hermes/hermes-agent/.hermes/bin/hermes
+Restart=on-failure
+RestartSec=30
+UMask=0077
+NoNewPrivileges=true
+KillMode=control-group
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

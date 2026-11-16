@@ -19,7 +19,7 @@ from .youtube import download_youtube, normalize_youtube_url
 from .doctor import HEARTBEAT_KEY
 from .store import INPUT
 from .store import rconn, load, save, all_jobs, JOBS
-from .queueing import PENDING, PROCESSING, TERMINAL, recover_inflight, reconcile_pending, close_interrupted_run
+from .queueing import PENDING, PROCESSING, TERMINAL, WAITING, recover_inflight, reconcile_pending, close_interrupted_run
 from .job_settings import normalize_job_settings
 from .telemetry import measure_stage, job_metric_context
 
@@ -107,11 +107,21 @@ def process(jid: str) -> None:
         if settings['ranker_mode'] == 'external' and not job.get('candidates'):
             raise ValueError('External model plan missing; heuristic selection is forbidden for external replay')
         job['qc_settings'] = normalize_qc(job.get('qc_settings'))
-        job['run_started_at'] = time.time()
-        close_interrupted_run(job)
-        job.setdefault('processing_runs', []).append({'run_id':str(uuid.uuid4()),'started_at': job['run_started_at'], 'state': 'RUNNING'})
-        from .provenance import component_snapshot
-        job['processing_runs'][-1]['component_snapshot']=component_snapshot(settings)
+        editorial_resume = (job.get('editorial_request') or {}).get('state') == 'ACCEPTED' and (job.get('editorial_request') or {}).get('resume_pending') is True
+        fallback_resume = (job.get('editorial_request') or {}).get('state') in ('EXPIRED','INVALID') and (job.get('editorial_request') or {}).get('fallback_pending') is True
+        if editorial_resume or fallback_resume:
+            runs=job.get('processing_runs') or []
+            row=job.get('editorial_request') or {}
+            if runs and runs[-1].get('run_id') == row.get('run_id') and runs[-1].get('state') == 'INTERRUPTED':
+                runs[-1].setdefault('resume_events',[]).append({'at':time.time(),'previous_state':'INTERRUPTED'})
+                runs[-1].update(state='RUNNING',timing_complete=False)
+        if not editorial_resume and not fallback_resume:
+            job['run_started_at'] = time.time()
+            close_interrupted_run(job)
+            job.setdefault('processing_runs', []).append({'run_id':str(uuid.uuid4()),'started_at': job['run_started_at'], 'state': 'RUNNING'})
+            from .provenance import component_snapshot
+            job['processing_runs'][-1]['component_snapshot']=component_snapshot(settings)
+
         save(job)
         if job.get("source_type") == "youtube" and not job.get("source"):
             if not job.get("platform_permission") or not job.get("license_note"):
@@ -161,12 +171,42 @@ def process(jid: str) -> None:
                 pending = transcript_path.with_suffix(".tmp")
                 pending.write_text(json.dumps(transcript, ensure_ascii=False, indent=2), encoding="utf-8")
                 os.replace(pending, transcript_path)
+        if settings.get('editorial_planner') == 'hermes_first' and not job.get('candidates') and not editorial_resume and not fallback_resume:
+            from .editorial_requests import start_editorial_if_eligible
+            from .hermes_api import _external_allowed
+            if start_editorial_if_eligible(job, transcript, duration, settings, now=time.time(), authorize=_external_allowed):
+                save(job)
+                return
+            if job.get('source_snapshot'):
+                from .editorial_requests import authorize_local_source
+                authorize_local_source(job)
+            save(job)
+        if editorial_resume:
+            from .editorial_requests import verify_frozen_inputs
+            from .hermes_api import _external_allowed
+            if not _external_allowed(job):
+                raise PermissionError('External source authorization revoked')
+            verify_frozen_inputs(job,transcript,source)
+        if fallback_resume:
+            from .editorial_requests import verify_frozen_inputs
+            if job.get('source_snapshot'):
+                from .editorial_requests import authorize_local_source
+                authorize_local_source(job)
+            row=verify_frozen_inputs(job,transcript,source)
+            job['editorial_planner_fallback']=row.get('failure_kind','UNKNOWN')
         if settings.get('retrieval_mode','off')!='off':
             from .editorial_retrieval import prepare_job_retrieval
             job['retrieval_snapshot']=prepare_job_retrieval(job,segments)
             save(job)
         with measure_stage(metrics,'RANKER',job_metric_context(job),requested={'mode':settings['ranker_mode'],'model':settings['llm_model'],'backend':settings['llm_backend']}) as stage:
-            if job.get('candidates'):
+            if editorial_resume and not job.get('candidates'):
+                from .editorial_requests import resume_accepted_plan
+                from .hermes_api import _external_allowed
+                if not _external_allowed(job):
+                    raise PermissionError('External source authorization revoked')
+                clips = resume_accepted_plan(job, transcript, source)
+                job['ranker_used'] = 'hermes'
+            elif job.get('candidates'):
                 clips = job['candidates']
                 stage['state']='CACHED'
             elif job.get('editorial_rework'):
@@ -270,12 +310,14 @@ def main() -> None:
         try:
             if time.monotonic()>=next_revision_scan:
                 from .editorial_rework import reconcile_requests
+                from .editorial_requests import reconcile_editorial_requests
                 reconcile_requests(queue=queue)
+                reconcile_editorial_requests(queue=queue)
                 next_revision_scan=time.monotonic()+30
             jid = queue.brpoplpush(PENDING, PROCESSING, timeout=5)
             if jid:
                 process(jid)
-                if load(jid).get('status') in TERMINAL:
+                if load(jid).get('status') in TERMINAL | WAITING:
                     queue.lrem(PROCESSING, 1, jid)
         except Exception:
             log.exception("worker loop error")

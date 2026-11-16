@@ -37,6 +37,18 @@ def test_hermes_token_is_scoped_and_candidate_has_no_paths(v2job,hermes_server):
     assert hermes_server(route,token='synthetic-general-token-long-enough')[0]==401
 
 
+def test_editorial_worker_token_has_only_editorial_routes(v2job, hermes_server, monkeypatch):
+    token = 'synthetic-editorial-worker-token-long-enough'
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN', token)
+    assert hermes_server('/v2/hermes/editorial-requests', token=token)[0] == 200
+    assert hermes_server('/v2/hermes/sources', token=token)[0] == 403
+    assert hermes_server('/v1/jobs', token=token)[0] == 401
+    route = f"/v2/hermes/jobs/{v2job['id']}/candidates/{v2job['candidates'][0]['candidate_id']}/reviews"
+    assert hermes_server(route, {}, token=token)[0] == 403
+    monkeypatch.setenv('CONTENT_FACTORY_EDITORIAL_TOKEN', 'synthetic-hermes-token-long-enough')
+    assert hermes_server('/v2/hermes/editorial-requests', token=token)[0] == 503
+
+
 def test_pipeline_status_supplies_group_model_transcript_candidates_and_renders(v2job, hermes_server, monkeypatch, tmp_path):
     monkeypatch.setattr(store, 'ROOT', tmp_path)
     jid = v2job['id']

@@ -6,12 +6,15 @@ const key='cf:processing-defaults:v1'
 export function preferences(schema:Schema):Values{try{return {...schema.defaults,...JSON.parse(localStorage.getItem(key)??'{}')}}catch{return {...schema.defaults}}}
 const labels:Record<string,string>={auto_pace:'Ajustar fala lenta (até 1,15×, preservando o tom)',editorial_protocol:'Protocolo editorial',clip_count:'Quantidade de candidatos',duration_mode:'Duração da história',target_seconds:'Duração de referência (s)',min_seconds:'Duração mínima (s)',max_seconds:'Duração máxima (s)',proposal_max_chunks:'Máximo de blocos Qwen',shortlist:'Candidatos para classificação',ollama_timeout:'Prazo por consulta Qwen (s)',whisper_model:'Modelo Whisper',whisper_beam_size:'Beam size Whisper',ranker_mode:'Seleção dos destaques',llm_backend:'Backend Qwen',llm_model:'Modelo Qwen',director_mode:'Direção da edição',render_engine:'Motor de render',render_quality:'Qualidade de render',render_fallback_ffmpeg:'Permitir fallback FFmpeg (apenas standard)',timeline_v3:'Montagem multitrecho v3 (requer protocolo 2)',framing_preset:'Conteúdo visual',framing_roi:'ROI manual (JSON ou vazio)',framing_windows:'Intervalos de página/tweet (ex.: 12.5-18;40-47)',retrieval_mode:'Exemplos editoriais',retrieval_dataset_id:'ID do dataset de exemplos',outro_asset_id:'Encerramento licenciado opcional'}
 const choices:Record<string,[string|number,string][]>= {
+  editorial_planner:[['local','Modelo local'],['hermes_first','Hermes quando autorizado']],
   editorial_protocol:[[2,'2 — revisão versionada'],[1,'1 — legado']],duration_mode:[['classic','Clássica (até 60 s)'],['flexible','Flexível (até 180 s)']],
   ranker_mode:[['ollama','Qwen'],['heuristic','Heurística']],director_mode:[['ollama','Qwen'],['heuristic','Heurística']],
   llm_backend:[['kepler_gpu','GPU K4200 (experimental)'],['ollama','CPU / Ollama']],llm_model:[['qwen2.5:3b','Qwen 2.5 3B'],['qwen2.5:1.5b','Qwen 2.5 1.5B']],
   render_engine:[['remotion','Remotion'],['ffmpeg','FFmpeg (simplificado)']],render_quality:[['high','Alta fidelidade — exige Remotion'],['standard','Standard']],
   framing_preset:[['legacy','Vertical aprovado'],['face','Rosto'],['gameplay','Gameplay'],['web','Página web'],['tweet','Tweet'],['document','Documento']],retrieval_mode:[['off','Desativados'],['lexical','Busca lexical local']]}
 export function SettingsFields({schema,value,onChange}:{schema:Schema;value:Values;onChange:(s:Values)=>void}){
+  labels.editorial_planner='Planejamento editorial'
+  labels.editorial_fallback_local='Permitir fallback editorial local'
   const {assets}=useS()
   function set(k:string,v:Values[string]){let next={...value,[k]:v};if(k==='duration_mode')next={...next,min_seconds:v==='flexible'?8:15,max_seconds:v==='flexible'?180:60};onChange(next)}
   return <div className="two settings-fields">{Object.keys({...schema.defaults,render_fallback_ffmpeg:true}).map(k=>{

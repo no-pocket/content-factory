@@ -176,6 +176,77 @@ def _pipeline(job):
 
 def dispatch(handler, path):
     method = handler.command
+    editorial_actor = 'service:hermes-editorial-runner' if getattr(handler, 'editorial_worker', False) else None
+    if path == ['editorial-requests'] and method == 'GET':
+        import time
+        editorial_actor or _actor()
+        rows=[]
+        for job in store.all_jobs():
+            snapshot=job.get('source_snapshot')
+            req=job.get('editorial_request')
+            if (job.get('status') != 'WAITING_EDITORIAL_PLAN' or not isinstance(snapshot,dict)
+                    or 'external' not in snapshot.get('allowed_model_scopes',[]) or not _external_allowed(job)
+                    or not isinstance(req,dict) or req.get('state') not in ('REQUESTED','CLAIMED')
+                    or req.get('generation_started') or req.get('expires_at',0) <= time.time()
+                    or (req['state']=='CLAIMED' and req.get('lease_until',0)>time.time())):
+                continue
+            rows.append({'job_id':job['id'],'request_id':req['request_id'],'expires_at':req['expires_at']})
+            if len(rows)>=100: break
+        return handler._json(200, {'requests':rows})
+    if len(path)==3 and path[0]=='jobs' and path[2] in ('editorial-claim','editorial-start') and method=='POST':
+        import time
+        from .editorial_requests import claim_job, begin_job_generation
+        body=_body(handler)
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise PermissionError('External source authorization required')
+            _require_external(job)
+        if path[2]=='editorial-claim':
+            if set(body) != {'request_id'}: raise ValueError('Invalid claim')
+            # A 600-second model budget needs room for process shutdown and submission.
+            result=claim_job(path[1],body['request_id'],actor=editorial_actor or _actor(),now=time.time(),seconds=750,authorize=authorize)
+        else:
+            if set(body) != {'request_id','token','version'}: raise ValueError('Invalid start')
+            begin_job_generation(path[1],body['request_id'],actor=editorial_actor or _actor(),token=body['token'],version=body['version'],now=time.time(),authorize=authorize)
+            result={'started':True}
+        return handler._json(200,result)
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-request' and method=='GET':
+        from .editorial_plan import transcript_digest, segment_id
+        editorial_actor or _actor()
+        with store.job_lock(path[1]):
+            job=store.load(path[1]); snapshot=job.get('source_snapshot'); req=job.get('editorial_request')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise PermissionError('External source authorization required')
+            _require_external(job)
+            if job.get('status') != 'WAITING_EDITORIAL_PLAN' or not isinstance(req,dict) or req.get('state') not in ('REQUESTED','CLAIMED'):
+                raise ValueError('Editorial request unavailable')
+            raw=(store.JOBS/(path[1]+'.transcript.json')).read_bytes()
+            if len(raw)>4*1024*1024: raise ValueError('Transcript too large')
+            tx=json.loads(raw.decode('utf8'))
+            if transcript_digest(tx) != req.get('transcript_digest'): raise ValueError('Transcript changed')
+            segments=[{'segment_id':segment_id(i),**{k:part.get(k) for k in ('start','end','text','words')}} for i,part in enumerate(tx['segments'])]
+            keys=('request_id','editorial_attempt_id','job_id','run_id','source_fingerprint','duration_ms','transcript_digest','min_seconds','max_seconds','expires_at','layout_presets','subtitle_presets')
+            return handler._json(200,{'request':{k:req.get(k) for k in keys},'transcript':{'language':tx.get('language'),'segments':segments}})
+    if len(path)==3 and path[0]=='jobs' and path[2]=='editorial-plan' and method=='POST':
+        import time
+        from .editorial_plan import parse_plan, MAX_PLAN_BYTES
+        from .editorial_requests import submit_job_plan
+        if handler.headers.get_content_type() != 'application/json' or handler.headers.get('Transfer-Encoding'):
+            raise ValueError('JSON with one Content-Length required')
+        lengths=handler.headers.get_all('Content-Length',[])
+        if len(lengths)!=1 or not 0 < int(lengths[0]) <= MAX_PLAN_BYTES:
+            raise ValueError('Editorial body size invalid')
+        raw=handler.rfile.read(int(lengths[0]))
+        if len(raw)!=int(lengths[0]): raise ValueError('Incomplete editorial body')
+        body=parse_plan(raw)
+        if set(body)!={'token','version','plan'}: raise ValueError('Invalid editorial submission')
+        def authorize(job):
+            snapshot=job.get('source_snapshot')
+            if not isinstance(snapshot,dict) or 'external' not in snapshot.get('allowed_model_scopes',[]):
+                raise PermissionError('External source authorization required')
+            _require_external(job)
+        return handler._json(200,submit_job_plan(path[1],body['plan'],actor=editorial_actor or _actor(),token=body['token'],version=body['version'],now=time.time(),authorize=authorize))
     if len(path) == 3 and path[0] == 'deliveries' and method == 'GET':
         from .telegram_deliveries import lookup
         item = lookup(path[1], int(path[2]))
@@ -199,9 +270,11 @@ def dispatch(handler, path):
         if not isinstance(settings, dict) or settings.get('editorial_protocol', 2) != 2:
             raise ValueError('Hermes ingestion requires editorial_protocol=2')
         defaults = {'duration_mode': 'flexible', 'min_seconds': 8, 'target_seconds': 40, 'max_seconds': 180}
+        planner_default = ({'editorial_planner': 'hermes_first'}
+                           if os.getenv('CONTENT_FACTORY_HERMES_EDITORIAL_DEFAULT', '').lower() == 'true' else {})
         # Explicit classic uses its existing normalized limits; never inherit the flexible ceiling.
         request['settings'] = {**(defaults if settings.get('duration_mode', 'flexible') == 'flexible' else {}),
-                               'auto_pace':True, **settings, 'editorial_protocol': 2}
+                               'auto_pace':True, **planner_default, **settings, 'editorial_protocol': 2}
         request.update(owner_message=body['owner_message'], actor_id=_actor())
         result = ingest_youtube(request)
         return handler._json(200 if result['duplicate'] else 201,

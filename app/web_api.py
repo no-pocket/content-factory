@@ -323,6 +323,8 @@ def job_action(jid: str, action: str, body: dict):
         job = service.verify_existing(jid)
     elif action == 'retry-enqueue':
         job = service.retry_enqueue(jid)
+    elif action == 'retry-editorial':
+        job = service.reprocess_failed_job(jid, body, owner_message='Solicitada nova análise editorial.', actor_id='browser:owner')
     elif action == 'reject':
         job = service.reject_job(jid, body.get('reason'), origin='api')
     else:
@@ -333,6 +335,11 @@ def job_action(jid: str, action: str, body: dict):
 @app.post('/api/jobs/{jid}/candidates/{cid}/{action}')
 def candidate_action(jid: str, cid: str, action: str, body: dict):
     job, index = identity(jid, cid)
+    if action == 'confirm-boundary':
+        if set(body) != {'artifact'} or not isinstance(body['artifact'], str):
+            raise ValueError('Identidade do render obrigatória')
+        service.confirm_audio_boundary(jid, cid, expected_artifact_id=body['artifact'], actor_id='local-owner', boundary='both')
+        return job_view(store.load(jid))
     if action == 'retry':
         return job_view(service.retry_candidate(jid, index))
     if action == 'captions':

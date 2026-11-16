@@ -65,11 +65,25 @@ class Handler(BaseHTTPRequestHandler):
         hermes = path[:2] == ['v2', 'hermes']
         bridge_token = os.getenv('CONTENT_FACTORY_HERMES_TOKEN', '')
         general_token = os.getenv('CONTENT_FACTORY_API_TOKEN', '')
+        editorial_token = os.getenv('CONTENT_FACTORY_EDITORIAL_TOKEN', '')
+        if editorial_token and (hmac.compare_digest(editorial_token, bridge_token) or hmac.compare_digest(editorial_token, general_token)):
+            return self._json(503, {'error': {'code': 'credential_scope', 'message': 'Editorial worker requires a distinct credential'}})
         if bridge_token and hmac.compare_digest(bridge_token, general_token):
             return self._json(503, {'error': {'code': 'credential_scope', 'message': 'Hermes requires a distinct dedicated credential'}})
         token = os.getenv('CONTENT_FACTORY_HERMES_TOKEN' if hermes else 'CONTENT_FACTORY_API_TOKEN', '')
-        if not token or (hermes and len(token) < 24) or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + token):
+        auth = self.headers.get('Authorization', '')
+        editorial = hermes and len(editorial_token) >= 24 and hmac.compare_digest(auth, 'Bearer ' + editorial_token)
+        if not editorial and (not token or (hermes and len(token) < 24) or not hmac.compare_digest(auth, 'Bearer ' + token)):
             return self._json(401, {'error': {'code': 'unauthorized', 'message': 'Bearer token required'}})
+        if editorial:
+            relative = path[2:]
+            allowed = ((relative == ['editorial-requests'] and self.command == 'GET') or
+                       (len(relative) == 3 and relative[0] == 'jobs' and
+                        ((relative[2] == 'editorial-request' and self.command == 'GET') or
+                         (relative[2] in ('editorial-claim', 'editorial-start', 'editorial-plan') and self.command == 'POST'))))
+            if not allowed:
+                raise PermissionError('Editorial worker credential cannot access this route')
+        self.editorial_worker = editorial
         # No cookie authentication, no CORS, no browser Origin accepted for mutations.
         if self.command == 'POST' and self.headers.get('Origin'):
             raise PermissionError('Browser origins are not enabled')

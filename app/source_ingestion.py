@@ -101,7 +101,8 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
         kind = 'video'
     if (kind and kind not in kinds) or (kind is None and not {'video','short'}.issubset(kinds)):
         raise PermissionError('Video kind missing, ambiguous or not authorized')
-    model_scope = 'external' if any(settings.get(k) == 'external' for k in ('ranker_mode','director_mode','llm_backend','llm_model')) else 'local'
+    hermes_allowed = settings.get('editorial_planner') == 'hermes_first' and 'external' in source['allowed_model_scopes']
+    model_scope = 'external' if hermes_allowed or any(settings.get(k) == 'external' for k in ('ranker_mode','director_mode','llm_backend','llm_model')) else 'local'
     if model_scope not in source['allowed_model_scopes']:
         raise PermissionError('Model scope is not authorized')
     return {'video_id':video_id,'channel_id':source['channel_id'],'title':str(metadata.get('title') or video_id)[:4000],

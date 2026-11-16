@@ -33,6 +33,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "editorial_planner": {"type": "string", "enum": ["local", "hermes_first"], "default": "local"},
+        "editorial_fallback_local": {"type": "boolean", "default": true},
         "outro_asset_id": {
           "type": [
             "string",

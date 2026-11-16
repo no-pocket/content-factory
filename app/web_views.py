@@ -91,8 +91,11 @@ def _job_view(job):
                       'edits': row.get('edit_requests', []), 'director': clip.get('director_used', 'legado'),
                       'renderer': clip.get('renderer_used', 'legado'), 'attempts': clip.get('attempts', 0),
                       'diagnostic': diagnostic(clip.get('qc')), 'story': diagnostic(clip.get('story_assessment')),
+                      'boundary_review_required': bool(clip.get('boundary_review_required')),
+                      'boundary_confirmed': service.audio_boundary_confirmed(clip),
                       'assembly': diagnostic(clip.get('assembly')), 'pace': diagnostic(clip.get('pace')),
                       'word_timing':diagnostic((clip.get('timeline') or {}).get('word_timing_diagnostics')),
+                      'title_diagnostic':diagnostic((clip.get('timeline') or {}).get('editorial_title_diagnostics')),
                       'output_seconds':candidate_duration(clip), 'captions': diagnostic(clip.get('social_captions'))})
     settings = job.get('settings') or {}
     return {'id': job['id'], 'name': job.get('video_title') or (job.get('youtube_metadata') or {}).get('title') or job['original_name'], 'who': job['creator'], 'lic': job['license_note'],
@@ -104,6 +107,10 @@ def _job_view(job):
             'auto_rework_enabled':auto_rework_enabled(),
             'reworks':[{k:r.get(k) for k in ('child_id','state','error','review_revision')} for r in job.get('rework_requests',[])],
             'review_status': editorial['review_status'], 'error': diagnostic(job.get('error')),
+            'editorial_result': diagnostic({'reason': (job.get('editorial_request') or {}).get('plan', {}).get('reason'),
+                                           'run_id': (job.get('processing_runs') or [{}])[-1].get('run_id'),
+                                           'failure_code': (job.get('editorial_request') or {}).get('failure_code'),
+                                           'fallback': job.get('editorial_planner_fallback')}),
             'events': diagnostic(job.get('ai_events', [])), 'activity': diagnostic(job.get('ai_activity'))}
 
 

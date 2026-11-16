@@ -85,3 +85,11 @@ def test_caption_route_is_candidate_scoped():
 def test_transcript_route_is_job_scoped():
     args=SimpleNamespace(command='transcript',job='00000000-0000-0000-0000-000000000001')
     assert client.route(args)=='/jobs/00000000-0000-0000-0000-000000000001/transcript'
+
+def test_editorial_request_routes_do_not_require_candidate():
+    from argparse import Namespace
+    import uuid
+    jid=str(uuid.uuid4())
+    assert client.route(Namespace(command='editorial-requests'))=='/editorial-requests'
+    for command in ('editorial-request','editorial-claim','editorial-start','editorial-plan'):
+        assert client.route(Namespace(command=command,job=jid))=='/jobs/'+jid+'/'+command

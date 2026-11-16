@@ -5,6 +5,7 @@ it('only idle jobs enter review even when an earlier candidate is already VALID'
   expect(needsReview({st:'RENDERING',cands:[{dec:'PENDING'}]})).toBe(false)
   expect(needsReview({st:'NEEDS_REVIEW',cands:[{dec:'PENDING'}]})).toBe(true)
   expect(canReviewJob('FAILED')).toBe(true)
+  expect(needsReview({st:'EDITORIAL_NO_CANDIDATES',cands:[]})).toBe(true)
 })
 it('publication selection is invalidated when the approved artifact changes',()=>{
   expect(publicationKey('j','c','render-A')).not.toBe(publicationKey('j','c','render-B'))

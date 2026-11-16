@@ -335,3 +335,15 @@ def test_confirmed_publication_link_only_accepts_provider_https(link, expected):
             'draft': {'provider': 'instagram', 'title': 'test', 'job_id': 'j', 'candidate_id': 'c', 'artifact_id': 'a'}}
     assert item_view(item)['permalink'] == expected
 
+
+def test_audio_boundary_confirmation_is_explicit_and_bound_to_artifact(web):
+    from app import store
+    job=make_job();job['candidates'][0]['boundary_review_required']=True;store.save(job)
+    cid=job['candidates'][0]['candidate_id'];base=f"/api/jobs/{job['id']}/candidates/{cid}"
+    row=web.get('/api/jobs/'+job['id']).json()['cands'][0]
+    assert row['boundary_review_required'] and not row['boundary_confirmed']
+    assert web.post(base+'/confirm-boundary',json={'artifact':'invalid'}).status_code==409
+    assert web.post(base+'/confirm-boundary',json={'artifact':row['artifact']}).status_code==200
+    updated=web.get('/api/jobs/'+job['id']).json()['cands'][0]
+    assert updated['boundary_confirmed'] is True
+    assert not store.load(job['id']).get('feedback_events')
