@@ -4,9 +4,12 @@ from app import social_captions
 
 
 def test_original_caption_can_summarize_cut_with_emoji():
-    clip = {'text': 'A Rockstar revelou imagens do mapa de Vice City.'}
+    clip = {'text': 'A Rockstar revelou imagens do mapa de Vice City.', 'reason': 'Novidades do mapa'}
     reply = {'response': json.dumps({'caption': '🌆 Novas imagens do mapa de Vice City!'}), 'done_reason': 'stop'}
-    result = social_captions.generate(clip, {'llm_backend': 'ollama'}, 'pt', infer=lambda *_: reply)
+    def infer(prompt, settings):
+        assert 'Novidades do mapa' in prompt
+        return reply
+    result = social_captions.generate(clip, {'llm_backend': 'ollama'}, 'pt', infer=infer)
     assert result['instagram']['origin'] == 'ollama'
     assert result['instagram']['text'] == '🌆 Novas imagens do mapa de Vice City!'
 
