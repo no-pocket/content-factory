@@ -12,7 +12,14 @@ O gateway confirmou o perfil servido e Telegram conectado após reload sem turno
 Ponte privada: tarefa Windows `Content Factory Hermes Private API`, iniciada no login
 do Machado, mantém SSH reverso para loopback do Pi18510→workstation8510. Credencial
 Hermes distinta e ator autorizado configurados somente em ambientes secretos.
-Reconexão configurada; reboot/logout não foram testados fisicamente.
+O processo usa PowerShell oculto, sem janela que precise ficar aberta. O loop
+SSH tenta reconectar após falhas de rede/Pi. Na workstation, as tarefas ocultas
+`Content Factory Hermes Tunnel Watchdog` (a cada cinco minutos) e
+`Content Factory Hermes Tunnel Logon Recovery` (ao logon) tentam iniciar a
+tarefa principal caso ela pare. O túnel e a consulta autenticada foram testados
+após encerrar o processo SSH e após parar a tarefa principal. As tarefas usam
+logon interativo: operação antes de entrar no Windows e reinícios físicos da
+workstation/Pi não foram verificados. O Docker Desktop também precisa estar ativo.
 Cliente remoto consultou19 fontes e baixou MP4 com SHA conferido. Teste real do agente,
 somente leitura, terminou com exit0 e identificou Qwen/DeepSeek/Hermes na fonte correta.
 Não foram criadas avaliações, notas ou seleções artificiais.
