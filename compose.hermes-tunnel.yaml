@@ -1,0 +1,17 @@
+services:
+  hermes-tunnel:
+    image: content-factory-worker:latest
+    profiles: [hermes-tunnel]
+    init: true
+    command: ["sh", "/opt/hermes-tunnel/run.sh"]
+    environment:
+      HERMES_TUNNEL_HOST: ${HERMES_TUNNEL_HOST:?Configure HERMES_TUNNEL_HOST}
+      HERMES_TUNNEL_USER: ${HERMES_TUNNEL_USER:?Configure HERMES_TUNNEL_USER}
+      HERMES_TUNNEL_HOSTKEY_ALIAS: ${HERMES_TUNNEL_HOSTKEY_ALIAS:?Configure HERMES_TUNNEL_HOSTKEY_ALIAS}
+      HERMES_TUNNEL_REMOTE_PORT: ${HERMES_TUNNEL_REMOTE_PORT:-18510}
+    volumes:
+      - ./integrations/hermes/tunnel/run.sh:/opt/hermes-tunnel/run.sh:ro
+      - ./data/hermes-tunnel:/run/hermes-tunnel:ro
+    depends_on: [api]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
