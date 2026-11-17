@@ -36,6 +36,10 @@ incerto para reconciliação. Falhas novas registram um código técnico sem inc
 mensagens ou credenciais remotas. A agenda tenta MP4 se a prévia WebM falhar e
 oferece um link para abrir o arquivo mestre.
 
+Na Revisão, candidatos v2 com aprovação limpa e QC válido oferecem **Agendar
+publicação**. A janela usa o mesmo formulário e confirmações da Publicação, com
+o candidato e a versão selecionados; aprovação e agendamento continuam separados.
+
 ## Rascunhos locais
 
 As sugestões de legenda são criadas a partir das palavras da timeline renderizada

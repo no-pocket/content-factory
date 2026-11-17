@@ -5,3 +5,5 @@ export const publicationKey=(job:string,candidate:string,artifact:string|null)=>
 export function syncReviewDraft<T extends {seen:unknown;requestId:string}>(draft:T,seen:T['seen'],requestId:string):T{return {...draft,seen,requestId}}
 export function visibleReviewJobs<T extends {id:string}>(all:T[],filtered:T[],selected:string):T[]{const open=all.find(j=>j.id===selected);return open&&!filtered.some(j=>j.id===selected)?[open,...filtered]:filtered}
 export function wasPublished(rows:{job_id:string;candidate_id:string;st:string}[],job:string,candidate:string){return rows.some(r=>r.job_id===job&&r.candidate_id===candidate&&r.st==='PUBLISHED')}
+
+export function canScheduleCandidate(job:{protocol:number},c:{dec:string;intact:boolean;qc:string;artifact:string|null}):boolean{return job.protocol===2&&c.dec==='APPROVED'&&c.intact&&!!c.artifact&&['VALID','WARNING'].includes(c.qc)}
