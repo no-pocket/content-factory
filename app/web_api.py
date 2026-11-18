@@ -370,8 +370,8 @@ def candidate_action(jid: str, cid: str, action: str, body: dict):
         from .social_captions import regenerate
         regenerate(jid, cid, body.get('artifact') if job.get('editorial_protocol') == 2 else None)
         return job_view(store.load(jid))
-    if action in ('edit', 'frames'):
-        expected_fields = ({'artifact', 'candidate_version', 'render_revision'} if action == 'frames' else
+    if action in ('edit', 'frames', 'boundaries'):
+        expected_fields = ({'artifact', 'candidate_version', 'render_revision'} if action in ('frames', 'boundaries') else
                            {'artifact', 'candidate_version', 'render_revision', 'editorial_revision',
                             'request_id', 'changes'})
         if set(body) != expected_fields:
@@ -395,6 +395,21 @@ def candidate_action(jid: str, cid: str, action: str, body: dict):
         actual = 'sha256:' + digest(artifact_manifest(job, index))
         if actual != clip.get('artifact_id'):
             raise service.Conflict('Candidate artifact changed; verify it before editing')
+        if action == 'boundaries':
+            transcript_path = store.JOBS / f'{jid}.transcript.json'
+            if not transcript_path.is_file():
+                raise service.Conflict('Saved source transcript is unavailable')
+            transcript = json.loads(transcript_path.read_text(encoding='utf-8'))
+            from .boundary_suggestions import suggest_word_boundary, extract_audio_boundary
+            words = [w for segment in transcript.get('segments', []) for w in (segment.get('words') or [])]
+            duration = job.get('duration')
+            source = Path(job.get('source') or '').resolve()
+            def suggest(value):
+                result = suggest_word_boundary(value, words, source_duration=duration)
+                if result['method'] is None and source.is_relative_to(store.INPUT.resolve()) and source.is_file():
+                    result = extract_audio_boundary(source, value, source_duration=duration)
+                return result
+            return {'start': suggest(clip['start']), 'end': suggest(clip['end'])}
         if action == 'frames':
             source = Path(job.get('source') or '').resolve()
             if not source.is_relative_to(store.INPUT.resolve()) or not source.is_file():

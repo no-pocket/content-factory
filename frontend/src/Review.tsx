@@ -18,6 +18,7 @@ export function Candidate({job,c,index}:{job:Job;c:Cand;index:number}){
   const p=draft.p,idle=canReviewJob(job.st),valid=idle&&['VALID','WARNING'].includes(c.qc)&&(job.protocol!==2||c.intact)
   const wordTiming=c.word_timing as {reason?:string;partial_segments_omitted?:number;zero_duration_words_grouped?:number}|undefined
   const titleDiagnostic=(c as Cand & {title_diagnostic?:{reason?:string}}).title_diagnostic
+  const captionWarnings=(c.diagnostic as {caption_readability?:{warnings?:{code:string;start:number;end:number;characters_per_second?:number}[]}}|null)?.caption_readability?.warnings??[]
   async function submit(dec:Dec){setBusy(true);setError('');try{
     await review(job.id,c.id,draft.seen,{...p,dec},draft.requestId);clear();setDraft({seen:{...draft.seen,n:draft.seen.n+1,revision:draft.seen.revision+1},p:{...p,dec},requestId:newRequestId()});toast('Avaliação salva.')
   }catch(e){setError((e instanceof Conflict?'Conflito de revisão. ':'')+message(e))}finally{setBusy(false)}}
@@ -28,6 +29,7 @@ export function Candidate({job,c,index}:{job:Job;c:Cand;index:number}){
     {!!c.word_timing?.zero_duration_words_grouped&&<p className="warn">{c.word_timing.zero_duration_words_grouped} palavras foram agrupadas por falta de duração individual. Foram usados os tempos observados da fala adjacente; confira as legendas.</p>}
     {wordTiming?.reason==='word_alignment_not_verified'&&<p className="warn">As legendas usam tempos de segmentos, sem alinhamento confiável por palavra. Confira o texto com o áudio.</p>}
     {!!wordTiming?.partial_segments_omitted&&<p className="warn">{wordTiming.partial_segments_omitted} segmento(s) nas bordas ficaram sem legendas porque foram cortados. Confira e corrija as legendas antes de aprovar.</p>}
+    {captionWarnings.length>0&&<details><summary>Legendas: {captionWarnings.length} alerta(s) de legibilidade</summary>{captionWarnings.map((w,i)=><p className="hint" key={i}>{tc(w.start)}–{tc(w.end)} · {w.code==='caption_fast'?'Texto rápido':w.code==='caption_long'?'Texto longo':'Duração inválida'}{w.characters_per_second!=null?` · ${w.characters_per_second} caracteres/s`:''}</p>)}</details>}
     {titleDiagnostic&&<p className="warn">O título proposto exige conferência editorial ({titleDiagnostic.reason}). Confira se corresponde ao áudio.</p>}
     {c.pace?.reason==='native_timing_unavailable'&&<p className="warn">Sem aceleração por tempos de palavras insuficientes. Confira as legendas.</p>}
     <p className="hint">Direção: {c.director} · Render: {c.renderer} · Palavras: {c.w??'não registrado'} · Tentativa {c.attempts}</p>

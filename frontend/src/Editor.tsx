@@ -15,6 +15,8 @@ interface Timeline{
 }
 interface Frame{frame_id:number;time:number;image:string;ocr:{status:string;text:string;reason?:string};vision:null|{scene:Scene;confidence:number;roi:Roi|null}}
 interface FrameResult{frames:Frame[];vision:{status:string;model?:string;reason?:string}}
+interface BoundarySuggestion{suggested_seconds:number;original_seconds:number;method:string|null;reason:string}
+interface BoundaryResult{start:BoundarySuggestion;end:BoundarySuggestion}
 const sceneNames:Record<Scene,string>={CREATOR_FACE:'Rosto do criador',GAMEPLAY:'Gameplay',SCREEN_CONTENT:'Tela / página',DOCUMENT:'Documento / slide',OTHER:'Outro',UNCERTAIN:'Incerto'}
 const fullRoi={x:0,y:0,width:1,height:1}
 
@@ -36,6 +38,7 @@ export function Editor({job,c,onClose}:{job:Job;c:Cand;onClose:()=>void}){
   const [start,setStart]=useState(c.s),[end,setEnd]=useState(c.e),[title,setTitle]=useState('')
   const [wordText,setWordText]=useState<Record<string,string>>({}),[framingSchedule,setFramingSchedule]=useState<unknown[]>([])
   const [frames,setFrames]=useState<FrameResult>(),[frameBusy,setFrameBusy]=useState(false),[selected,setSelected]=useState<Record<number,Scene>>({})
+  const [boundaries,setBoundaries]=useState<BoundaryResult>(),[boundaryBusy,setBoundaryBusy]=useState(false)
   const [scheduleEdited,setScheduleEdited]=useState(false),[confirmed,setConfirmed]=useState(false),[busy,setBusy]=useState(false)
   const url=`/jobs/${encodeURIComponent(job.id)}/candidates/${encodeURIComponent(c.id)}/media/timeline?artifact=${encodeURIComponent(c.artifact??'')}`
 
@@ -65,6 +68,14 @@ export function Editor({job,c,onClose}:{job:Job;c:Cand;onClose:()=>void}){
       })
       setFrames(result);setSelected(Object.fromEntries(result.frames.map(frame=>[frame.frame_id,frame.vision?.scene??'UNCERTAIN'])))
     }catch(e){setError(message(e))}finally{setFrameBusy(false)}
+  }
+  async function suggestBoundaries(){
+    setBoundaryBusy(true);setError('')
+    try{
+      setBoundaries(await api<BoundaryResult>(`/jobs/${encodeURIComponent(job.id)}/candidates/${encodeURIComponent(c.id)}/boundaries`,{
+        method:'POST',body:JSON.stringify({artifact:c.artifact,candidate_version:c.candidate_version,render_revision:c.render_revision}),
+      }))
+    }catch(e){setError(message(e))}finally{setBoundaryBusy(false)}
   }
   function applyFrames(){
     if(!timeline||!frames)return
@@ -110,6 +121,7 @@ export function Editor({job,c,onClose}:{job:Job;c:Cand;onClose:()=>void}){
         <Field l="Fim na fonte (s)"><input type="number" min={start+.1} max={sourceMax} step=".01" value={end} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isFinite(n))update(()=>setEnd(n))}}/></Field>
         <p className="hint editor-span">Cortes que atravessam uma palavra são recusados. O vídeo acima mostra a versão atual; a nova será pré-visualizada após renderização.</p>
       </div>:<p className="hint">Montagem multitrecho: a ordem e os cortes das cenas são mantidos. Legendas e enquadramento continuam editáveis.</p>}
+      {timeline.schema_version==='2.0'&&<div className="ac"><span className="hint">Sugestões locais por pausas ou energia do áudio; confira o resultado antes de renderizar.</span><button type="button" className="b" disabled={busy||boundaryBusy} onClick={suggestBoundaries}>{boundaryBusy?'Buscando sugestões…':'Sugerir limites'}</button>{boundaries&&(['start','end'] as const).map(side=>{const b=boundaries[side];return b.method?<button type="button" className="b" key={side} onClick={()=>update(()=>side==='start'?setStart(b.suggested_seconds):setEnd(b.suggested_seconds))}>Usar sugestão de {side==='start'?'início':'fim'}: {b.suggested_seconds.toFixed(2)} s · {b.method==='word_gap'?'pausa entre palavras':'vale de áudio'}</button>:<span className="hint" key={side}>Sem sugestão confiável para {side==='start'?'o início':'o fim'}.</span>})}</div>}
       <Field l="Título sobreposto (vazio remove)"><input maxLength={80} value={title} onChange={e=>update(()=>setTitle(e.target.value))}/></Field>
       <details className="editor-captions"><summary>Corrigir palavras das legendas ({timeline.layers.captions.length})</summary>
         <div className="caption-list">{timeline.layers.captions.map((word,index)=>{
