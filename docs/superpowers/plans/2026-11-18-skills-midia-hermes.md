@@ -88,3 +88,12 @@ Usar ideias por implementação própria sempre que for mais simples; se houver 
 - [ ] Atualizar instruções do Hermes no Pi com backup; validar pedido editorial real quando o proprietário fornecer fonte; informar limitações e motores/fallback por etapa. Não enviar credenciais nem dados locais ao GitHub.
 
 **Fora de escopo inicial:** instalar terceiros diretamente, trocar o renderizador, migrar toda a biblioteca, enviar vídeos ao OpenClip/Gemini, publicar automaticamente ou avaliar qualidade só por métricas de retenção.
+
+## Progresso de execução
+
+- Baseline isolado: 70 testes de contratos, montagem, QC e análise visual passaram.
+- Briefing v1.1: critérios editoriais acrescentados ao executor e à skill local; testes focados passaram. Implantação no Pi pendente: havia solicitação editorial ativa na verificação.
+- Bordas: sugestões por intervalos de palavras e vales de energia disponíveis no editor como rascunho, com confirmação antes de gerar novo render. Falta validar interface e mídia reais, limites de duração e timeouts em cenários adicionais.
+- QC: alertas consultivos de caracteres/segundo e extensão por bloco adicionados; amostragem passou a considerar início, fim e transições. Falta validar render real, medições opcionais de loudness/true peak e congelamento.
+- Contrato Hermes v2 para múltiplos trechos e catálogo de presets/assets: ainda não implementados.
+- Nenhuma das alterações desta execução foi implantada; o worker tinha um job em transcrição, um na fila e uma solicitação editorial pendente.

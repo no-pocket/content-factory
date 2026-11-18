@@ -55,9 +55,19 @@ def _source_at(timeline: dict, output_time: float) -> float:
     return timeline['source_range']['start'] + output_time
 
 
-def _sample_times(duration: float) -> list[float]:
+def _sample_times(duration: float, transitions=()) -> list[float]:
+    if duration <= 0:
+        raise ValueError('Invalid timeline duration')
+    end = max(0, duration - 1 / 30)
+    essential = [min(0.001, end), end] + [float(t) for t in transitions if type(t) in (int,float) and math.isfinite(t) and 0 < t < end]
+    selected = sorted(set(round(t, 3) for t in essential))
+    if len(selected) > MAX_FRAMES:
+        selected = [selected[round(i * (len(selected)-1) / (MAX_FRAMES-1))] for i in range(MAX_FRAMES)]
     count = min(MAX_FRAMES, max(3, math.ceil(duration / 4)))
-    return [round(duration * (i + 0.5) / count, 3) for i in range(count)]
+    for i in range(count):
+        if len(selected) >= MAX_FRAMES: break
+        selected.append(round(duration * (i + .5) / count, 3))
+    return sorted(set(selected))
 
 
 def _extract_frame(source: Path, source_time: float) -> bytes:
@@ -175,7 +185,7 @@ def analyze_candidate_frames(source: Path, timeline: dict) -> dict:
     if not streams or type(streams[0].get('width')) is not int or type(streams[0].get('height')) is not int:
         raise ValueError('Source video dimensions are unavailable')
     frame_height = max(2, round(FRAME_WIDTH * streams[0]['height'] / streams[0]['width'] / 2) * 2)
-    times = _sample_times(duration)
+    times = _sample_times(duration, [part.get('output_start') for part in timeline.get('segments', [])])
     frames = []
     for index, output_time in enumerate(times):
         image = _extract_frame(source, _source_at(timeline, output_time))

@@ -45,3 +45,11 @@ def test_ocr_boxes_are_normalized_to_actual_sampled_frame_dimensions(monkeypatch
     result = frame_analysis._ocr(b'jpeg', 540)
 
     assert result['regions'][0]['box'] == {'x': .05, 'y': .25, 'width': .25, 'height': 18 / 540}
+
+def test_samples_opening_ending_and_segment_transitions():
+    from app.frame_analysis import _sample_times
+    times=_sample_times(12, transitions=[4,8])
+    assert 0 <= times[0] <= .001
+    assert times[-1]<12 and times[-1]>11.9
+    assert 4 in times and 8 in times
+    assert times==sorted(set(times))
