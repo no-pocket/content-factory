@@ -103,7 +103,7 @@ def process(jid: str) -> None:
         raw_settings = dict(job.get('settings') or {})
         raw_settings.setdefault('render_quality', 'standard')  # preserve pre-profile job intent
         settings = normalize_job_settings(raw_settings)
-        if job.get('source_snapshot'):
+        if job.get('source_snapshot') and job['source_snapshot'].get('policy_mode') != 'not_enforced':
             from .source_ingestion import require_active_source
             from .source_registry import get_source
             try:
@@ -135,7 +135,7 @@ def process(jid: str) -> None:
 
         save(job)
         if job.get("source_type") == "youtube" and not job.get("source"):
-            if not job.get("platform_permission") or not job.get("license_note"):
+            if (job.get("source_snapshot") or {}).get("policy_mode") != "not_enforced" and (not job.get("platform_permission") or not job.get("license_note")):
                 raise PermissionError("Autorização da plataforma e do titular precisam estar registradas")
             job["status"] = "DOWNLOADING"
             save(job)

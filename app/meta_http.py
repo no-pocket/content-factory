@@ -34,7 +34,8 @@ class MetaHTTP:
             raise ValueError('invalid Meta token')
         match = re.fullmatch(r'(upload|facebook_upload)/([0-9]+)', path)
         if match:
-            if method != 'POST' or file is None or params is not None:
+            if params is not None or not ((method == 'POST' and file is not None) or
+                                           (match[1] == 'upload' and method == 'GET' and file is None and headers is None)):
                 raise ValueError('invalid upload')
             prefix = 'ig-api-upload' if match[1] == 'upload' else 'video-upload'
             host = 'rupload.facebook.com'

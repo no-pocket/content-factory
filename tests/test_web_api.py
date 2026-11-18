@@ -335,6 +335,14 @@ def test_human_timeline_edit_and_frame_analysis_routes_are_artifact_bound(web, m
                 'render_revision': clip['render_revision']}
     frame_response = web.post(frames_route, json=identity)
     assert frame_response.status_code == 200 and frame_response.json()['vision']['status'] == 'UNCONFIGURED'
+    job['duration'] = 20
+    store.save(job)
+    boundary_route = f"/api/jobs/{job['id']}/candidates/{cid}/boundaries"
+    boundary_response = web.post(boundary_route, json=identity)
+    assert boundary_response.status_code == 200
+    assert boundary_response.json()['start']['method'] is None
+    assert store.load(job['id'])['status'] == job['status']
+    assert web.post(boundary_route, json={**identity, 'artifact':'obsolete'}).status_code == 409
 
     edit_response = web.post(f"/api/jobs/{job['id']}/candidates/{cid}/edit", json={
         **identity, 'editorial_revision': 0, 'request_id': str(uuid.uuid4()),

@@ -22,6 +22,7 @@ h2{font-size:14px;font-weight:600;margin:22px 0 6px}.cand h2,.mh h2{margin:0}
 .rw{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--ln)}.rw p{margin:0}.rw.col{display:block}.mh{display:flex;gap:10px;align-items:center;justify-content:space-between}
 .log{list-style:none;margin:0;padding:0}.log li{padding:6px 0;border-top:1px solid var(--ln)}
 .cand{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:16px;margin-bottom:14px}.cand .mh{justify-content:flex-start;margin-bottom:8px}
+.agenda-item>.rw{border-top:0;padding-top:0}.agenda-reschedule{align-items:center}.agenda-reschedule .fl{margin-bottom:0}.schedule-backdrop{position:fixed;inset:0;background:#000a;z-index:100;display:grid;place-items:center;padding:16px}.schedule-dialog{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:24px;width:min(100%,460px);box-shadow:0 12px 48px #0008}.schedule-dialog h2{margin:0 0 16px}
 .tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:500;background:var(--bg);color:var(--mu);white-space:nowrap}
 .tag.ok{color:var(--ok)}.tag.wr{color:var(--wr)}.tag.er{color:var(--er)}.tag.ac{color:var(--ac)}.tags{display:flex;gap:6px;flex-wrap:wrap}
 .ruler{position:relative;height:14px;background:repeating-linear-gradient(90deg,var(--ln) 0 1px,transparent 1px 5%),var(--bg);border-radius:3px}.ruler i{position:absolute;top:2px;bottom:2px;background:var(--ac);border-radius:2px;min-width:3px}
@@ -55,3 +56,5 @@ details{border-top:1px solid var(--ln);margin:6px 0 12px}summary{min-height:44px
 @media(max-width:699px){.sh{display:block}.nv{position:fixed;inset:auto 0 0 0;height:auto;flex-direction:row;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));z-index:5}
 .nv a{flex:1;flex-direction:column;gap:0;min-height:52px;min-width:0;font-size:10px;border-left:0;border-top:3px solid transparent;justify-content:center}.nv a[aria-current]{border-top-color:#8EA2FF}.nv a span{display:block;white-space:nowrap}
 main{padding:16px 14px 100px}.top{padding:8px 14px}h1{font-size:21px}.rv{grid-template-columns:1fr}.pv{max-width:220px;margin-inline:auto}.dy{min-height:44px;padding:2px}#ts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+
+.review-publish-dialog{max-width:850px;max-height:90vh;overflow:auto;width:min(850px,95vw)}

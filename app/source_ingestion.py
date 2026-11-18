@@ -86,6 +86,12 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
         raise ValueError('Metadata video identity mismatch')
     if metadata.get('channel_id') != source['channel_id']:
         raise PermissionError('Metadata channel does not match authorized source')
+    if source.get('policy_mode') == 'not_enforced':
+        if metadata.get('is_live') or metadata.get('live_status') in {'is_live','is_upcoming','post_live'}:
+            raise PermissionError('Live or upcoming video is not supported')
+        return {'video_id':video_id,'channel_id':source['channel_id'],'title':str(metadata.get('title') or video_id)[:4000],
+                'language':metadata.get('language'),'video_kind':'unspecified','model_scope':'external' if settings.get('editorial_planner') == 'hermes_first' else 'local',
+                'live_status':metadata.get('live_status'),'duration':metadata.get('duration')}
     require_active_source(source)
     language = metadata.get('language')
     # A primary language grants its regional variants; a regional grant stays narrow.
@@ -114,7 +120,7 @@ def verify_source_metadata(metadata: dict, video_id: str, source: dict, settings
             'language':language,'video_kind':kind or 'video_or_short','model_scope':model_scope,
             'live_status':live,'duration':metadata.get('duration')}
 
-def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_details=None) -> dict:
+def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_details=None, enforce_source_policy=True) -> dict:
     fields = {'source_url','source_id','settings','owner_message','actor_id'}
     if not isinstance(payload,dict) or set(payload)-fields:
         raise ValueError('Unknown ingestion fields')
@@ -138,10 +144,19 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_deta
     # Serialize imports across API/UI processes, and discover already-persisted jobs after crashes.
     with store.file_lock(store.ROOT / 'source-ingestion.lock'):
         with store.file_lock(store.ROOT / 'sources.lock'):
-            try:
-                source = source_registry.get_source(channel_id)
-            except KeyError as exc:
-                raise PermissionError('Channel is not registered as authorized') from exc
+            if enforce_source_policy:
+                try:
+                    source = source_registry.get_source(channel_id)
+                except KeyError as exc:
+                    raise PermissionError('Channel is not registered as authorized') from exc
+            else:
+                try:
+                    existing_source = source_registry.get_source(channel_id)
+                except KeyError:
+                    existing_source = {}
+                source = {**existing_source, 'channel_id':channel_id,
+                          'name':existing_source.get('name') or metadata.get('channel') or metadata.get('uploader') or channel_id,
+                          'policy_mode':'not_enforced', 'allowed_model_scopes':['local','external']}
             verified = verify_source_metadata(metadata,video_id,source,settings)
             verified['source_url'] = url
             existing = find_existing_youtube(video_id)
@@ -153,8 +168,9 @@ def ingest_youtube(payload: dict, *, queue=None, metadata_fetcher=None, job_deta
             if any(not isinstance(v,str) or not v.strip() or len(v)>4000 for v in context.values()):
                 raise ValueError('Invalid ingestion context')
             job = service.create_job({'source_url':url,'creator':source['name'],
-                'license_note':source['authorization_reference'],'rights_confirmed':True,
-                'platform_permission':True,'settings':settings,**job_details},queue=queue,
+                'license_note':source.get('authorization_reference') or 'Autorização não verificada',
+                'rights_confirmed':source.get('rights_confirmed') is True,
+                'platform_permission':source.get('platform_permission') is True,'settings':settings,**job_details},queue=queue,
                 source_provenance={'source_id':channel_id,'source_snapshot':source,
                     'youtube_video_id':video_id,'video_title':verified['title'],'original_name':verified['title'],
                     'youtube_metadata':verified,'ingestion_context':context,'metadata_verified_at':time.time()})

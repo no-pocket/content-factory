@@ -39,7 +39,8 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
     for key in ('creator', 'license_note'):
         if not isinstance(payload.get(key), str) or not payload[key].strip() or len(payload[key]) > 4000:
             raise ValueError(f'{key} required, max 4000 characters')
-    if payload.get('rights_confirmed') is not True:
+    unrestricted = isinstance(source_provenance,dict) and (source_provenance.get('source_snapshot') or {}).get('policy_mode') == 'not_enforced'
+    if payload.get('rights_confirmed') is not True and not unrestricted:
         raise PermissionError('Rights confirmation required')
     title = payload.get('video_title')
     if title is not None and (not isinstance(title, str) or not title.strip() or len(title) > 4000):
@@ -65,7 +66,7 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
             raise ValueError('evaluation requires cohort and variant strings, max 100 characters')
     source_url = payload.get('source_url')
     if source_url:
-        if payload.get('platform_permission') is not True:
+        if payload.get('platform_permission') is not True and not unrestricted:
             raise PermissionError('Platform permission required')
         source_url = normalize_youtube_url(source_url)
         path, name, fingerprint = None, source_url, None
@@ -86,7 +87,7 @@ def create_job(payload: dict, *, upload=None, filename: str | None = None, queue
             raise
         name = Path(filename).name
     job = store.new_job(path, name, payload['creator'].strip(), payload['license_note'].strip(),
-                        source_url=source_url, platform_permission=bool(source_url), settings=settings,
+                        source_url=source_url, platform_permission=payload.get('platform_permission') is True, settings=settings,
                         source_provenance=source_provenance)
     job.update(qc_settings=qc, source_fingerprint=fingerprint, pipeline_version='quality-v2')
     if title is not None:
@@ -249,7 +250,7 @@ def reprocess_failed_job(jid: str, request: dict, *, owner_message: str, actor_i
     fingerprint = digest({'request': request, 'owner_message': owner_message, 'actor_id': actor_id})
     with store.job_lock(jid):
         job = store.load(jid)
-        if job.get('source_snapshot'):
+        if job.get('source_snapshot') and job['source_snapshot'].get('policy_mode') != 'not_enforced':
             from .source_registry import get_source
             require_active_source(job['source_snapshot'])
             require_active_source(get_source(job['source_snapshot']['channel_id']))

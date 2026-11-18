@@ -20,6 +20,8 @@ REVIEWABLE = {'VALID', 'WARNING'}
 
 def annotate_caption_qc(qc, clip):
     timeline=clip['timeline']
+    from .caption_quality import analyze_caption_readability
+    qc['caption_readability']=analyze_caption_readability(timeline)
     diagnostics=timeline.get('word_timing_diagnostics') or {}
     if diagnostics.get('partial_segments_omitted') or (clip.get('proposal_source')=='hermes' and not timeline['layers']['captions']):
         qc['caption_warning']='caption_coverage_incomplete'
@@ -75,6 +77,7 @@ def render_candidates(job: dict, source: Path, segments: list, settings: dict,
                 try:
                     _validate_duration(clip, settings)
                     current = inspect_candidate(target, candidate_duration(clip), audio_expected, limits, preview_size)
+                    if 'timeline' in clip: annotate_caption_qc(current,clip)
                 except ValueError as exc:
                     current = {'state':'FAILED', 'errors':[str(exc)]}
                 metric['qc_state']=current['state']

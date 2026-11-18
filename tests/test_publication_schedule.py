@@ -51,6 +51,28 @@ def test_ambiguous_execution_never_retries(v2job, tmp_path, monkeypatch):
     assert agenda.due_items(now=2) == []
 
 
+def test_uncertain_failure_records_safe_reason_without_exception_text(v2job, tmp_path, monkeypatch):
+    from app import publication_schedule as agenda
+    monkeypatch.setattr(agenda, 'ROOT', tmp_path)
+    job=approved(v2job)
+    item=agenda.schedule(job['id'],job['candidates'][0]['candidate_id'],'instagram',title='Teste',caption='',scheduled_at=1,page_id='123',instagram_id='456')
+    def fail(draft,job,destination,progress):
+        progress('SENDING','987')
+        raise ConnectionResetError('PRIVATE_SECRET')
+    result=agenda.execute(item['id'],fail,now=2)
+    assert result['state']=='UNCERTAIN' and result['failure_detail']=='connection_reset'
+    assert 'PRIVATE_SECRET' not in str(result)
+    retried=agenda.retry(item['id'],confirmed_not_published=True)
+    assert retried['attempt_history'][-1]['failure_detail']=='connection_reset'
+
+
+def test_failure_details_allow_only_safe_http_codes():
+    from app import publication_schedule as agenda
+    from app.meta_http import MetaHTTPError
+    assert agenda._failure_detail(MetaHTTPError('Meta request failed (HTTP 503)'))=='meta_http_503'
+    assert agenda._failure_detail(MetaHTTPError('private token'))=='meta_response_error'
+
+
 def test_destination_is_bound_when_scheduled(v2job, tmp_path, monkeypatch):
     from app import publication_schedule as agenda
     monkeypatch.setattr(agenda, 'ROOT', tmp_path)

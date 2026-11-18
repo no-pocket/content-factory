@@ -51,8 +51,9 @@ def download_youtube(url: str, destination: Path, *, source_snapshot: dict | Non
             from .source_ingestion import verify_source_metadata
             from .source_registry import get_source
             # Keep the original policy snapshot; revocation also stops future downloads.
-            current = get_source(source_snapshot['channel_id'])
-            verify_source_metadata(info, vid, current, settings or {})
+            if source_snapshot.get('policy_mode') != 'not_enforced':
+                current = get_source(source_snapshot['channel_id'])
+                verify_source_metadata(info, vid, current, settings or {})
             verify_source_metadata(info, vid, source_snapshot, settings or {})
 
     def media_filter(info, *, incomplete=False):

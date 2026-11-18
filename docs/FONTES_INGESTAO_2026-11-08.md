@@ -1,5 +1,10 @@
 # Fontes autorizadas e importação pelo Hermes — 08/11/2026
 
+Atualização: novas importações solicitadas ao Hermes dispensam cadastro e validação
+de políticas de fonte; o registro informa que a autorização não foi verificada.
+A identidade do vídeo, limites técnicos e deduplicação continuam validados. Jobs
+existentes preservam seus snapshots e políticas. A credencial Hermes continua obrigatória.
+
 O cliente não recebia as variáveis personalizadas no processo do gateway. A correção
 lê apenas as três configurações Content Factory do arquivo seguro adjacente ao próprio
 perfil, sem consultar ambiente global/cwd ou exportar segredos. Passou com o ambiente
@@ -10,7 +15,9 @@ Canais ficam em data/sources.json, distintos dos grupos editoriais de vídeos j�
 processados. Cadastro local/admin registra ID canônico, nome, situação, referência de
 autorização, confirmações de direitos/plataforma e políticas de idioma, tipo e escopo
 local/externo. Hermes lê resumos, sem evidência privada de autorização; não pode ativar
-fontes pela sua credencial limitada. Cadastros começam pendentes.
+fontes pela sua credencial limitada. Na interface, novos cadastros começam ativos,
+com modelos locais e externos e tipos de vídeo habilitados; salvar exige confirmar
+os direitos e a permissão da plataforma. Status e políticas continuam ajustáveis.
 
 No cadastro de canal, aceite o ID canônico ou um link do YouTube no formato
 `https://youtube.com/@canal` ou `https://youtube.com/channel/UC...`. O link é

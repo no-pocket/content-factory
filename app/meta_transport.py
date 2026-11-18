@@ -15,8 +15,22 @@ def instagram(api, account_id: str, token: str, video: Path, caption: str, *, sl
         raise RuntimeError('Instagram did not return a container')
     progress('SENDING', container)
     with video.open('rb') as stream:
-        result = api('POST', 'upload/' + container, token, file=stream,
-                     headers={'offset': '0', 'file_size': str(video.stat().st_size)})
+        try:
+            result = api('POST', 'upload/' + container, token, file=stream,
+                         headers={'offset': '0', 'file_size': str(video.stat().st_size)})
+        except OSError:
+            # A single retry is safe only within this same unpublished session,
+            # after Meta confirms it has accepted no bytes.
+            try:
+                offset = api('GET', 'upload/' + container, token).get('offset')
+                status = api('GET', container + '?fields=status_code,status', token).get('status_code')
+            except Exception:
+                raise
+            if type(offset) is not int or offset != 0 or status != 'IN_PROGRESS':
+                raise
+            stream.seek(0)
+            result = api('POST', 'upload/' + container, token, file=stream,
+                         headers={'offset': '0', 'file_size': str(video.stat().st_size)})
     if result.get('success') is not True:
         raise RuntimeError('Instagram upload failed')
     progress('PROCESSING', container)

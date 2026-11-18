@@ -4,19 +4,21 @@ import {useS,useDraft,review,action,media,api,toast,message,DEMO,simulateExterna
 import {Head,Field,Tag,Seg,DEC,fmt,tc} from './ui'
 import {DIMS,REASONS} from './types'
 import type {Job,Cand,Payload,Seen,Dim,Dec} from './types'
-import {canReviewJob,needsReview,syncReviewDraft,visibleReviewJobs} from './review-state'
+import {canReviewJob,needsReview,syncReviewDraft,visibleReviewJobs,canScheduleCandidate,publicationKey} from './review-state'
+import {Publish} from './Publish'
 import {Editor} from './Editor'
 const seen=(c:Cand):Seen=>({artifact:c.artifact,n:c.hist.length,revision:c.revision})
 const fresh=(c:Cand):Payload=>({dec:'PENDING',comment:'',adjust:'',reasons:[],rating:{...c.rating},grade:c.grade})
 export function Candidate({job,c,index}:{job:Job;c:Cand;index:number}){
   const [draft,setDraft,clear]=useDraft('review:'+job.id+':'+c.id,()=>({seen:seen(c),p:fresh(c),requestId:newRequestId()}))
-  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[format,setFormat]=useState('webm'),[player]=useState(0),[editor,setEditor]=useState(false)
+  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[format,setFormat]=useState('webm'),[player]=useState(0),[editor,setEditor]=useState(false),[publishing,setPublishing]=useState(false)
   const stale=draft.seen.artifact!==c.artifact||draft.seen.n!==c.hist.length||draft.seen.revision!==c.revision
   useEffect(()=>{if(stale&&!busy){setDraft(syncReviewDraft(draft,seen(c),newRequestId()));setError('');if(draft.seen.artifact!==c.artifact)toast('Vídeo atualizado. Confira a nova versão antes de avaliar.')}},[stale,busy,c.artifact,c.hist.length,c.revision])
   const set=(p:Partial<Payload>)=>setDraft({...draft,p:{...draft.p,...p},requestId:newRequestId()})
   const p=draft.p,idle=canReviewJob(job.st),valid=idle&&['VALID','WARNING'].includes(c.qc)&&(job.protocol!==2||c.intact)
   const wordTiming=c.word_timing as {reason?:string;partial_segments_omitted?:number;zero_duration_words_grouped?:number}|undefined
   const titleDiagnostic=(c as Cand & {title_diagnostic?:{reason?:string}}).title_diagnostic
+  const captionWarnings=(c.diagnostic as {caption_readability?:{warnings?:{code:string;start:number;end:number;characters_per_second?:number}[]}}|null)?.caption_readability?.warnings??[]
   async function submit(dec:Dec){setBusy(true);setError('');try{
     await review(job.id,c.id,draft.seen,{...p,dec},draft.requestId);clear();setDraft({seen:{...draft.seen,n:draft.seen.n+1,revision:draft.seen.revision+1},p:{...p,dec},requestId:newRequestId()});toast('Avaliação salva.')
   }catch(e){setError((e instanceof Conflict?'Conflito de revisão. ':'')+message(e))}finally{setBusy(false)}}
@@ -27,6 +29,7 @@ export function Candidate({job,c,index}:{job:Job;c:Cand;index:number}){
     {!!c.word_timing?.zero_duration_words_grouped&&<p className="warn">{c.word_timing.zero_duration_words_grouped} palavras foram agrupadas por falta de duração individual. Foram usados os tempos observados da fala adjacente; confira as legendas.</p>}
     {wordTiming?.reason==='word_alignment_not_verified'&&<p className="warn">As legendas usam tempos de segmentos, sem alinhamento confiável por palavra. Confira o texto com o áudio.</p>}
     {!!wordTiming?.partial_segments_omitted&&<p className="warn">{wordTiming.partial_segments_omitted} segmento(s) nas bordas ficaram sem legendas porque foram cortados. Confira e corrija as legendas antes de aprovar.</p>}
+    {captionWarnings.length>0&&<details><summary>Legendas: {captionWarnings.length} alerta(s) de legibilidade</summary>{captionWarnings.map((w,i)=><p className="hint" key={i}>{tc(w.start)}–{tc(w.end)} · {w.code==='caption_fast'?'Texto rápido':w.code==='caption_long'?'Texto longo':'Duração inválida'}{w.characters_per_second!=null?` · ${w.characters_per_second} caracteres/s`:''}</p>)}</details>}
     {titleDiagnostic&&<p className="warn">O título proposto exige conferência editorial ({titleDiagnostic.reason}). Confira se corresponde ao áudio.</p>}
     {c.pace?.reason==='native_timing_unavailable'&&<p className="warn">Sem aceleração por tempos de palavras insuficientes. Confira as legendas.</p>}
     <p className="hint">Direção: {c.director} · Render: {c.renderer} · Palavras: {c.w??'não registrado'} · Tentativa {c.attempts}</p>
@@ -51,10 +54,11 @@ export function Candidate({job,c,index}:{job:Job;c:Cand;index:number}){
         {job.protocol===2&&<Field l="Grau de conteúdo"><select value={p.grade??''} onChange={e=>set({grade:e.target.value===''?null:Number(e.target.value)})}><option value="">Não avaliado</option>{[0,1,2,3].map(n=><option key={n} value={n}>{n}</option>)}</select></Field>}
         <Field l="Pedidos de ajuste"><textarea maxLength={4000} value={p.adjust} onChange={e=>set({adjust:e.target.value})}/></Field>
       </details>
-      <div className="ac"><button className="b ok" type="button" disabled={busy||stale||!valid} onClick={()=>submit('APPROVED')}>Aprovar</button>{job.protocol===2&&<button className="b" type="button" disabled={busy||stale||!valid} onClick={()=>submit('APPROVED_WITH_ADJUSTMENTS')}>Aprovar com ajustes</button>}<button className="b er" type="button" disabled={busy||stale||!idle||!p.comment.trim()} onClick={()=>submit('REJECTED')}>Recusar</button></div>
+      <div className="ac">{canScheduleCandidate(job,c)&&<button type="button" className="b p" disabled={busy||stale} onClick={()=>setPublishing(true)}>Agendar publicação</button>}<button className="b ok" type="button" disabled={busy||stale||!valid} onClick={()=>submit('APPROVED')}>Aprovar</button>{job.protocol===2&&<button className="b" type="button" disabled={busy||stale||!valid} onClick={()=>submit('APPROVED_WITH_ADJUSTMENTS')}>Aprovar com ajustes</button>}<button className="b er" type="button" disabled={busy||stale||!idle||!p.comment.trim()} onClick={()=>submit('REJECTED')}>Recusar</button></div>
       {busy&&<p role="status">Salvando…</p>}<p className="hint">Avaliar não publica. Rascunho mantido nesta sessão do navegador.</p>
     </form><details><summary>Histórico ({c.hist.length}) e ajustes registrados</summary>{c.hist.map((e,i)=><div key={i} className="rw col"><span className="hint">{fmt(e.at)} · {e.by} · {DEC[e.dec]?.[0]??e.dec}</span><p>{e.comment||'Sem comentário.'}</p></div>)}{c.edits.length>0&&<pre>{JSON.stringify(c.edits,null,2)}</pre>}</details></div></div>
     {editor&&<Editor job={job} c={c} onClose={()=>setEditor(false)}/>}
+    {publishing&&<div className="schedule-backdrop"><section role="dialog" aria-modal="true" aria-labelledby="review-publish-title" className="schedule-dialog review-publish-dialog" onKeyDown={e=>{if(e.key==='Escape'&&!e.defaultPrevented)setPublishing(false)}}><div className="mh"><h2 id="review-publish-title">Agendar publicação</h2><button type="button" className="b" onClick={()=>setPublishing(false)}>Fechar</button></div><Publish embedded candidateKey={publicationKey(job.id,c.id,c.artifact)}/></section></div>}
   </article>
 }
 interface GroupSummary{group_id:string;jobs:{id:string;original_name:string;model:{label:string}}[];candidate_count:number}

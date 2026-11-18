@@ -29,7 +29,8 @@ def create_attempt(parent_id, request_id, *, queue=None, metadata_fetcher=None, 
         video_id = url.split('v=')[-1]
         metadata = (metadata_fetcher or source_ingestion.fetch_youtube_metadata)(url)
         with store.file_lock(store.ROOT / 'sources.lock'):
-            source = source_registry.get_source(metadata.get('channel_id'))
+            parent_source = parent.get('source_snapshot') or {}
+            source = parent_source if parent_source.get('policy_mode') == 'not_enforced' else source_registry.get_source(metadata.get('channel_id'))
             settings = normalize_job_settings({**parent['settings'], 'editorial_planner':'hermes_first',
                                                'editorial_protocol':2, **({'editorial_fallback_local':False} if reserved_actor else {})})
             verified = source_ingestion.verify_source_metadata(metadata, video_id, source, settings)
