@@ -321,6 +321,7 @@ def authorize_local_source(job):
     from .source_registry import get_source
     snapshot=job.get('source_snapshot')
     if not isinstance(snapshot,dict): raise PermissionError('Missing source snapshot')
+    if snapshot.get('policy_mode') == 'not_enforced': return
     require_active_source(snapshot)
     current=get_source(snapshot['channel_id'])
     require_active_source(current)

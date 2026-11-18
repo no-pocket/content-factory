@@ -53,6 +53,8 @@ def _source_summary(source):
 
 def _external_allowed(job):
     snapshot = job.get('source_snapshot')
+    if isinstance(snapshot,dict) and snapshot.get('policy_mode') == 'not_enforced':
+        return True
     if snapshot is None:
         return True  # Legacy jobs retain their existing explicit editorial access.
     if not isinstance(snapshot, dict) or 'external' not in snapshot.get('allowed_model_scopes', []):
@@ -296,7 +298,7 @@ def dispatch(handler, path):
         request['settings'] = {**(defaults if settings.get('duration_mode', 'flexible') == 'flexible' else {}),
                                'auto_pace':True, **planner_default, **settings, 'editorial_protocol': 2}
         request.update(owner_message=body['owner_message'], actor_id=_actor())
-        result = ingest_youtube(request)
+        result = ingest_youtube(request, enforce_source_policy=False)
         return handler._json(200 if result['duplicate'] else 201,
                              {'job': _pipeline(result['job']),
                               'duplicate': result['duplicate']})

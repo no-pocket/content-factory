@@ -1,5 +1,10 @@
 # Fontes autorizadas e importação pelo Hermes — 08/11/2026
 
+Atualização: novas importações solicitadas ao Hermes dispensam cadastro e validação
+de políticas de fonte; o registro informa que a autorização não foi verificada.
+A identidade do vídeo, limites técnicos e deduplicação continuam validados. Jobs
+existentes preservam seus snapshots e políticas. A credencial Hermes continua obrigatória.
+
 O cliente não recebia as variáveis personalizadas no processo do gateway. A correção
 lê apenas as três configurações Content Factory do arquivo seguro adjacente ao próprio
 perfil, sem consultar ambiente global/cwd ou exportar segredos. Passou com o ambiente
