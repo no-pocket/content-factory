@@ -179,3 +179,9 @@ def test_revoked_source_receipt_is_discarded_without_hiding_other_403_errors(tmp
 def test_poll_once_does_not_call_model_when_no_requests(tmp_path):
     pending=runner.PendingSubmission(tmp_path/'pending.json')
     assert runner.poll_once(api=lambda *args:{'requests':[]},invoke=lambda _:pytest.fail('unexpected invocation'),pending=pending) is None
+
+def test_prompt_requires_editorial_context_and_evidence_without_forcing_cuts():
+    view={'request':{'min_seconds':8,'max_seconds':60,'layout_presets':['legacy'],'subtitle_presets':['bold_karaoke_v1']},'transcript':{'language':'pt','segments':[]}}
+    prompt=runner.build_prompt(view)
+    for requirement in ('abertura independente','contexto','desenvolvimento','fechamento','HUD','nao presumir acesso visual','nao force cortes'):
+        assert requirement in prompt
